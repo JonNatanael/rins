@@ -1,26 +1,30 @@
 #!/usr/bin/env python
 import rospy
-from std_msgs.msg import String
+from geometry_msgs.msg import Twist
 
 def callback(data):
 	rospy.loginfo(rospy.get_caller_id() + "I heard %s", data.data)
 
+def rectangle_movement(step):
+  twist = Twist()
+  twist.linear.x = 0.4 
+  step = step % 20
+  if step % 5 == 0:
+    twist.linear.x = 0
+    twist.angular.z = 2.8
+  return twist
 
 def controller():
+	pub = rospy.Publisher('/cmd_vel_mux/input/teleop', Twist, queue_size=1)
 	rospy.init_node('controller', anonymous=True)
+	rospy.sleep(.2)
 
-	rospy.Subscriber('move_type', String, callback)
+	for i in range(1,40):
+		pub.publish(rectangle_movement(i))
+		rospy.sleep(.1)
 
-	rospy.spin()
-    #pub = rospy.Publisher('controller', String, queue_size=10)
-    #rospy.init_node('control', anonymous=True)
-    #rate = rospy.Rate(2)  # 10hz
-
-    #while not rospy.is_shutdown():
-    #    hello_str = "hello world %s" % rospy.get_time()
-    #    rospy.loginfo(hello_str)
-    #    pub.publish(hello_str)
-    #    rate.sleep()
+	#pub.publish(cmd)
+	#rospy.sleep(.1)
 
 if __name__ == '__main__':
     try:
