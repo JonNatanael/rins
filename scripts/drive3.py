@@ -17,36 +17,15 @@ def rectangle_movement(step):
 def controller():
   pub = rospy.Publisher('/cmd_vel_mux/input/teleop', Twist, queue_size=1)
   rospy.init_node('controller', anonymous=True)
+
+  rospy.init_node('/odom', anonymous=True)
+  rospy.Subscriber('chatter', nav_msgs/Odometry.msg, callback)
+
   rospy.sleep(.2)
 
   #for i in range(1,40):
   # pub.publish(rectangle_movement(i))
   # rospy.sleep(.1)
-  
-  twist = Twist()
-  twist.linear.x = 0.8 
-  pub.publish(twist)
-  rospy.sleep(3)
-
-  twist = Twist()
-  twist.angular.z = -3.1
-  pub.publish(twist)
-  rospy.sleep(.5)
-
-  twist = Twist()
-  twist.linear.x = 1.35
-  pub.publish(twist)
-  rospy.sleep(4)
-
-  twist = Twist()
-  twist.angular.z = -3.1
-  pub.publish(twist)
-  rospy.sleep(.5)
-
-  twist = Twist()
-  twist.linear.x = 0.3
-  pub.publish(twist)
-  rospy.sleep(.3)
 
   #pub.publish(cmd)
   #rospy.sleep(.1)
