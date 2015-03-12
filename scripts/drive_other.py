@@ -9,7 +9,7 @@ def rectangle_movement(step):
   twist = Twist()
   twist.linear.x = 0.4 
   step = step % 20
-  if step % 5 == 0:
+  if step % 10 == 0:
     twist.linear.x = 0
     twist.angular.z = 2.8
   return twist
@@ -21,7 +21,7 @@ def controller():
 
 	for i in range(1,40):
 		pub.publish(rectangle_movement(i))
-		rospy.sleep(.1)
+		rospy.sleep(0.1)
 
 	#pub.publish(cmd)
 	#rospy.sleep(.1)
