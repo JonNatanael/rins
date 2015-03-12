@@ -28,23 +28,23 @@ def controller():
   pub.publish(twist)
   rospy.sleep(3)
 
-  twist = Twist()
+  twist.linear.x = 0.0
   twist.angular.z = -3.1
   pub.publish(twist)
   rospy.sleep(.5)
 
-  twist = Twist()
   twist.linear.x = 1.35
+  twist.angular.z = 0
   pub.publish(twist)
   rospy.sleep(4)
 
-  twist = Twist()
+  twist.linear.x = 0.0
   twist.angular.z = -3.1
   pub.publish(twist)
   rospy.sleep(.5)
 
-  twist = Twist()
   twist.linear.x = 0.3
+  twist.angular.z = 0
   pub.publish(twist)
   rospy.sleep(.3)
 
