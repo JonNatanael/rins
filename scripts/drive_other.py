@@ -15,13 +15,15 @@ def rectangle_movement(step):
   return twist
 
 def controller():
-	pub = rospy.Publisher('/cmd_vel_mux/input/teleop', Twist, queue_size=1)
-	rospy.init_node('controller', anonymous=True)
-	rospy.sleep(.2)
-
-	for i in range(1,40):
-		pub.publish(rectangle_movement(i))
-		rospy.sleep(0.1)
+  pub = rospy.Publisher('/cmd_vel_mux/input/teleop', Twist, queue_size=1)
+  rospy.init_node('controller', anonymous=True)
+  rospy.sleep(.2)
+  
+  for i in range(1,2):
+    twist = Twist()
+    twist.linear.x = -0.3
+    pub.publish(twist)
+    rospy.sleep(0.1)
 
 	#pub.publish(cmd)
 	#rospy.sleep(.1)
