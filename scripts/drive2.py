@@ -34,16 +34,22 @@ def controller():
   for i in range(1,35):
     pub.publish(forward(i))
     rospy.sleep(.1)
-  pub.publish(turn(-3.1))#pozitivno je v levo
+
+  pub.publish(turn(-3.3))#pozitivno je v levo
   rospy.sleep(1)
-  for i in range(1,60):
+
+  for i in range(1,58):
     pub.publish(forward(i))
     rospy.sleep(.1)
-  pub.publish(turn(-3.1))#pozitivno je v levo
-  rospy.sleep(1)
-  for i in range(1,15):
-    pub.publish(forward(i))
-    rospy.sleep(.1)
+
+  #pub.publish(turn(-3.1))#pozitivno je v levo
+  #rospy.sleep(1)
+
+  #for i in range(1,15):
+  #  pub.publish(forward(i))
+  #  rospy.sleep(.1)
+
+  ######################## 
   #70cm desno
   #for i in range(1,35):
   #  pub.publish(forward(i))
