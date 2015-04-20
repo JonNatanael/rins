@@ -29,17 +29,23 @@ import actionlib
 from actionlib_msgs.msg import *
 from geometry_msgs.msg import Pose, PoseWithCovarianceStamped, Point, Quaternion, Twist
 from move_base_msgs.msg import MoveBaseAction, MoveBaseGoal
+from visualization_msgs import MarkerArray, Marker
 from random import sample
 from math import pow, sqrt
 
-class NavTest():
+
+
+class master_driver():
+	faces = []
+	faces_i = 0
+
     def __init__(self):
         rospy.init_node('master_driver', anonymous=True)
         
         rospy.on_shutdown(self.shutdown)
         
         # How long in seconds should the robot pause at each location?
-        self.rest_time = rospy.get_param("~rest_time", 1)
+        self.rest_time = rospy.get_param("~rest_time", 2)
         
         # Goal state return values
         goal_states = ['PENDING', 'ACTIVE', 'PREEMPTED', 
@@ -54,12 +60,30 @@ class NavTest():
         # that was used to launch RViz.
         loc = []
         
-        loc[0] = Pose(Point(0.643, 4.720, 0.000), Quaternion(0.000, 0.000, 0.223, 0.975))
-        loc[1] = Pose(Point(-1.994, 4.382, 0.000), Quaternion(0.000, 0.000, -0.670, 0.743))
-        loc[2] = Pose(Point(-3.719, 4.401, 0.000), Quaternion(0.000, 0.000, 0.733, 0.680))
-        loc[3] = Pose(Point(0.720, 2.229, 0.000), Quaternion(0.000, 0.000, 0.786, 0.618))
-        loc[4] = Pose(Point(1.471, 1.007, 0.000), Quaternion(0.000, 0.000, 0.480, 0.877))
-        loc[5] = Pose(Point(-0.861, -0.019, 0.000), Quaternion(0.000, 0.000, 0.892, -0.451))
+        loc[0] = Pose(Point(0.279, -0.453, 0.000), Orientation(0.000, 0.000, -0.680, 0.733))
+        loc[1] = Pose(Point(0.279, -0.453, 0.000), Orientation(0.000, 0.000, 0.947, 0.321))
+        loc[2] = Pose(Point(0.279, -0.453, 0.000), Orientation(0.000, 0.000, 0.437, 0.899))
+
+        loc[3] = Pose(Point(1.032, -0.553, 0.000), Orientation(0.000, 0.000, -0.818, 0.576))
+
+        loc[4] = Pose(Point(1.644, -0.241, 0.000), Orientation(0.000, 0.000, -0.643, 0.765))
+        loc[5] = Pose(Point(1.644, -0.241, 0.000), Orientation(0.000, 0.000, -0.291, 0.957))
+
+        loc[6] = Pose(Point(1.546, 0.554, 0.000), Orientation(0.000, 0.000, 0.534, 0.845))
+        loc[7] = Pose(Point(1.312, 0.609, 0.000), Orientation(0.000, 0.000, 0.966, -0.258))
+
+        loc[8] = Pose(Point(0.180, 0.843, 0.000), Orientation(0.000, 0.000, -0.797, 0.604))
+
+        loc[9] = Pose(Point(0.380, 1.197, 0.000), Orientation(0.000, 0.000, 0.163, 0.987))
+        loc[10] = Pose(Point(0.380, 1.197, 0.000), Orientation(0.000, 0.000, 0.987, -0.163))
+
+        loc[11] = Pose(Point(0.129, 1.760, 0.000), Orientation(0.000, 0.000, 0.978, 0.208))
+        loc[12] = Pose(Point(-0.087, 1.855, 0.000), Orientation(0.000, 0.000, 0.839, 0.544))
+
+        loc[13] = Pose(Point(0.748, 2.166, 0.000), Orientation(0.000, 0.000, -0.182, 0.983))
+        loc[14] = Pose(Point(0.748, 2.166, 0.000), Orientation(0.000, 0.000, 0.285, 0.959))
+        loc[15] = Pose(POint(0.748, 2.166, 0.000), Orientation(0.000, 0.000, 0.598, 0.802))
+
         
         # Publisher to manually control the robot (e.g. to stop it)
         #self.cmd_vel_pub = rospy.Publisher('cmd_vel', Twist)
@@ -70,14 +94,14 @@ class NavTest():
         rospy.loginfo("Waiting for move_base action server...")
         
         # Wait 60 seconds for the action server to become available
-        self.move_base.wait_for_server(rospy.Duration(60))
+        self.move_base.wait_for_server(rospy.Duration(30))
         
         rospy.loginfo("Connected to move base server")
         
-        # A variable to hold the initial pose of the robot to be set by 
-        # the user in RViz
-        #initial_pose = PoseWithCovarianceStamped()
-        
+        #Subscribe to the facial recognition server
+        sub = rospy.Subscriber('facemapper/markers', visualization_msgs/MarkerArray.msg, face_callback, queue_size=10)
+
+
         # Variables to keep track of success rate, running time,
         # and distance traveled
         n_loc = len(loc)
@@ -85,17 +109,10 @@ class NavTest():
         n_successes = 0
         i = 0
         start_time = rospy.Time.now()
-        
-        # Get the initial pose from the user
-        #rospy.loginfo("*** Click the 2D Pose Estimate button in RViz to set the robot's initial pose...")
-        #rospy.wait_for_message('initialpose', PoseWithCovarianceStamped)
-        #self.last_location = Pose()
-        #rospy.Subscriber('initialpose', PoseWithCovarianceStamped, self.update_initial_pose)
-        
-        # Make sure we have the initial pose
-        #while initial_pose.header.stamp == "":
-        #    rospy.sleep(1)
-            
+        global faces
+        global faces_i
+
+
         rospy.loginfo("Starting navigation test")
         
         # Begin the main loop and run through a sequence of locations
@@ -111,7 +128,7 @@ class NavTest():
             i+ = 1
 
             # Let the user know where the robot is going next
-            rospy.loginfo("Going to: " + str(loc))
+            rospy.loginfo("Going to: " + str(loc[i]))
             
             # Start the robot toward the next location
             self.move_base.send_goal(self.goal)
@@ -131,17 +148,35 @@ class NavTest():
                 else:
                   rospy.loginfo("Goal failed with error code: " + str(goal_states[state]))
             
-	    
+            #Check if we found any faces and approach them
+	    	if ( len(faces) > faces_i )
+	    		self.approach
 
             # Print a summary of faces found and visited
             rospy.loginfo("Success so far: " + str(n_successes) + "/" + 
                           str(n_goals) + " = " + 
                           str(100 * n_successes/n_goals) + "%")
+
+            if (i > n_loc)
+            	break
+
+	    	rospy.sleep(self.rest_time)
             
-	    rospy.sleep(self.rest_time)
-            
-    def update_initial_pose(self, initial_pose):
-        self.initial_pose = initial_pose
+    def face_callback(data):
+        global faces
+        global faces_i
+
+
+
+	def approach():
+        global faces
+        global faces_i
+
+        while( len(faces) > faces_i )
+        	#TODO approach face
+
+        	faces_i += 1
+
 
     def shutdown(self):
         rospy.loginfo("Stopping the robot...")
@@ -149,7 +184,7 @@ class NavTest():
         rospy.sleep(2)
         self.cmd_vel_pub.publish(Twist())
         rospy.sleep(1)
-      
+     
 def trunc(f, n):
     # Truncates/pads a float f to n decimal places without rounding
     slen = len('%.*f' % (n, f))
