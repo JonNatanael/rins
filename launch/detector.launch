@@ -6,12 +6,11 @@
 	<arg name="image_topic" value="/camera/rgb/image_color" />
   </include>
 
-   
-
   <include file="$(find facedetector)/launch/facevisualizer.launch" />
 
+  <include file="$(find localizer)/launch/localizer_node.launch" />
   
-  <node pkg="rins" type="faces" name="faces" output="screen">
+  <node pkg="rins" type="faces.py" name="faces" output="screen">
     <param name="faces_topic" type="string" value="/facedetector/faces" />
     <param name="camera_topic" type="string" value="/camera/rgb/camera_info" />
   </node>

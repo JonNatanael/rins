@@ -62,10 +62,13 @@ catkin_package(
     PCL
 )
 
+catkin_python_setup()
+
 add_executable (example src/example.cpp)
 
 
-install(PROGRAMS scripts/drive.py
+install(PROGRAMS
+        #scripts/drive.py
         scripts/faces.py
         DESTINATION ${CATKIN_PACKAGE_BIN_DESTINATION})
 

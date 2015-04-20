@@ -1,6 +1,6 @@
 #!/usr/bin/env python
 import roslib
-roslib.load_manifest('facedetector')
+#roslib.load_manifest('faces')
 import rospy
 import sys, select, termios, tty
 from std_msgs.msg import String, Bool, ColorRGBA
@@ -12,6 +12,7 @@ from sensor_msgs.msg import CameraInfo
 from visualization_msgs.msg import Marker, MarkerArray
 from image_geometry import PinholeCameraModel
 from geometry_msgs.msg import Point, Vector3
+import math
 
 # Node for face detection.
 class FaceMapper():
@@ -22,18 +23,22 @@ class FaceMapper():
         camera_model.fromCameraInfo(camera)
 
         n = len(faces.x)
+        #print self.faces_list
 
         markers = MarkerArray()
 
         for i in xrange(0, n):
             u = faces.x[i] + faces.width[i] / 2
             v = faces.y[i] + faces.height[i] / 2
+            # TODO limit detections on y coordinate
             #print u, v
             point = Point(((u - camera_model.cx()) - camera_model.Tx()) / camera_model.fx(),
                  ((v - camera_model.cy()) - camera_model.Ty()) / camera_model.fy(), 1)
-            print point
+            
+            #print point
             resp = self.localize(faces.header, point, 3)
             if resp:
+            	#print resp
                 marker = Marker()
                 marker.header.stamp = faces.header.stamp
                 marker.header.frame_id = faces.header.frame_id
@@ -47,9 +52,28 @@ class FaceMapper():
                 marker.color = ColorRGBA(1, 0, 0, 1)
                 markers.markers.append(marker)
 
+
+
+                if len(self.faces_list)>0:
+                	in_range = False
+                	for j in xrange(0,len(self.faces_list)):
+                		if self.dist(self.faces_list[j].pose.position.x,self.faces_list[j].pose.position.y,resp.pose.position.x,resp.pose.position.y) < self.dist_limit:
+                			#print "added face"
+                			in_range = True
+                	if not in_range:	
+                		self.faces_list.append(resp)
+                		#print resp.pose.position.x, resp.pose.position.y
+                else:
+                	print "added face"
+                	self.faces_list.append(resp)
+
+
         self.markers_pub.publish(markers)
 
         self.message_counter = self.message_counter + 1
+
+    def dist(self,x1,y1,x2,y2):
+    	return math.sqrt((x1-x2)*(x1-x2)+(y1-y2)*(y1-y2))
 
     def __init__(self):
         region_scope = rospy.get_param('~region', 3)
@@ -70,11 +94,14 @@ class FaceMapper():
 
         self.message_counter = 0
 
+        self.faces_list = []
+        self.dist_limit = 0.3
+
 # Main function.    
 if __name__ == '__main__':
 
-        rospy.init_node('facemapper')
-        try:
-        fd = FaceMapper()
+    rospy.init_node('facemapper')
+    try:
+    	fd = FaceMapper()
         rospy.spin()    
-        except rospy.ROSInterruptException: pass
+    except rospy.ROSInterruptException: pass
