@@ -66,5 +66,6 @@ add_executable (example src/example.cpp)
 
 
 install(PROGRAMS scripts/drive.py
+        scripts/faces.py
         DESTINATION ${CATKIN_PACKAGE_BIN_DESTINATION})
 

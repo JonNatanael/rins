@@ -1,34 +1,80 @@
 #!/usr/bin/env python
-
-import sys
+import roslib
+roslib.load_manifest('facedetector')
 import rospy
-from localizer.srv import *
+import sys, select, termios, tty
+from std_msgs.msg import String, Bool, ColorRGBA
+import sensor_msgs.msg
+import message_filters
+from facedetector.msg import Detection
+from localizer.srv import Localize
+from sensor_msgs.msg import CameraInfo
+from visualization_msgs.msg import Marker, MarkerArray
+from image_geometry import PinholeCameraModel
+from geometry_msgs.msg import Point, Vector3
 
-def get_loc():
-	rospy.wait_for_service('localizer')
-	try:
-		a = rospy.ServiceProxy('localizer')
-		
+# Node for face detection.
+class FaceMapper():
 
-def add_two_ints_client(x, y):
-    rospy.wait_for_service('add_two_ints')
-    try:
-        add_two_ints = rospy.ServiceProxy('add_two_ints', AddTwoInts)
-        resp1 = add_two_ints(x, y)
-        return resp1.sum
-    except rospy.ServiceException, e:
-        print "Service call failed: %s"%e
+    def faces_callback(self, faces, camera):
 
-def usage():
-    return "%s [x y]"%sys.argv[0]
+        camera_model = PinholeCameraModel()
+        camera_model.fromCameraInfo(camera)
 
-if __name__ == "__main__":
+        n = len(faces.x)
 
-    if len(sys.argv) == 3:
-        x = int(sys.argv[1])
-        y = int(sys.argv[2])
-    else:
-        print usage()
-        sys.exit(1)
-    print "Requesting %s+%s"%(x, y)
-    print "%s + %s = %s"%(x, y, add_two_ints_client(x, y))
+        markers = MarkerArray()
+
+        for i in xrange(0, n):
+            u = faces.x[i] + faces.width[i] / 2
+            v = faces.y[i] + faces.height[i] / 2
+            #print u, v
+            point = Point(((u - camera_model.cx()) - camera_model.Tx()) / camera_model.fx(),
+                 ((v - camera_model.cy()) - camera_model.Ty()) / camera_model.fy(), 1)
+            print point
+            resp = self.localize(faces.header, point, 3)
+            if resp:
+                marker = Marker()
+                marker.header.stamp = faces.header.stamp
+                marker.header.frame_id = faces.header.frame_id
+                marker.pose = resp.pose
+                marker.type = Marker.CUBE
+                marker.action = Marker.ADD
+                marker.frame_locked = False
+                marker.lifetime = rospy.Time(0)
+                marker.id = i
+                marker.scale = Vector3(0.1, 0.1, 0.1)
+                marker.color = ColorRGBA(1, 0, 0, 1)
+                markers.markers.append(marker)
+
+        self.markers_pub.publish(markers)
+
+        self.message_counter = self.message_counter + 1
+
+    def __init__(self):
+        region_scope = rospy.get_param('~region', 3)
+        markers_topic = rospy.get_param('~markers_topic', rospy.resolve_name('%s/markers' % rospy.get_name()))
+        faces_topic = rospy.get_param('~faces_topic', '/facedetector/faces')
+        camera_topic = rospy.get_param('~camera_topic', '/camera/camera_info')      
+
+        rospy.wait_for_service('localizer/localize')
+
+        self.faces_sub = message_filters.Subscriber(faces_topic, Detection)
+        self.camera_sub = message_filters.Subscriber(camera_topic, CameraInfo)
+        self.joined_sub = message_filters.TimeSynchronizer([self.faces_sub, self.camera_sub], 30)
+        self.joined_sub.registerCallback(self.faces_callback)
+
+        self.localize = rospy.ServiceProxy('localizer/localize', Localize)
+
+        self.markers_pub = rospy.Publisher(markers_topic, MarkerArray)
+
+        self.message_counter = 0
+
+# Main function.    
+if __name__ == '__main__':
+
+        rospy.init_node('facemapper')
+        try:
+        fd = FaceMapper()
+        rospy.spin()    
+        except rospy.ROSInterruptException: pass
