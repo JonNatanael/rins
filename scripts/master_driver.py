@@ -156,26 +156,22 @@ class master_driver():
                           str(n_goals) + " = " + 
                           str(100 * n_successes/n_goals) + "%")
 
-<<<<<<< HEAD
-            if (i > n_loc):
-=======
-            /*
-            move_cmd = Twist()
-            angular_speed = rospy.get_param("~angular_speed", 0.7)
-            move_cmd.angular.z = angular_speed
-            self.cmd_vel.publish(move_cmd)
-            rospy.sleep(4.0)
-            
-            // stop rotating
-            move_cmd = Twist()
-            self.cmd_vel.publish(move_cmd)
-            rospy.sleep(1.0)
-            */
-            // priblizaj se obrazom
 
-            if (i > n_loc)
->>>>>>> 8f74699adf54b356c9accdb3b3381d86b00c22fd
+            if (i > n_loc):
             	break
+
+            #move_cmd = Twist()
+            #angular_speed = rospy.get_param("~angular_speed", 0.7)
+            #move_cmd.angular.z = angular_speed
+            #self.cmd_vel.publish(move_cmd)
+            #rospy.sleep(4.0)
+            
+            # stop rotating
+            #move_cmd = Twist()
+            #self.cmd_vel.publish(move_cmd)
+            #rospy.sleep(1.0)
+            
+            # priblizaj se obrazom
 
 	    	rospy.sleep(self.rest_time)
             
@@ -189,17 +185,10 @@ class master_driver():
         global faces
         global faces_i
 
-<<<<<<< HEAD
         while( len(faces) > faces_i ):
         	#TODO approach face
 
         	faces_i += 1
-=======
-        while( len(faces) > faces_i )
-            #TODO approach face
-            
-            faces_i += 1
->>>>>>> 8f74699adf54b356c9accdb3b3381d86b00c22fd
 
 
     def shutdown(self):
