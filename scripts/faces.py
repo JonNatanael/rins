@@ -18,7 +18,7 @@ import math
 class FaceMapper():
 
     def faces_callback(self, faces, camera):
-        print "faces"
+        #print "faces"
 
         camera_model = PinholeCameraModel()
         camera_model.fromCameraInfo(camera)
@@ -50,17 +50,17 @@ class FaceMapper():
                 marker.id = i
                 marker.scale = Vector3(0.1, 0.1, 0.1)
                 marker.color = ColorRGBA(1, 0, 0, 1)
-
-
-                if len(self.faces_list)>0:
-                	in_range = False
-                	for j in xrange(0,len(self.faces_list)):
-                		if self.dist(self.faces_list[j].pose.position.x,self.faces_list[j].pose.position.y,resp.pose.position.x,resp.pose.position.y) < self.dist_limit:
-                			in_range = True
-                	if not in_range:	
-                		self.faces_list.append(marker)
-                else:
-                	self.faces_list.append(marker)
+                
+                if abs(resp.pose.position.y) < self.height_limit:
+                    if len(self.faces_list)>0:
+                    	in_range = False
+                    	for j in xrange(0,len(self.faces_list)):
+                    		if self.dist(self.faces_list[j].pose.position.x,self.faces_list[j].pose.position.y,resp.pose.position.x,resp.pose.position.y) < self.dist_limit:
+                    			in_range = True
+                    	if not in_range:	
+                    		self.faces_list.append(marker)
+                    else:
+                    	self.faces_list.append(marker)
 
 
 
@@ -68,7 +68,8 @@ class FaceMapper():
         for face in self.faces_list:
             markers.markers.append(face)
 
-        print markers
+        print len(self.faces_list)
+        #print markers
 
         self.markers_pub.publish(markers)
 
@@ -98,6 +99,7 @@ class FaceMapper():
 
         self.faces_list = []
         self.dist_limit = 0.3
+        self.height_limit = 0.2
 
 # Main function.    
 if __name__ == '__main__':
