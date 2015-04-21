@@ -184,7 +184,7 @@ class master_driver():
         robo = loc[i]
         x2 = robo.pose.Point.x
         y2 = robo.pose.Point.y
-		if (abs((x2 - x1)**2 + (y2 - y1)**2) < dist):
+        if (abs((x2 - x1)**2 + (y2 - y1)**2) < dist):
             x3 = x2
             y3 = y2
         else:
