@@ -92,7 +92,7 @@ class master_driver():
         rospy.loginfo("Waiting for move_base action server...")
         
         # Wait 60 seconds for the action server to become available
-        self.move_base.wait_for_server(rospy.Duration(30))
+        self.move_base.wait_for_server(rospy.Duration(300))
         
         rospy.loginfo("Connected to move base server")
         
@@ -132,7 +132,7 @@ class master_driver():
             self.move_base.send_goal(self.goal)
             
             # Allow 15 seconds to get there
-            finished_within_time = self.move_base.wait_for_result(rospy.Duration(15)) 
+            finished_within_time = self.move_base.wait_for_result(rospy.Duration(60)) 
             
             # Check for success or failure
             if not finished_within_time:
@@ -195,7 +195,7 @@ class master_driver():
         rospy.loginfo("Stopping the robot...")
         self.move_base.cancel_goal()
         rospy.sleep(2)
-        self.cmd_vel_pub.publish(Twist())
+        #self.cmd_vel_pub.publish(Twist())
         rospy.sleep(1)
      
 def trunc(f, n):
