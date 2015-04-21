@@ -157,7 +157,7 @@ class master_driver():
             #               str(100 * n_successes/n_goals) + "%")
 
 
-            if (i => n_loc):
+            if i >= n_loc:
             	break
 
             #move_cmd = Twist()
