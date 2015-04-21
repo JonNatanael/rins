@@ -180,7 +180,7 @@ class master_driver():
         
         dist = 0.35 # distance from face
         listener = TransformListener()
-        robo = listener.lookupTransform('/map', '/odom', rospy.Time(0))
+        robo = listener.lookupTransform('/amcl_pose', '/odom', rospy.Time.now())
         x2 = robo.pose.position.x
         y2 = robo.pose.position.y
 	if (abs((x2 - x1)**2 + (y2 - y1)**2) < dist):
