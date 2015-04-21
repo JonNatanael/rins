@@ -189,9 +189,17 @@ class master_driver():
             x3 = x2
             y3 = y2
         else:
-            m = (y2-y1)/(x2-x1) # slope
-            x3 = x1 + dist * 1/sqrt(1 + m**2) #  VEDNO NAREDI OFFSET V ENO STRAN! (positive, positive)
-            y3 = y1 + dist * m/sqrt(1 + m**2)
+            m = abs((y2-y1)/(x2-x1)) # slope
+            offsetX = dist * 1/sqrt(1 + m**2)
+            offsetY = dist * m/sqrt(1 + m**2)
+            if (x2 > x1):
+                x3 = x1 + offsetX
+            else:
+                x3 = x1 - offsetX
+            if (x2 > x1):
+                y3 = y1 + offsetY
+            else:
+                y3 = y1 - offsetY
         
         #print str(x2) + "  " + str(y2)
         #print str(x3) + "  " + str(y3)
