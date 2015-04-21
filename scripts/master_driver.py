@@ -128,7 +128,7 @@ class master_driver():
         while not rospy.is_shutdown():
 
             if i >= n_loc:
-                self.shutdown()
+                break
         
             self.move(loc[i])
 		            
@@ -162,35 +162,51 @@ class master_driver():
 
     def move(self, location):
         self.goal = MoveBaseGoal()
-        self.goal.target_pose.pose = location
+        self.goal.target_pose.pose = loc[i]
         self.goal.target_pose.header.frame_id = 'map' 
         self.goal.target_pose.header.stamp = rospy.Time.now()
         
         # Let the user know where the robot is going next
-        rospy.loginfo("Going to: " + str(location))
+        rospy.loginfo("Going to: " + str(loc[i]))
 
-        self.move_base.send_goal(self.goal)
+        # self.move_base.send_goal(self.goal)
             
-        # Allow 60 seconds to get there
-        finished_within_time = self.move_base.wait_for_result(rospy.Duration(60)) 
+        # # Allow 60 seconds to get there
+        # finished_within_time = self.move_base.wait_for_result(rospy.Duration(60)) 
             
-        # Check for success or failure
-        if not finished_within_time:
-            self.move_base.cancel_goal()
-            rospy.loginfo("Timed out achieving goal")
-        else:
-            state = self.move_base.get_state()
-            if state == GoalStatus.SUCCEEDED:
-                rospy.loginfo("Goal succeeded!")
-                rospy.loginfo("State:" + str(state))
-            else:
-              rospy.loginfo("Goal failed with error code: " + str(goal_states[state]))
+        # # Check for success or failure
+        # if not finished_within_time:
+        #     self.move_base.cancel_goal()
+        #     rospy.loginfo("Timed out achieving goal")
+        # else:
+        #     state = self.move_base.get_state()
+        #     if state == GoalStatus.SUCCEEDED:
+        #         rospy.loginfo("Goal succeeded!")
+        #         rospy.loginfo("State:" + str(state))
+        #     else:
+        #       rospy.loginfo("Goal failed with error code: " + str(goal_states[state]))
 
 
-    def approach(self):
-        #TODO
+    def approach(self, index):
     	print "approaching face nr.:" + str(faces_i)
         
+        x1 = faces[faces_i].pose.position.x
+        y1 = faces[faces_i].pose.position.y
+        
+        dist = 0.35 # distance from face
+        listener = tf.TransformListener()
+        robo = listener.lookupTransform('/map', '/odom', rospy.Time(0))
+        x2 = robo.pose.position.x
+        y2 = robo.pose.position.y
+	if (math.abs((x2 - x1)**2 + (y2 - y1)**2) < dist):
+            x3 = x2
+            y3 = y2
+        else:
+            m = (y2-y1)/(x2-x1) # slope
+            x3 = x1 + d * 1/math.sqrt(1 + m**2) #  VEDNO NAREDI OFFSET V ENO STRAN! (positive, positive)
+            y3 = y1 + d * m/math.sqrt(1 + m**2)
+        
+        Pose(Point(x3, y3, 0.000), Quaternion(0.000, 0.000, ?, ?))
 
 
     def shutdown(self):
