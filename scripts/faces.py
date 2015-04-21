@@ -18,12 +18,12 @@ import math
 class FaceMapper():
 
     def faces_callback(self, faces, camera):
+        print "faces"
 
         camera_model = PinholeCameraModel()
         camera_model.fromCameraInfo(camera)
 
         n = len(faces.x)
-        #print self.faces_list
 
         markers = MarkerArray()
 
@@ -50,23 +50,25 @@ class FaceMapper():
                 marker.id = i
                 marker.scale = Vector3(0.1, 0.1, 0.1)
                 marker.color = ColorRGBA(1, 0, 0, 1)
-                markers.markers.append(marker)
-
 
 
                 if len(self.faces_list)>0:
                 	in_range = False
                 	for j in xrange(0,len(self.faces_list)):
                 		if self.dist(self.faces_list[j].pose.position.x,self.faces_list[j].pose.position.y,resp.pose.position.x,resp.pose.position.y) < self.dist_limit:
-                			#print "added face"
                 			in_range = True
                 	if not in_range:	
-                		self.faces_list.append(resp)
-                		#print resp.pose.position.x, resp.pose.position.y
+                		self.faces_list.append(marker)
                 else:
-                	print "added face"
-                	self.faces_list.append(resp)
+                	self.faces_list.append(marker)
 
+
+
+        #add all previously detected faces
+        for face in self.faces_list:
+            markers.markers.append(face)
+
+        print markers
 
         self.markers_pub.publish(markers)
 
@@ -102,6 +104,7 @@ if __name__ == '__main__':
 
     rospy.init_node('facemapper')
     try:
+        print "here"
     	fd = FaceMapper()
         rospy.spin()    
     except rospy.ROSInterruptException: pass
