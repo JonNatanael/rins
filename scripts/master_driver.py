@@ -182,7 +182,7 @@ class master_driver():
         robo = listener.lookupTransform('/map', '/odom', rospy.Time(0))
         x2 = robo.pose.position.x
         y2 = robo.pose.position.y
-		if (math.abs((x2 - x1)**2 + (y2 - y1)**2) < dist):
+	if (abs((x2 - x1)**2 + (y2 - y1)**2) < dist):
             x3 = x2
             y3 = y2
         else:
