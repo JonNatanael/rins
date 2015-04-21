@@ -33,9 +33,15 @@ from visualization_msgs.msg import Marker, MarkerArray
 from random import sample
 from math import pow, sqrt
 
+def face_callback(data):
+    # global faces
+    # global faces_i
+    #print data
+    global faces
+    faces = data.markers
+
 class master_driver():
     #faces = []
-    #faces_i = 0
 
     def __init__(self):
         rospy.init_node('master_driver', anonymous=True)
@@ -56,6 +62,7 @@ class master_driver():
         # Nav Goals in RViz when running in the simulator.
         # Pose coordinates are then displayed in the terminal
         # that was used to launch RViz.
+        global loc
         loc = []
         
         # loc.append(Pose(Point(0.279, -0.453, 0.000), Quaternion(0.000, 0.000, -0.680, 0.733)))
@@ -100,7 +107,7 @@ class master_driver():
         rospy.loginfo("Connected to move base server")
         
         #Subscribe to the facial recognition server
-        #sub = rospy.Subscriber('facemapper/markers', visualization_msgs/MarkerArray.msg, face_callback, queue_size=10)
+        sub = rospy.Subscriber('/faces/markers', MarkerArray, face_callback, queue_size=10)
 
 
         # Variables to keep track of success rate, running time,
@@ -108,53 +115,31 @@ class master_driver():
         n_loc = len(loc)
         n_goals = 0
         n_successes = 0
+        global i
         i = 0
         start_time = rospy.Time.now()
-     #   global faces
-      #  global faces_i
+        global faces_i
+        faces_i = 0
 
 
         rospy.loginfo("Starting navigation")
         
         # Begin the main loop and run through a sequence of locations
         while not rospy.is_shutdown():
-        
-            # Set up the next goal
-            self.goal = MoveBaseGoal()
-            self.goal.target_pose.pose = loc[i]
-            self.goal.target_pose.header.frame_id = 'map' 
-            self.goal.target_pose.header.stamp = rospy.Time.now()
-            
-            # Increment the counter
-            i += 1
 
             if i >= n_loc:
-            	break
-            # Let the user know where the robot is going next
-            rospy.loginfo("Going to: " + str(loc[i]))
-            
-            # Start the robot toward the next location
-            self.move_base.send_goal(self.goal)
-            
-            # Allow 60 seconds to get there
-            finished_within_time = self.move_base.wait_for_result(rospy.Duration(60)) 
-            
-            # Check for success or failure
-            if not finished_within_time:
-                self.move_base.cancel_goal()
-                rospy.loginfo("Timed out achieving goal")
-            else:
-                state = self.move_base.get_state()
-                if state == GoalStatus.SUCCEEDED:
-                    rospy.loginfo("Goal succeeded!")
-                    rospy.loginfo("State:" + str(state))
-                else:
-                  rospy.loginfo("Goal failed with error code: " + str(goal_states[state]))
-		
-            
+                break
+        
+            self.move(loc[i])
+		            
             #Check if we found any faces and approach them
-	    	# while ( len(faces) > faces_i ):
-	    	# 	self.approach()
+            while len(faces) > faces_i:
+                self.approach()
+                faces_i += 1
+                self.move(loc[i])
+
+            # Increment the counter
+            i += 1
 
             # Print a summary of faces found and visited
             # rospy.loginfo("Success so far: " + str(n_successes) + "/" + 
@@ -172,26 +157,40 @@ class master_driver():
             #self.cmd_vel.publish(move_cmd)
             #rospy.sleep(1.0)
             
-            # priblizaj se obrazom
+            rospy.sleep(self.rest_time)
 
-	    	rospy.sleep(self.rest_time)
+
+    def move(self, location):
+        self.goal = MoveBaseGoal()
+        self.goal.target_pose.pose = loc[i]
+        self.goal.target_pose.header.frame_id = 'map' 
+        self.goal.target_pose.header.stamp = rospy.Time.now()
+        
+        # Let the user know where the robot is going next
+        rospy.loginfo("Going to: " + str(loc[i]))
+
+        # self.move_base.send_goal(self.goal)
             
-    def face_callback(data):
-        # global faces
-        # global faces_i
-        print ""
+        # # Allow 60 seconds to get there
+        # finished_within_time = self.move_base.wait_for_result(rospy.Duration(60)) 
+            
+        # # Check for success or failure
+        # if not finished_within_time:
+        #     self.move_base.cancel_goal()
+        #     rospy.loginfo("Timed out achieving goal")
+        # else:
+        #     state = self.move_base.get_state()
+        #     if state == GoalStatus.SUCCEEDED:
+        #         rospy.loginfo("Goal succeeded!")
+        #         rospy.loginfo("State:" + str(state))
+        #     else:
+        #       rospy.loginfo("Goal failed with error code: " + str(goal_states[state]))
 
 
-
-    def approach():
-    	print ""
-        # global faces
-        # global faces_i
-
-        #while( len(faces) > faces_i ):
-        	#TODO approach face
-
-        #	faces_i += 1
+    def approach(self):
+        #TODO
+    	print "approaching face nr.:" + str(faces_i)
+        
 
 
     def shutdown(self):
@@ -208,6 +207,7 @@ def trunc(f, n):
 
 if __name__ == '__main__':
     try:
+        faces = []
         master_driver()
         rospy.spin()
     except rospy.ROSInterruptException:
