@@ -45,12 +45,12 @@ class FaceMapper():
                 marker.pose = resp.pose
                 marker.type = Marker.CUBE
                 marker.action = Marker.ADD
-                marker.frame_locked = False
+                marker.frame_locked = True
                 marker.lifetime = rospy.Time(0)
-                marker.id = i
+                marker.id = len(self.faces_list)
                 marker.scale = Vector3(0.1, 0.1, 0.1)
                 marker.color = ColorRGBA(1, 0, 0, 1)
-                
+
                 if abs(resp.pose.position.y) < self.height_limit:
                     if len(self.faces_list)>0:
                     	in_range = False
