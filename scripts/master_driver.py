@@ -148,8 +148,8 @@ class master_driver():
 		
             
             #Check if we found any faces and approach them
-	    	# if ( len(faces) > faces_i ):
-	    	# 	self.approach
+	    	# while ( len(faces) > faces_i ):
+	    	# 	self.approach()
 
             # Print a summary of faces found and visited
             # rospy.loginfo("Success so far: " + str(n_successes) + "/" + 
