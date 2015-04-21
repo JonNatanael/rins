@@ -32,6 +32,7 @@ from move_base_msgs.msg import MoveBaseAction, MoveBaseGoal
 from visualization_msgs.msg import Marker, MarkerArray
 from random import sample
 from math import pow, sqrt
+from tf import TransformListener
 
 def face_callback(data):
     # global faces
@@ -178,7 +179,7 @@ class master_driver():
         y1 = faces[index].pose.position.y
         
         dist = 0.35 # distance from face
-        listener = tf.TransformListener()
+        listener = TransformListener()
         robo = listener.lookupTransform('/map', '/odom', rospy.Time(0))
         x2 = robo.pose.position.x
         y2 = robo.pose.position.y
