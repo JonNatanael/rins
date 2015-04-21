@@ -34,8 +34,8 @@ from random import sample
 from math import pow, sqrt
 
 class master_driver():
-    faces = []
-    faces_i = 0
+    #faces = []
+    #faces_i = 0
 
     def __init__(self):
         rospy.init_node('master_driver', anonymous=True)
@@ -107,8 +107,8 @@ class master_driver():
         n_successes = 0
         i = 0
         start_time = rospy.Time.now()
-        global faces
-        global faces_i
+     #   global faces
+      #  global faces_i
 
 
         rospy.loginfo("Starting navigation")
@@ -176,19 +176,21 @@ class master_driver():
 	    	rospy.sleep(self.rest_time)
             
     def face_callback(data):
-        global faces
-        global faces_i
+        # global faces
+        # global faces_i
+        print ""
 
 
 
     def approach():
-        global faces
-        global faces_i
+    	print ""
+        # global faces
+        # global faces_i
 
-        while( len(faces) > faces_i ):
+        #while( len(faces) > faces_i ):
         	#TODO approach face
 
-        	faces_i += 1
+        #	faces_i += 1
 
 
     def shutdown(self):
