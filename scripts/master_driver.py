@@ -131,7 +131,7 @@ class master_driver():
             # Start the robot toward the next location
             self.move_base.send_goal(self.goal)
             
-            # Allow 15 seconds to get there
+            # Allow 60 seconds to get there
             finished_within_time = self.move_base.wait_for_result(rospy.Duration(60)) 
             
             # Check for success or failure
@@ -157,7 +157,7 @@ class master_driver():
             #               str(100 * n_successes/n_goals) + "%")
 
 
-            if (i > n_loc):
+            if (i => n_loc):
             	break
 
             #move_cmd = Twist()
