@@ -182,8 +182,8 @@ class master_driver():
         listener = TransformListener()
         #robo = listener.lookupTransform('/amcl_pose', '/odom', rospy.Time.now())
         robo = loc[i]
-        x2 = robo.pose.position.x
-        y2 = robo.pose.position.y
+        x2 = robo.pose.Point.x
+        y2 = robo.pose.Point.y
 		if (abs((x2 - x1)**2 + (y2 - y1)**2) < dist):
             x3 = x2
             y3 = y2
