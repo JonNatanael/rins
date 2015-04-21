@@ -58,9 +58,12 @@ class master_driver():
         # that was used to launch RViz.
         loc = []
         
-        loc.append(Pose(Point(0.279, -0.453, 0.000), Quaternion(0.000, 0.000, -0.680, 0.733)))
-        loc.append(Pose(Point(0.279, -0.453, 0.000), Quaternion(0.000, 0.000, 0.947, 0.321)))
-        loc.append(Pose(Point(0.279, -0.453, 0.000), Quaternion(0.000, 0.000, 0.437, 0.899)))
+        # loc.append(Pose(Point(0.279, -0.453, 0.000), Quaternion(0.000, 0.000, -0.680, 0.733)))
+        # loc.append(Pose(Point(0.279, -0.453, 0.000), Quaternion(0.000, 0.000, 0.947, 0.321)))
+        # loc.append(Pose(Point(0.279, -0.453, 0.000), Quaternion(0.000, 0.000, 0.437, 0.899)))
+
+        loc.append(Pose(Point(0.836, -0.338, 0.000), Quaternion(0.000, 0.000, 0.978, 0.210)))
+        loc.append(Pose(Point(0.836, -0.338, 0.000), Quaternion(0.000, 0.000, 0.926, -0.378)))
 
         loc.append(Pose(Point(1.032, -0.553, 0.000), Quaternion(0.000, 0.000, -0.818, 0.576)))
 
@@ -78,9 +81,9 @@ class master_driver():
         loc.append(Pose(Point(0.129, 1.760, 0.000), Quaternion(0.000, 0.000, 0.978, 0.208)))
         loc.append(Pose(Point(-0.087, 1.855, 0.000), Quaternion(0.000, 0.000, 0.839, 0.544)))
 
-        loc.append(Pose(Point(0.748, 2.166, 0.000), Quaternion(0.000, 0.000, -0.182, 0.983)))
-        loc.append(Pose(Point(0.748, 2.166, 0.000), Quaternion(0.000, 0.000, 0.285, 0.959)))
-        loc.append(Pose(Point(0.748, 2.166, 0.000), Quaternion(0.000, 0.000, 0.598, 0.802)))
+        loc.append(Pose(Point(1.1, 2.35, 0.000), Quaternion(0.000, 0.000, -0.182, 0.983)))
+        loc.append(Pose(Point(1.1, 2.35, 0.000), Quaternion(0.000, 0.000, 0.285, 0.959)))
+        loc.append(Pose(Point(1.1, 2.35, 0.000), Quaternion(0.000, 0.000, 0.598, 0.802)))
 
         
         # Publisher to manually control the robot (e.g. to stop it)
@@ -125,6 +128,8 @@ class master_driver():
             # Increment the counter
             i += 1
 
+            if i >= n_loc:
+            	break
             # Let the user know where the robot is going next
             rospy.loginfo("Going to: " + str(loc[i]))
             
@@ -155,10 +160,6 @@ class master_driver():
             # rospy.loginfo("Success so far: " + str(n_successes) + "/" + 
             #               str(n_goals) + " = " + 
             #               str(100 * n_successes/n_goals) + "%")
-
-
-            if i >= n_loc:
-            	break
 
             #move_cmd = Twist()
             #angular_speed = rospy.get_param("~angular_speed", 0.7)
