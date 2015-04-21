@@ -23,21 +23,21 @@
       
 """
 
-import roslib; roslib.load_manifest('rbx1_nav')
+import roslib
 import rospy
 import actionlib
 from actionlib_msgs.msg import *
 from geometry_msgs.msg import Pose, PoseWithCovarianceStamped, Point, Quaternion, Twist
 from move_base_msgs.msg import MoveBaseAction, MoveBaseGoal
-from visualization_msgs import MarkerArray, Marker
+from visualization_msgs.msg import Marker, MarkerArray
 from random import sample
 from math import pow, sqrt
 
 
 
 class master_driver():
-	faces = []
-	faces_i = 0
+    faces = []
+    faces_i = 0
 
     def __init__(self):
         rospy.init_node('master_driver', anonymous=True)
@@ -60,29 +60,29 @@ class master_driver():
         # that was used to launch RViz.
         loc = []
         
-        loc[0] = Pose(Point(0.279, -0.453, 0.000), Orientation(0.000, 0.000, -0.680, 0.733))
-        loc[1] = Pose(Point(0.279, -0.453, 0.000), Orientation(0.000, 0.000, 0.947, 0.321))
-        loc[2] = Pose(Point(0.279, -0.453, 0.000), Orientation(0.000, 0.000, 0.437, 0.899))
+        loc.append(Pose(Point(0.279, -0.453, 0.000), Quaternion(0.000, 0.000, -0.680, 0.733)))
+        loc.append(Pose(Point(0.279, -0.453, 0.000), Quaternion(0.000, 0.000, 0.947, 0.321)))
+        loc.append(Pose(Point(0.279, -0.453, 0.000), Quaternion(0.000, 0.000, 0.437, 0.899)))
 
-        loc[3] = Pose(Point(1.032, -0.553, 0.000), Orientation(0.000, 0.000, -0.818, 0.576))
+        loc.append(Pose(Point(1.032, -0.553, 0.000), Quaternion(0.000, 0.000, -0.818, 0.576)))
 
-        loc[4] = Pose(Point(1.644, -0.241, 0.000), Orientation(0.000, 0.000, -0.643, 0.765))
-        loc[5] = Pose(Point(1.644, -0.241, 0.000), Orientation(0.000, 0.000, -0.291, 0.957))
+        loc.append(Pose(Point(1.644, -0.241, 0.000), Quaternion(0.000, 0.000, -0.643, 0.765)))
+        loc.append(Pose(Point(1.644, -0.241, 0.000), Quaternion(0.000, 0.000, -0.291, 0.957)))
 
-        loc[6] = Pose(Point(1.546, 0.554, 0.000), Orientation(0.000, 0.000, 0.534, 0.845))
-        loc[7] = Pose(Point(1.312, 0.609, 0.000), Orientation(0.000, 0.000, 0.966, -0.258))
+        loc.append(Pose(Point(1.546, 0.554, 0.000), Quaternion(0.000, 0.000, 0.534, 0.845)))
+        loc.append(Pose(Point(1.312, 0.609, 0.000), Quaternion(0.000, 0.000, 0.966, -0.258)))
 
-        loc[8] = Pose(Point(0.180, 0.843, 0.000), Orientation(0.000, 0.000, -0.797, 0.604))
+        loc.append(Pose(Point(0.180, 0.843, 0.000), Quaternion(0.000, 0.000, -0.797, 0.604)))
 
-        loc[9] = Pose(Point(0.380, 1.197, 0.000), Orientation(0.000, 0.000, 0.163, 0.987))
-        loc[10] = Pose(Point(0.380, 1.197, 0.000), Orientation(0.000, 0.000, 0.987, -0.163))
+        loc.append(Pose(Point(0.380, 1.197, 0.000), Quaternion(0.000, 0.000, 0.163, 0.987)))
+        loc.append(Pose(Point(0.380, 1.197, 0.000), Quaternion(0.000, 0.000, 0.987, -0.163)))
 
-        loc[11] = Pose(Point(0.129, 1.760, 0.000), Orientation(0.000, 0.000, 0.978, 0.208))
-        loc[12] = Pose(Point(-0.087, 1.855, 0.000), Orientation(0.000, 0.000, 0.839, 0.544))
+        loc.append(Pose(Point(0.129, 1.760, 0.000), Quaternion(0.000, 0.000, 0.978, 0.208)))
+        loc.append(Pose(Point(-0.087, 1.855, 0.000), Quaternion(0.000, 0.000, 0.839, 0.544)))
 
-        loc[13] = Pose(Point(0.748, 2.166, 0.000), Orientation(0.000, 0.000, -0.182, 0.983))
-        loc[14] = Pose(Point(0.748, 2.166, 0.000), Orientation(0.000, 0.000, 0.285, 0.959))
-        loc[15] = Pose(POint(0.748, 2.166, 0.000), Orientation(0.000, 0.000, 0.598, 0.802))
+        loc.append(Pose(Point(0.748, 2.166, 0.000), Quaternion(0.000, 0.000, -0.182, 0.983)))
+        loc.append(Pose(Point(0.748, 2.166, 0.000), Quaternion(0.000, 0.000, 0.285, 0.959)))
+        loc.append(Pose(Point(0.748, 2.166, 0.000), Quaternion(0.000, 0.000, 0.598, 0.802)))
 
         
         # Publisher to manually control the robot (e.g. to stop it)
@@ -99,7 +99,7 @@ class master_driver():
         rospy.loginfo("Connected to move base server")
         
         #Subscribe to the facial recognition server
-        sub = rospy.Subscriber('facemapper/markers', visualization_msgs/MarkerArray.msg, face_callback, queue_size=10)
+        #sub = rospy.Subscriber('facemapper/markers', visualization_msgs/MarkerArray.msg, face_callback, queue_size=10)
 
 
         # Variables to keep track of success rate, running time,
@@ -113,7 +113,7 @@ class master_driver():
         global faces_i
 
 
-        rospy.loginfo("Starting navigation test")
+        rospy.loginfo("Starting navigation")
         
         # Begin the main loop and run through a sequence of locations
         while not rospy.is_shutdown():
@@ -125,7 +125,7 @@ class master_driver():
             self.goal.target_pose.header.stamp = rospy.Time.now()
             
             # Increment the counter
-            i+ = 1
+            i += 1
 
             # Let the user know where the robot is going next
             rospy.loginfo("Going to: " + str(loc[i]))
@@ -149,7 +149,7 @@ class master_driver():
                   rospy.loginfo("Goal failed with error code: " + str(goal_states[state]))
             
             #Check if we found any faces and approach them
-	    	if ( len(faces) > faces_i )
+	    	if ( len(faces) > faces_i ):
 	    		self.approach
 
             # Print a summary of faces found and visited
@@ -157,7 +157,7 @@ class master_driver():
                           str(n_goals) + " = " + 
                           str(100 * n_successes/n_goals) + "%")
 
-            if (i > n_loc)
+            if (i > n_loc):
             	break
 
 	    	rospy.sleep(self.rest_time)
@@ -168,11 +168,11 @@ class master_driver():
 
 
 
-	def approach():
+    def approach():
         global faces
         global faces_i
 
-        while( len(faces) > faces_i )
+        while( len(faces) > faces_i ):
         	#TODO approach face
 
         	faces_i += 1
@@ -192,7 +192,7 @@ def trunc(f, n):
 
 if __name__ == '__main__':
     try:
-        NavTest()
+        master_driver()
         rospy.spin()
     except rospy.ROSInterruptException:
         rospy.loginfo("AMCL navigation test finished.")
