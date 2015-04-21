@@ -33,11 +33,9 @@ from visualization_msgs import MarkerArray, Marker
 from random import sample
 from math import pow, sqrt
 
-
-
 class master_driver():
-	faces = []
-	faces_i = 0
+    faces = []
+    faces_i = 0
 
     def __init__(self):
         rospy.init_node('master_driver', anonymous=True)
@@ -147,6 +145,7 @@ class master_driver():
                     rospy.loginfo("State:" + str(state))
                 else:
                   rospy.loginfo("Goal failed with error code: " + str(goal_states[state]))
+		
             
             #Check if we found any faces and approach them
 	    	if ( len(faces) > faces_i )
@@ -156,6 +155,20 @@ class master_driver():
             rospy.loginfo("Success so far: " + str(n_successes) + "/" + 
                           str(n_goals) + " = " + 
                           str(100 * n_successes/n_goals) + "%")
+
+            /*
+            move_cmd = Twist()
+            angular_speed = rospy.get_param("~angular_speed", 0.7)
+            move_cmd.angular.z = angular_speed
+            self.cmd_vel.publish(move_cmd)
+            rospy.sleep(4.0)
+            
+            // stop rotating
+            move_cmd = Twist()
+            self.cmd_vel.publish(move_cmd)
+            rospy.sleep(1.0)
+            */
+            // priblizaj se obrazom
 
             if (i > n_loc)
             	break
@@ -173,9 +186,9 @@ class master_driver():
         global faces_i
 
         while( len(faces) > faces_i )
-        	#TODO approach face
-
-        	faces_i += 1
+            #TODO approach face
+            
+            faces_i += 1
 
 
     def shutdown(self):
