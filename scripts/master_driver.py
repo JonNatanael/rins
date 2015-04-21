@@ -128,77 +128,61 @@ class master_driver():
         while not rospy.is_shutdown():
 
             if i >= n_loc:
-                break
+                sefl.shutdown()
         
             self.move(loc[i])
 		            
             #Check if we found any faces and approach them
             while len(faces) > faces_i:
-                self.approach()
+                self.approach(faces_i)
                 faces_i += 1
                 self.move(loc[i])
 
             # Increment the counter
             i += 1
-
-            # Print a summary of faces found and visited
-            # rospy.loginfo("Success so far: " + str(n_successes) + "/" + 
-            #               str(n_goals) + " = " + 
-            #               str(100 * n_successes/n_goals) + "%")
-
-            #move_cmd = Twist()
-            #angular_speed = rospy.get_param("~angular_speed", 0.7)
-            #move_cmd.angular.z = angular_speed
-            #self.cmd_vel.publish(move_cmd)
-            #rospy.sleep(4.0)
-            
-            # stop rotating
-            #move_cmd = Twist()
-            #self.cmd_vel.publish(move_cmd)
-            #rospy.sleep(1.0)
             
             rospy.sleep(self.rest_time)
 
 
     def move(self, location):
         self.goal = MoveBaseGoal()
-        self.goal.target_pose.pose = loc[i]
+        self.goal.target_pose.pose = location
         self.goal.target_pose.header.frame_id = 'map' 
         self.goal.target_pose.header.stamp = rospy.Time.now()
         
         # Let the user know where the robot is going next
-        rospy.loginfo("Going to: " + str(loc[i]))
+        rospy.loginfo("Going to: " + str(location))
 
-        # self.move_base.send_goal(self.goal)
+        self.move_base.send_goal(self.goal)
             
-        # # Allow 60 seconds to get there
-        # finished_within_time = self.move_base.wait_for_result(rospy.Duration(60)) 
+        # Allow 60 seconds to get there
+        finished_within_time = self.move_base.wait_for_result(rospy.Duration(60)) 
             
-        # # Check for success or failure
-        # if not finished_within_time:
-        #     self.move_base.cancel_goal()
-        #     rospy.loginfo("Timed out achieving goal")
-        # else:
-        #     state = self.move_base.get_state()
-        #     if state == GoalStatus.SUCCEEDED:
-        #         rospy.loginfo("Goal succeeded!")
-        #         rospy.loginfo("State:" + str(state))
-        #     else:
-        #       rospy.loginfo("Goal failed with error code: " + str(goal_states[state]))
+        # Check for success or failure
+        if not finished_within_time:
+            self.move_base.cancel_goal()
+            rospy.loginfo("Timed out achieving goal")
+        else:
+            state = self.move_base.get_state()
+            if state == GoalStatus.SUCCEEDED:
+                rospy.loginfo("Goal succeeded!")
+                rospy.loginfo("State:" + str(state))
+            else:
+              rospy.loginfo("Goal failed with error code: " + str(goal_states[state]))
 
 
     def approach(self, index):
-    	print "approaching face nr.:" + str(faces_i)
+    	print "approaching face nr.:" + str(index)
         
-        x1 = faces[faces_i].pose.position.x
-        y1 = faces[faces_i].pose.position.y
+        x1 = faces[index].pose.position.x
+        y1 = faces[index].pose.position.y
         
         dist = 0.35 # distance from face
         listener = tf.TransformListener()
         robo = listener.lookupTransform('/map', '/odom', rospy.Time(0))
         x2 = robo.pose.position.x
         y2 = robo.pose.position.y
-	if (math.abs((x2 - x1)**2 + (y2 - y1)**2) < dist):
+		if (math.abs((x2 - x1)**2 + (y2 - y1)**2) < dist):
             x3 = x2
             y3 = y2
         else:
@@ -206,7 +190,8 @@ class master_driver():
             x3 = x1 + d * 1/math.sqrt(1 + m**2) #  VEDNO NAREDI OFFSET V ENO STRAN! (positive, positive)
             y3 = y1 + d * m/math.sqrt(1 + m**2)
         
-        Pose(Point(x3, y3, 0.000), Quaternion(0.000, 0.000, ?, ?))
+        print str(x3) + "  " + str(y3)
+        # Pose(Point(x3, y3, 0.000), Quaternion(0.000, 0.000, ?, ?))
 
 
     def shutdown(self):
