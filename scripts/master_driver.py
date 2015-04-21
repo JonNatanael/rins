@@ -53,6 +53,7 @@ class master_driver():
         self.rest_time = rospy.get_param("~rest_time", 2)
         
         # Goal state return values
+        global goal_states
         goal_states = ['PENDING', 'ACTIVE', 'PREEMPTED', 
                        'SUCCEEDED', 'ABORTED', 'REJECTED',
                        'PREEMPTING', 'RECALLING', 'RECALLED',
@@ -131,13 +132,13 @@ class master_driver():
             if i >= n_loc:
                 sefl.shutdown()
         
-            # self.move(loc[i])
+            self.move(loc[i])
 		            
             #Check if we found any faces and approach them
             while len(faces) > faces_i:
                 self.approach(faces_i)
                 faces_i += 1
-                # self.move(loc[i])
+                self.move(loc[i])
 
             # Increment the counter
             i += 1
@@ -189,11 +190,12 @@ class master_driver():
             y3 = y2
         else:
             m = (y2-y1)/(x2-x1) # slope
-            x3 = x1 + d * 1/math.sqrt(1 + m**2) #  VEDNO NAREDI OFFSET V ENO STRAN! (positive, positive)
-            y3 = y1 + d * m/math.sqrt(1 + m**2)
+            x3 = x1 + dist * 1/sqrt(1 + m**2) #  VEDNO NAREDI OFFSET V ENO STRAN! (positive, positive)
+            y3 = y1 + dist * m/sqrt(1 + m**2)
         
-        print str(x3) + "  " + str(y3)
-        # self.move(Pose(Point(x3, y3, 0.000), Quaternion(0.000, 0.000, 0.0, 0.0)))
+        #print str(x2) + "  " + str(y2)
+        #print str(x3) + "  " + str(y3)
+        self.move(Pose(Point(x3, y3, 0.000), Quaternion(0.000, 0.000, 0.0, 0.0)))
 
 
     def shutdown(self):
