@@ -131,13 +131,13 @@ class master_driver():
             if i >= n_loc:
                 sefl.shutdown()
         
-            self.move(loc[i])
+            # self.move(loc[i])
 		            
             #Check if we found any faces and approach them
             while len(faces) > faces_i:
                 self.approach(faces_i)
                 faces_i += 1
-                self.move(loc[i])
+                # self.move(loc[i])
 
             # Increment the counter
             i += 1
@@ -180,10 +180,11 @@ class master_driver():
         
         dist = 0.35 # distance from face
         listener = TransformListener()
-        robo = listener.lookupTransform('/amcl_pose', '/odom', rospy.Time.now())
+        #robo = listener.lookupTransform('/amcl_pose', '/odom', rospy.Time.now())
+        robo = loc[i]
         x2 = robo.pose.position.x
         y2 = robo.pose.position.y
-	if (abs((x2 - x1)**2 + (y2 - y1)**2) < dist):
+		if (abs((x2 - x1)**2 + (y2 - y1)**2) < dist):
             x3 = x2
             y3 = y2
         else:
@@ -192,7 +193,7 @@ class master_driver():
             y3 = y1 + d * m/math.sqrt(1 + m**2)
         
         print str(x3) + "  " + str(y3)
-        self.move(Pose(Point(x3, y3, 0.000), Quaternion(0.000, 0.000, 0.0, 0.0)))
+        # self.move(Pose(Point(x3, y3, 0.000), Quaternion(0.000, 0.000, 0.0, 0.0)))
 
 
     def shutdown(self):
