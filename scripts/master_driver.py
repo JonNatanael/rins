@@ -128,7 +128,7 @@ class master_driver():
         while not rospy.is_shutdown():
 
             if i >= n_loc:
-                break
+                self.shutdown()
         
             self.move(loc[i])
 		            
@@ -162,29 +162,29 @@ class master_driver():
 
     def move(self, location):
         self.goal = MoveBaseGoal()
-        self.goal.target_pose.pose = loc[i]
+        self.goal.target_pose.pose = location
         self.goal.target_pose.header.frame_id = 'map' 
         self.goal.target_pose.header.stamp = rospy.Time.now()
         
         # Let the user know where the robot is going next
-        rospy.loginfo("Going to: " + str(loc[i]))
+        rospy.loginfo("Going to: " + str(location))
 
-        # self.move_base.send_goal(self.goal)
+        self.move_base.send_goal(self.goal)
             
-        # # Allow 60 seconds to get there
-        # finished_within_time = self.move_base.wait_for_result(rospy.Duration(60)) 
+        # Allow 60 seconds to get there
+        finished_within_time = self.move_base.wait_for_result(rospy.Duration(60)) 
             
-        # # Check for success or failure
-        # if not finished_within_time:
-        #     self.move_base.cancel_goal()
-        #     rospy.loginfo("Timed out achieving goal")
-        # else:
-        #     state = self.move_base.get_state()
-        #     if state == GoalStatus.SUCCEEDED:
-        #         rospy.loginfo("Goal succeeded!")
-        #         rospy.loginfo("State:" + str(state))
-        #     else:
-        #       rospy.loginfo("Goal failed with error code: " + str(goal_states[state]))
+        # Check for success or failure
+        if not finished_within_time:
+            self.move_base.cancel_goal()
+            rospy.loginfo("Timed out achieving goal")
+        else:
+            state = self.move_base.get_state()
+            if state == GoalStatus.SUCCEEDED:
+                rospy.loginfo("Goal succeeded!")
+                rospy.loginfo("State:" + str(state))
+            else:
+              rospy.loginfo("Goal failed with error code: " + str(goal_states[state]))
 
 
     def approach(self):
