@@ -152,9 +152,9 @@ class master_driver():
 	    	# 	self.approach
 
             # Print a summary of faces found and visited
-            rospy.loginfo("Success so far: " + str(n_successes) + "/" + 
-                          str(n_goals) + " = " + 
-                          str(100 * n_successes/n_goals) + "%")
+            # rospy.loginfo("Success so far: " + str(n_successes) + "/" + 
+            #               str(n_goals) + " = " + 
+            #               str(100 * n_successes/n_goals) + "%")
 
 
             if (i > n_loc):
