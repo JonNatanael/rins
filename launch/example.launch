@@ -1,9 +1,0 @@
-<?xml version="1.0"?>
-<launch>
-
-    <node pkg="rins" type="example" name="example">
-        <remap from="input" to="/camera/depth_registered/points"/> <!-- Remap an input topic to the internal topic with name "input" -->
-        <remap from="output" to="/pcl_minimal/output"/> <!-- Remap an output topic to the internal topic with name "output" -->
-    </node>
-
-</launch>
