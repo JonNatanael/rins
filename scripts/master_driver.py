@@ -27,7 +27,7 @@ import roslib
 import rospy
 import actionlib
 from actionlib_msgs.msg import *
-from geometry_msgs.msg import Pose, PoseWithCovarianceStamped, Point, Quaternion, Twist
+from geometry_msgs.msg import Pose, PoseWithCovarianceStamped, Point, Quaternion, Twist, PoseArray
 from move_base_msgs.msg import MoveBaseAction, MoveBaseGoal
 from visualization_msgs.msg import Marker, MarkerArray
 from random import sample
@@ -108,7 +108,7 @@ class master_driver():
         #Subscribe to the facial recognition server
 
         #sub = rospy.Subscriber('/faces/markers', MarkerArray, face_callback, queue_size=10)
-        sub = rospy.Subscriber('/faces/locations', [], "", queue_size=10)
+        sub = rospy.Subscriber('/faces/locations', PoseArray, "", queue_size=10)
 
         # Variables to keep track of success rate, running time,
         # and distance traveled
