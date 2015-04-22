@@ -192,9 +192,22 @@ class master_driver():
             y3 = y2
         else:
             m = abs((y2-y1)/(x2-x1)) # slope
+<<<<<<< HEAD
             # = 
             x3 = x1 + dist * 1/sqrt(1 + m**2) #  VEDNO NAREDI OFFSET V ENO STRAN! (positive, positive)
             y3 = y1 + dist * m/sqrt(1 + m**2)
+=======
+            offsetX = dist * 1/sqrt(1 + m**2)
+            offsetY = dist * m/sqrt(1 + m**2)
+            if (x2 > x1):
+                x3 = x1 + offsetX
+            else:
+                x3 = x1 - offsetX
+            if (x2 > x1):
+                y3 = y1 + offsetY
+            else:
+                y3 = y1 - offsetY
+>>>>>>> 934f6757f18a27fd72e4a1e0730fa41aa28ca2e0
         
         print "current face"
         #print str(x1) + "  " + str(y1)
