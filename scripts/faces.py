@@ -50,7 +50,7 @@ class FaceMapper():
                 marker.id = len(self.faces_list)
                 marker.scale = Vector3(0.1, 0.1, 0.1)
                 marker.color = ColorRGBA(1, 0, 0, 1)
-                print marker
+                #print marker
 
                 if abs(resp.pose.position.y) < self.height_limit:
                     if len(self.faces_list)>0:
@@ -100,7 +100,7 @@ class FaceMapper():
         self.message_counter = 0
 
         self.faces_list = []
-        self.dist_limit = 0.3
+        self.dist_limit = 0.5
         self.height_limit = 0.2
 
 # Main function.    
