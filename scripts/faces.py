@@ -38,7 +38,7 @@ class FaceMapper():
             #print point
             resp = self.localize(faces.header, point, 3)
             if resp:
-            	#print resp
+                #print resp
                 marker = Marker()
                 marker.header.stamp = faces.header.stamp
                 marker.header.frame_id = faces.header.frame_id
@@ -53,13 +53,13 @@ class FaceMapper():
                 #print marker
 
                 # TODO transform current face position to map coordinates
-        		(trans, rot) = listener.lookupTransform('/map', '/odom', rospy.Time.now())
-        		# read current face position
-        		x1 = marker.pose.position.x
-        		y1 = marker.pose.position.z
-        		# transform to map coordinates
-        		x1 = trans[0]+cos(rot[2])*x1
-        		y1 = trans[1]+sin(rot[2])*y1
+                (trans, rot) = listener.lookupTransform('/map', '/odom', rospy.Time.now())
+                # read current face position
+                x1 = marker.pose.position.x
+                y1 = marker.pose.position.z
+                # transform to map coordinates
+                x1 = trans[0]+cos(rot[2])*x1
+                y1 = trans[1]+sin(rot[2])*y1
 
 
                 # TODO compare these coordinates to all previously detected faces
