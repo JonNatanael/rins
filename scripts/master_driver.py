@@ -217,7 +217,13 @@ class master_driver():
         print "target position"
         print str(x3) + "  " + str(y3)
         self.move(Pose(Point(x3, y3, 0.000), Quaternion(0.000, 0.000, 0.0, 1.0)))
-
+        
+        # fix angle for approach
+        #(trans, rot) = listener.lookupTransform('/map', '/odom', rospy.Time.now())
+        #
+        #m = (trans[1]-y1)/(trans[0]-x1) # slope
+        #theta = atan(m)
+        #self.move(Pose(Point(x3, y3, 0.000), Quaternion(0.000, 0.000, sin(theta/2), cos(theta/2))))
 
     def shutdown(self):
         rospy.loginfo("Stopping the robot...")
