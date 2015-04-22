@@ -186,8 +186,8 @@ class master_driver():
 
         #print trans[0],trans[1]
         #robo = loc[i]
-        x1 = trans[0]+cos(rot[2])*x1
-        y1 = trans[1]+sin(rot[2])*y1
+        #x1 = trans[0]+cos(rot[2])*x1
+        #y1 = trans[1]+sin(rot[2])*y1
         x2 = trans[0]
         y2 = trans[1]
         #print x2,y2
@@ -196,9 +196,8 @@ class master_driver():
             y3 = y2
         else:
             m = abs((y2-y1)/(x2-x1)) # slope
-            # = 
-            x3 = x1 + dist * 1/sqrt(1 + m**2) #  VEDNO NAREDI OFFSET V ENO STRAN! (positive, positive)
-            y3 = y1 + dist * m/sqrt(1 + m**2)
+            #x3 = x1 + dist * 1/sqrt(1 + m**2)
+            #y3 = y1 + dist * m/sqrt(1 + m**2)
             offsetX = dist * 1/sqrt(1 + m**2)
             offsetY = dist * m/sqrt(1 + m**2)
             if (x2 > x1):
