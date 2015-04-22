@@ -107,7 +107,7 @@ class master_driver():
         
         #Subscribe to the facial recognition server
         sub = rospy.Subscriber('/faces/markers', MarkerArray, face_callback, queue_size=10)
-        sub = rospy.Subscriber('/faces/locations', Point[], "", queue_size=10)
+        sub = rospy.Subscriber('/faces/locations', [], "", queue_size=10)
 
         # Variables to keep track of success rate, running time,
         # and distance traveled
@@ -218,7 +218,7 @@ class master_driver():
         print str(x3) + "  " + str(y3)
         self.move(Pose(Point(x3, y3, 0.000), Quaternion(0.000, 0.000, 0.0, 1.0)))
         
-        # fix angle for approach
+        # angle correction for approach
         #(trans, rot) = listener.lookupTransform('/map', '/odom', rospy.Time.now())
         #
         #m = (trans[1]-y1)/(trans[0]-x1) # slope
