@@ -31,8 +31,9 @@ from geometry_msgs.msg import Pose, PoseWithCovarianceStamped, Point, Quaternion
 from move_base_msgs.msg import MoveBaseAction, MoveBaseGoal
 from visualization_msgs.msg import Marker, MarkerArray
 from random import sample
-from math import pow, sqrt
-from tf import TransformListener
+from math import pow, sqrt, sin, cos
+from tf import TransformListener, ConnectivityException, Exception, LookupException
+from nav_msgs.msg import Odometry
 
 def face_callback(data):
     # global faces
@@ -140,7 +141,7 @@ class master_driver():
                 faces_i += 1
                 self.move(loc[i])
 		#self.shutdown()
-		exit()
+		#exit()
 
             # Increment the counter
             i += 1
@@ -157,22 +158,22 @@ class master_driver():
         # Let the user know where the robot is going next
         rospy.loginfo("Going to: " + str(location))
 
-        self.move_base.send_goal(self.goal)
+        # self.move_base.send_goal(self.goal)
             
-        # Allow 60 seconds to get there
-        finished_within_time = self.move_base.wait_for_result(rospy.Duration(60)) 
+        # # Allow 60 seconds to get there
+        # finished_within_time = self.move_base.wait_for_result(rospy.Duration(60)) 
             
-        # Check for success or failure
-        if not finished_within_time:
-            self.move_base.cancel_goal()
-            rospy.loginfo("Timed out achieving goal")
-        else:
-            state = self.move_base.get_state()
-            if state == GoalStatus.SUCCEEDED:
-                rospy.loginfo("Goal succeeded!")
-                rospy.loginfo("State:" + str(state))
-            else:
-              rospy.loginfo("Goal failed with error code: " + str(goal_states[state]))
+        # # Check for success or failure
+        # if not finished_within_time:
+        #     self.move_base.cancel_goal()
+        #     rospy.loginfo("Timed out achieving goal")
+        # else:
+        #     state = self.move_base.get_state()
+        #     if state == GoalStatus.SUCCEEDED:
+        #         rospy.loginfo("Goal succeeded!")
+        #         rospy.loginfo("State:" + str(state))
+        #     else:
+        #       rospy.loginfo("Goal failed with error code: " + str(goal_states[state]))
 
 
     def approach(self, index):
@@ -183,40 +184,44 @@ class master_driver():
         
         dist = 0.35 # distance from face
         listener = TransformListener()
-        #robo = listener.lookupTransform('/amcl_pose', '/odom', rospy.Time.now())
-        robo = loc[i]
-        x2 = robo.position.x
-        y2 = robo.position.y
+        rospy.sleep(2.0)
+        (trans, rot) = listener.lookupTransform('/map', '/odom', rospy.Time.now())
+
+
+        #print trans[0],trans[1]
+        #robo = loc[i]
+        x1 = trans[0]+cos(rot[2])*x1
+        y1 = trans[1]+sin(rot[2])*y1
+        x2 = trans[0]
+        y2 = trans[1]
+        #print x2,y2
         if (abs((x2 - x1)**2 + (y2 - y1)**2) < dist):
             x3 = x2
             y3 = y2
         else:
             m = abs((y2-y1)/(x2-x1)) # slope
-<<<<<<< HEAD
             # = 
             x3 = x1 + dist * 1/sqrt(1 + m**2) #  VEDNO NAREDI OFFSET V ENO STRAN! (positive, positive)
             y3 = y1 + dist * m/sqrt(1 + m**2)
-=======
             offsetX = dist * 1/sqrt(1 + m**2)
             offsetY = dist * m/sqrt(1 + m**2)
             if (x2 > x1):
                 x3 = x1 + offsetX
             else:
                 x3 = x1 - offsetX
-            if (x2 > x1):
+            if (y2 > y1):
                 y3 = y1 + offsetY
             else:
                 y3 = y1 - offsetY
->>>>>>> 934f6757f18a27fd72e4a1e0730fa41aa28ca2e0
         
         print "current face"
-        #print str(x1) + "  " + str(y1)
-	print faces[index]
-        print "current position"
-        print str(x2) + "  " + str(y2)
+        print str(x1) + "  " + str(y1)
+        #print faces[index]
+        #print "current position"
+        #print str(x2) + "  " + str(y2)
         print "target position"
         print str(x3) + "  " + str(y3)
-        self.move(Pose(Point(x3, y3, 0.000), Quaternion(0.000, 0.000, 0.0, 0.0)))
+        #self.move(Pose(Point(x3, y3, 0.000), Quaternion(0.000, 0.000, 0.0, 0.0)))
 
 
     def shutdown(self):
