@@ -81,7 +81,7 @@ class master_driver():
         loc.append(Pose(Point(1.644, -0.241, 0.000), Quaternion(0.000, 0.000, -0.291, 0.957)))
 
         loc.append(Pose(Point(1.546, 0.554, 0.000), Quaternion(0.000, 0.000, 0.534, 0.845)))
-        loc.append(Pose(Point(1.312, 0.609, 0.000), Quaternion(0.000, 0.000, 0.966, -0.258)))
+        loc.append(Pose(Point(1.546, 0.554, 0.000), Quaternion(0.000, 0.000, 0.966, -0.258)))
 
         loc.append(Pose(Point(0.180, 0.843, 0.000), Quaternion(0.000, 0.000, -0.797, 0.604)))
 
@@ -130,7 +130,7 @@ class master_driver():
         # Begin the main loop and run through a sequence of locations
         while not rospy.is_shutdown():
 
-            if i >= n_loc:
+            if i > n_loc:
                 self.shutdown()
         
             self.move(loc[i])
