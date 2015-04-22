@@ -66,19 +66,19 @@ class FaceMapper():
 
                 if abs(resp.pose.position.y) < self.height_limit:
                     if len(self.faces_list)>0:
-                    	in_range = False
-                    	for j in xrange(0,len(self.faces_list)):
-                    		#if self.dist(self.faces_list[j].pose.position.x,self.faces_list[j].pose.position.y,resp.pose.position.x,resp.pose.position.y) < self.dist_limit:
-                    		if self.dist(self.faces_locs[j].x,self.faces_locs[j].y,x1,y1) < self.dist_limit:
-                    			in_range = True
-                    	if not in_range:	
+                        in_range = False
+                        for j in xrange(0,len(self.faces_list)):
+                            #if self.dist(self.faces_list[j].pose.position.x,self.faces_list[j].pose.position.y,resp.pose.position.x,resp.pose.position.y) < self.dist_limit:
+                            if self.dist(self.faces_locs[j].x,self.faces_locs[j].y,x1,y1) < self.dist_limit:
+                                in_range = True
+                        if not in_range:	
                             if marker.pose.position.z > 0:
-                    		  self.faces_list.append(marker)
-                    		  self.faces_locs.append(Point(x1,y1,1))
+                              self.faces_list.append(marker)
+                              self.faces_locs.append(Point(x1,y1,1))
                     else:
                         if marker.pose.position.z > 0:
-                    	   self.faces_list.append(marker)
-                    	   self.faces_locs.append(Point(x1,y1,1))
+                           self.faces_list.append(marker)
+                           self.faces_locs.append(Point(x1,y1,1))
 
         #add all previously detected faces
         for face in self.faces_list:
@@ -93,7 +93,7 @@ class FaceMapper():
         self.message_counter = self.message_counter + 1
 
     def dist(self,x1,y1,x2,y2):
-    	return math.sqrt((x1-x2)*(x1-x2)+(y1-y2)*(y1-y2))
+        return math.sqrt((x1-x2)*(x1-x2)+(y1-y2)*(y1-y2))
 
     def __init__(self):
         region_scope = rospy.get_param('~region', 3)
@@ -111,9 +111,9 @@ class FaceMapper():
         self.localize = rospy.ServiceProxy('localizer/localize', Localize)
 
         self.markers_pub = rospy.Publisher(markers_topic, MarkerArray)
-		self.markers_pub.publish([])
+        self.markers_pub.publish([])
 
-        self.locations_pub = rospy.Publisher(locations_topic, Point[])
+        self.locations_pub = rospy.Publisher(locations_topic, [])
         self.locations_pub.publish([])
 
         self.message_counter = 0
