@@ -158,22 +158,22 @@ class master_driver():
         # Let the user know where the robot is going next
         rospy.loginfo("Going to: " + str(location))
 
-        # self.move_base.send_goal(self.goal)
+        self.move_base.send_goal(self.goal)
             
-        # # Allow 60 seconds to get there
-        # finished_within_time = self.move_base.wait_for_result(rospy.Duration(60)) 
+        # Allow 60 seconds to get there
+        finished_within_time = self.move_base.wait_for_result(rospy.Duration(60)) 
             
-        # # Check for success or failure
-        # if not finished_within_time:
-        #     self.move_base.cancel_goal()
-        #     rospy.loginfo("Timed out achieving goal")
-        # else:
-        #     state = self.move_base.get_state()
-        #     if state == GoalStatus.SUCCEEDED:
-        #         rospy.loginfo("Goal succeeded!")
-        #         rospy.loginfo("State:" + str(state))
-        #     else:
-        #       rospy.loginfo("Goal failed with error code: " + str(goal_states[state]))
+        # Check for success or failure
+        if not finished_within_time:
+            self.move_base.cancel_goal()
+            rospy.loginfo("Timed out achieving goal")
+        else:
+            state = self.move_base.get_state()
+            if state == GoalStatus.SUCCEEDED:
+                rospy.loginfo("Goal succeeded!")
+                rospy.loginfo("State:" + str(state))
+            else:
+              rospy.loginfo("Goal failed with error code: " + str(goal_states[state]))
 
 
     def approach(self, index):
@@ -221,7 +221,7 @@ class master_driver():
         #print str(x2) + "  " + str(y2)
         print "target position"
         print str(x3) + "  " + str(y3)
-        #self.move(Pose(Point(x3, y3, 0.000), Quaternion(0.000, 0.000, 0.0, 0.0)))
+        self.move(Pose(Point(x3, y3, 0.000), Quaternion(0.000, 0.000, 0.0, 0.0)))
 
 
     def shutdown(self):
