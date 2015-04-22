@@ -71,8 +71,8 @@ class master_driver():
         # loc.append(Pose(Point(0.279, -0.453, 0.000), Quaternion(0.000, 0.000, 0.947, 0.321)))
         # loc.append(Pose(Point(0.279, -0.453, 0.000), Quaternion(0.000, 0.000, 0.437, 0.899)))
 
-        loc.append(Pose(Point(0.836, -0.338, 0.000), Quaternion(0.000, 0.000, 0.978, 0.210)))
-        loc.append(Pose(Point(0.836, -0.338, 0.000), Quaternion(0.000, 0.000, 0.926, -0.378)))
+        #loc.append(Pose(Point(0.836, -0.338, 0.000), Quaternion(0.000, 0.000, 0.978, 0.210)))
+        #loc.append(Pose(Point(0.836, -0.338, 0.000), Quaternion(0.000, 0.000, 0.926, -0.378)))
 
         loc.append(Pose(Point(1.032, -0.553, 0.000), Quaternion(0.000, 0.000, -0.818, 0.576)))
 
@@ -130,7 +130,7 @@ class master_driver():
         while not rospy.is_shutdown():
 
             if i >= n_loc:
-                sefl.shutdown()
+                self.shutdown()
         
             self.move(loc[i])
 		            
@@ -139,6 +139,8 @@ class master_driver():
                 self.approach(faces_i)
                 faces_i += 1
                 self.move(loc[i])
+		#self.shutdown()
+		exit()
 
             # Increment the counter
             i += 1
@@ -177,7 +179,7 @@ class master_driver():
     	print "approaching face nr.:" + str(index)
         
         x1 = faces[index].pose.position.x
-        y1 = faces[index].pose.position.y
+        y1 = faces[index].pose.position.z
         
         dist = 0.35 # distance from face
         listener = TransformListener()
@@ -189,12 +191,18 @@ class master_driver():
             x3 = x2
             y3 = y2
         else:
-            m = (y2-y1)/(x2-x1) # slope
+            m = abs((y2-y1)/(x2-x1)) # slope
+            # = 
             x3 = x1 + dist * 1/sqrt(1 + m**2) #  VEDNO NAREDI OFFSET V ENO STRAN! (positive, positive)
             y3 = y1 + dist * m/sqrt(1 + m**2)
         
-        #print str(x2) + "  " + str(y2)
-        #print str(x3) + "  " + str(y3)
+        print "current face"
+        #print str(x1) + "  " + str(y1)
+	print faces[index]
+        print "current position"
+        print str(x2) + "  " + str(y2)
+        print "target position"
+        print str(x3) + "  " + str(y3)
         self.move(Pose(Point(x3, y3, 0.000), Quaternion(0.000, 0.000, 0.0, 0.0)))
 
 

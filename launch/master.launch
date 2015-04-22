@@ -4,11 +4,11 @@
 
   <!--<include file="$(find rins)/launch/amcl_demo.launch" />-->
 
+  <include file="$(find turtlebot_bringup)/launch/3dsensor.launch" />
+
   <node name="map_server" pkg="map_server" type="map_server" args="$(find rins)/map/map.yaml"/>
 
   <!-- face detector -->  
-
-  <include file="$(find turtlebot_bringup)/launch/3dsensor.launch" />
 
   <include file="$(find facedetector)/launch/facedetector.launch">
    <arg name="image_topic" value="/camera/rgb/image_color" />

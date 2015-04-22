@@ -50,6 +50,7 @@ class FaceMapper():
                 marker.id = len(self.faces_list)
                 marker.scale = Vector3(0.1, 0.1, 0.1)
                 marker.color = ColorRGBA(1, 0, 0, 1)
+                print marker
 
                 if abs(resp.pose.position.y) < self.height_limit:
                     if len(self.faces_list)>0:
@@ -58,11 +59,11 @@ class FaceMapper():
                     		if self.dist(self.faces_list[j].pose.position.x,self.faces_list[j].pose.position.y,resp.pose.position.x,resp.pose.position.y) < self.dist_limit:
                     			in_range = True
                     	if not in_range:	
-                    		self.faces_list.append(marker)
+                            if marker.pose.position.z > 0:
+                    		  self.faces_list.append(marker)
                     else:
-                    	self.faces_list.append(marker)
-
-
+                        if marker.pose.position.z > 0:
+                    	   self.faces_list.append(marker)
 
         #add all previously detected faces
         for face in self.faces_list:
@@ -94,6 +95,7 @@ class FaceMapper():
         self.localize = rospy.ServiceProxy('localizer/localize', Localize)
 
         self.markers_pub = rospy.Publisher(markers_topic, MarkerArray)
+	self.markers_pub.publish([])
 
         self.message_counter = 0
 
