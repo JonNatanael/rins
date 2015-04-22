@@ -88,6 +88,7 @@ class FaceMapper():
         #print markers
 
         self.markers_pub.publish(markers)
+        self.locations_pub.publish(faces_locs)
 
         self.message_counter = self.message_counter + 1
 
@@ -111,6 +112,9 @@ class FaceMapper():
 
         self.markers_pub = rospy.Publisher(markers_topic, MarkerArray)
 		self.markers_pub.publish([])
+
+        self.locations_pub = rospy.Publisher(locations_topic, Point[])
+        self.locations_pub.publish([])
 
         self.message_counter = 0
 

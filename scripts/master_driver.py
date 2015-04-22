@@ -107,7 +107,7 @@ class master_driver():
         
         #Subscribe to the facial recognition server
         sub = rospy.Subscriber('/faces/markers', MarkerArray, face_callback, queue_size=10)
-
+        sub = rospy.Subscriber('/faces/locations', Point[], "", queue_size=10)
 
         # Variables to keep track of success rate, running time,
         # and distance traveled
