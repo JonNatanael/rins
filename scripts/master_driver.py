@@ -68,10 +68,6 @@ class master_driver():
         global loc
         loc = []
         
-        # loc.append(Pose(Point(0.279, -0.453, 0.000), Quaternion(0.000, 0.000, -0.680, 0.733)))
-        # loc.append(Pose(Point(0.279, -0.453, 0.000), Quaternion(0.000, 0.000, 0.947, 0.321)))
-        # loc.append(Pose(Point(0.279, -0.453, 0.000), Quaternion(0.000, 0.000, 0.437, 0.899)))
-
         #loc.append(Pose(Point(0.836, -0.338, 0.000), Quaternion(0.000, 0.000, 0.978, 0.210)))
         #loc.append(Pose(Point(0.836, -0.338, 0.000), Quaternion(0.000, 0.000, 0.926, -0.378)))
 
