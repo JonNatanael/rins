@@ -52,18 +52,33 @@ class FaceMapper():
                 marker.color = ColorRGBA(1, 0, 0, 1)
                 #print marker
 
+                # TODO transform current face position to map coordinates
+        		(trans, rot) = listener.lookupTransform('/map', '/odom', rospy.Time.now())
+        		# read current face position
+        		x1 = marker.pose.position.x
+        		y1 = marker.pose.position.z
+        		# transform to map coordinates
+        		x1 = trans[0]+cos(rot[2])*x1
+        		y1 = trans[1]+sin(rot[2])*y1
+
+
+                # TODO compare these coordinates to all previously detected faces
+
                 if abs(resp.pose.position.y) < self.height_limit:
                     if len(self.faces_list)>0:
                     	in_range = False
                     	for j in xrange(0,len(self.faces_list)):
-                    		if self.dist(self.faces_list[j].pose.position.x,self.faces_list[j].pose.position.y,resp.pose.position.x,resp.pose.position.y) < self.dist_limit:
+                    		#if self.dist(self.faces_list[j].pose.position.x,self.faces_list[j].pose.position.y,resp.pose.position.x,resp.pose.position.y) < self.dist_limit:
+                    		if self.dist(self.faces_locs[j].x,self.faces_locs[j].y,x1,y1) < self.dist_limit:
                     			in_range = True
                     	if not in_range:	
                             if marker.pose.position.z > 0:
                     		  self.faces_list.append(marker)
+                    		  self.faces_locs.append(Point(x1,y1,1))
                     else:
                         if marker.pose.position.z > 0:
                     	   self.faces_list.append(marker)
+                    	   self.faces_locs.append(Point(x1,y1,1))
 
         #add all previously detected faces
         for face in self.faces_list:
@@ -95,13 +110,20 @@ class FaceMapper():
         self.localize = rospy.ServiceProxy('localizer/localize', Localize)
 
         self.markers_pub = rospy.Publisher(markers_topic, MarkerArray)
-	self.markers_pub.publish([])
+		self.markers_pub.publish([])
 
         self.message_counter = 0
 
         self.faces_list = []
+        self.faces_locs = []
         self.dist_limit = 0.5
         self.height_limit = 0.2
+
+        # init transform listener
+        listener = TransformListener()
+        rospy.sleep(2.0)
+
+
 
 # Main function.    
 if __name__ == '__main__':
