@@ -98,6 +98,8 @@ class FaceMapper():
     def __init__(self):
         region_scope = rospy.get_param('~region', 3)
         markers_topic = rospy.get_param('~markers_topic', rospy.resolve_name('%s/markers' % rospy.get_name()))
+        locations_topic = rospy.get_param('~locations_topic', rospy.resolve_name('%s/locations' % rospy.get_name()))
+
         faces_topic = rospy.get_param('~faces_topic', '/facedetector/faces')
         camera_topic = rospy.get_param('~camera_topic', '/camera/camera_info')      
 

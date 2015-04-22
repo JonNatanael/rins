@@ -106,7 +106,8 @@ class master_driver():
         rospy.loginfo("Connected to move base server")
         
         #Subscribe to the facial recognition server
-        sub = rospy.Subscriber('/faces/markers', MarkerArray, face_callback, queue_size=10)
+
+        #sub = rospy.Subscriber('/faces/markers', MarkerArray, face_callback, queue_size=10)
         sub = rospy.Subscriber('/faces/locations', [], "", queue_size=10)
 
         # Variables to keep track of success rate, running time,
@@ -175,8 +176,11 @@ class master_driver():
     def approach(self, index):
     	print "approaching face nr.:" + str(index)
         
-        x1 = faces[index].pose.position.x
-        y1 = faces[index].pose.position.z
+        # x1 = faces[index].pose.position.x
+        # y1 = faces[index].pose.position.z
+
+        x1 = faces[index].x
+        y1 = faces[index].z
         
         dist = 0.35 # distance from face
         listener = TransformListener()
