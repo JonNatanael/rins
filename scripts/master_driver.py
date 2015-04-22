@@ -83,7 +83,7 @@ class master_driver():
         loc.append(Pose(Point(1.546, 0.554, 0.000), Quaternion(0.000, 0.000, 0.534, 0.845)))
         loc.append(Pose(Point(1.546, 0.554, 0.000), Quaternion(0.000, 0.000, 0.966, -0.258)))
 
-        loc.append(Pose(Point(0.180, 0.843, 0.000), Quaternion(0.000, 0.000, -0.797, 0.604)))
+        loc.append(Pose(Point(0.180, 0.843, 0.000), Quaternion(0.000, 0.000, -0.382, 0.924)))
 
         loc.append(Pose(Point(0.380, 1.197, 0.000), Quaternion(0.000, 0.000, 0.163, 0.987)))
         loc.append(Pose(Point(0.380, 1.197, 0.000), Quaternion(0.000, 0.000, 0.987, -0.163)))
@@ -221,7 +221,7 @@ class master_driver():
         #print str(x2) + "  " + str(y2)
         print "target position"
         print str(x3) + "  " + str(y3)
-        self.move(Pose(Point(x3, y3, 0.000), Quaternion(0.000, 0.000, 0.0, 0.0)))
+        self.move(Pose(Point(x3, y3, 0.000), Quaternion(0.000, 0.000, 0.0, 1.0)))
 
 
     def shutdown(self):
