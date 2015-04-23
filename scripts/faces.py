@@ -11,7 +11,7 @@ from localizer.srv import Localize
 from sensor_msgs.msg import CameraInfo
 from visualization_msgs.msg import Marker, MarkerArray
 from image_geometry import PinholeCameraModel
-from geometry_msgs.msg import Point, Vector3, PoseArray, Pose, Quaternion
+from geometry_msgs.msg import Point, Vector3, PoseArray, Pose, Quaternion, PointStamped
 from math import sin, cos, sqrt
 from tf import TransformListener
 from tf.transformations import euler_from_quaternion
@@ -66,6 +66,12 @@ class FaceMapper():
                     listener.waitForTransform("/map", "/camera_rgb_optical_frame", rospy.Time(0), rospy.Duration(2.0))
                     #(trans, rot) = listener.lookupTransform('/map', '/camera_rgb_optical_frame', rospy.Time(0))
                     (trans, rot) = listener.lookupTransform('/map', '/camera_rgb_optical_frame', faces.header.stamp)
+                    ps = PointStamped()
+                    ps.header.stamp = faces.header.stamp
+                    ps.header.frame_id = faces.header.frame_id
+                    ps.point = marker.pose.position
+                    p = tf.transformPoint('/map', ps)
+                    print ps
                     print trans,rot
                 except:
                     print 'exp'
