@@ -69,7 +69,7 @@ class FaceMapper():
                     ps.header.frame_id = faces.header.frame_id
                     ps.point = marker.pose.position
                     t = TransformerROS()
-                    p = t.transformPoint('/map', ps)
+                    p = t.transformPoint('map', ps)
                     print p
                 except Exception as ex:
                     print "e1"
