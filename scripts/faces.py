@@ -118,7 +118,8 @@ class FaceMapper():
     def createMarker(self,pose,header):
     	mrkr = Marker()
         mrkr.header.stamp = header.stamp
-        mrkr.header.frame_id = header.frame_id
+        #mrkr.header.frame_id = header.frame_id
+        mrkr.header.frame_id = 'map'
         mrkr.pose = pose
         mrkr.type = Marker.CUBE
         mrkr.action = Marker.ADD
