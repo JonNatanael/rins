@@ -28,7 +28,6 @@ class FaceMapper():
         n = len(faces.x)
 
         markers = MarkerArray()
-        app_points = MarkerArray()
 
         for i in xrange(0, n):
             u = faces.x[i] + faces.width[i] / 2
@@ -58,19 +57,20 @@ class FaceMapper():
                 # TODO transform current face position to map coordinates
                 #listener = TransformListener()
                 #rospy.sleep(4.0)
-                listener = TransformListener()
-                listener.waitForTransform("/map", "/odom", rospy.Time(), rospy.Duration(2.0))
-                (trans, rot) = listener.lookupTransform('/map', '/odom', rospy.Time(0))
-                print trans,rot
-                (roll,pitch,yaw)=euler_from_quaternion(rot)
-                print yaw
-                # read current face position
-                x1 = marker.pose.position.x
-                y1 = marker.pose.position.z
-                # transform to map coordinates
-                x1 = trans[0]+cos(yaw)*x1
-                y1 = trans[1]+sin(yaw)*y1
-                #print x1,y1
+                
+                trans = (0,0,0)
+                rot = (0,0,1,0)
+
+                try:
+                    listener = TransformListener()
+                    (trans, rot) = listener.lookupTransform('/map', '/camera_rgb_optical_frame', rospy.Time(0))
+                    print trans,rot
+                except:
+                    print 'exp'
+
+                x1 = trans[0]
+                y1 = trans[1]
+                print x1,y1,trans[2]
 
 
                 # TODO compare these coordinates to all previously detected faces
@@ -81,23 +81,24 @@ class FaceMapper():
                         for j in xrange(0,len(self.faces_list)):
                             #if self.dist(self.faces_list[j].pose.position.x,self.faces_list[j].pose.position.y,resp.pose.position.x,resp.pose.position.y) < self.dist_limit:
                             if self.dist(self.faces_locs.poses[j].position.x, self.faces_locs.poses[j].position.y, x1, y1) < self.dist_limit:
-                                in_range = True
+                                in_range = False#True
                         if not in_range:	
                             if marker.pose.position.z > 0:
                               self.faces_list.append(marker)
-                              pose = Pose(Point(x1,y1,1), Quaternion(0,0,0,1))
+                              pose = Pose(Point(x1, y1, 0.66), Quaternion(0, 0, 1, 0))
                               self.faces_locs.poses.append(pose)
-                              app_points.markers.append(self.createMarker(pose, faces.header))
+                              self.app_points.markers.append(self.createMarker(pose, faces.header))
                     else:
                         if marker.pose.position.z > 0:
                             self.faces_list.append(marker)
-                            pose = Pose(Point(x1,y1,1), Quaternion(0,0,0,1))
+                            pose = Pose(Point(x1, y1, 0.66), Quaternion(0, 0, 1, 0))
                             self.faces_locs.poses.append(pose)
-                            app_points.markers.append(self.createMarker(pose, faces.header))
+                            self.app_points.markers.append(self.createMarker(pose, faces.header))
 
         #add all previously detected faces
         for face in self.faces_list:
             markers.markers.append(face)
+            #print face
 
         print len(self.faces_list)
         #print markers
@@ -105,7 +106,7 @@ class FaceMapper():
         self.markers_pub.publish(markers)
         self.locations_pub.publish(self.faces_locs)
 
-        self.approach_point_pub.publish(app_points)
+        self.approach_point_pub.publish(self.app_points)
 
         self.message_counter = self.message_counter + 1
 
@@ -119,7 +120,7 @@ class FaceMapper():
         mrkr.pose = pose
         mrkr.type = Marker.CUBE
         mrkr.action = Marker.ADD
-        mrkr.frame_locked = True
+        mrkr.frame_locked = False
         mrkr.lifetime = rospy.Time(0)
         mrkr.id = len(self.faces_list)
         mrkr.scale = Vector3(0.1, 0.1, 0.1)
@@ -154,6 +155,8 @@ class FaceMapper():
         self.approach_point_pub.publish([])
 
         self.message_counter = 0
+
+        self.app_points = MarkerArray()
 
         self.faces_list = []
         self.faces_locs = PoseArray(Header(),[])
