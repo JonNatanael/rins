@@ -58,7 +58,7 @@ class FaceMapper():
                 #listener = TransformListener()
                 #rospy.sleep(4.0)
                 listener = TransformListener()
-                listener.waitForTransform("/map", "/odom", rospy.Time(), rospy.Duration(10.0))
+                listener.waitForTransform("/map", "/odom", rospy.Time(), rospy.Duration(2.0))
                 (trans, rot) = listener.lookupTransform('/map', '/odom', rospy.Time(0))
                 print trans,rot
                 (roll,pitch,yaw)=euler_from_quaternion(rot)
@@ -67,8 +67,8 @@ class FaceMapper():
                 x1 = marker.pose.position.x
                 y1 = marker.pose.position.z
                 # transform to map coordinates
-                x1 = trans[0]+cos(rot[2])*x1
-                y1 = trans[1]+sin(rot[2])*y1
+                x1 = trans[0]+cos(yaw)*x1
+                y1 = trans[1]+sin(yaw)*y1
                 #print x1,y1
 
 
