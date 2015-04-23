@@ -81,8 +81,10 @@ class FaceMapper():
 
                 #x1 = marker.pose.position.x+trans[0]*sin(rot[2])
                 #y1 = marker.pose.position.z+trans[1]*cos(rot[3])
-                x1 = trans[0]+p.point.x
-                y1 = trans[1]+p.point.y
+                #x1 = trans[0]+p.point.x
+                x1 = p.point.x
+                y1 = p.point.y
+                #y1 = trans[1]+p.point.y
                 print x1,y1,trans[2]
 
 
