@@ -105,7 +105,7 @@ class FaceMapper():
         self.markers_pub.publish(markers)
         self.locations_pub.publish(self.faces_locs)
 
-        self.approach_point_pub.publish(self.app_points)
+        self.approach_point_pub.publish(app_points)
 
         self.message_counter = self.message_counter + 1
 
