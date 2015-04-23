@@ -70,13 +70,17 @@ class FaceMapper():
                 except:
                     print 'exp'
 
-                ps = PointStamped()
-                ps.header.stamp = faces.header.stamp
-                ps.header.frame_id = faces.header.frame_id
-                ps.point = marker.pose.position
-                t = TransformerROS()
-                p = t.transformPoint('/map', ps)
-                print p
+                try:
+                    ps = PointStamped()
+                    ps.header.stamp = faces.header.stamp
+                    ps.header.frame_id = faces.header.frame_id
+                    ps.point = marker.pose.position
+                    t = TransformerROS()
+                    p = t.transformPoint('/map', ps)
+                    print p
+                except:
+                    print 'no map'
+                
                     
 
                 #x1 = marker.pose.position.x+trans[0]*sin(rot[2])
