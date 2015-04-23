@@ -67,8 +67,8 @@ class FaceMapper():
                     #(trans, rot) = listener.lookupTransform('/map', '/camera_rgb_optical_frame', rospy.Time(0))
                     (trans, rot) = listener.lookupTransform('/map', '/camera_rgb_optical_frame', faces.header.stamp)
                     print trans,rot
-                except:
-                    print 'exp'
+                except Exception as ex:
+                    print ex
 
                 try:
                     ps = PointStamped()
@@ -78,8 +78,8 @@ class FaceMapper():
                     t = TransformerROS()
                     p = t.transformPoint('/map', ps)
                     print p
-                except:
-                    print 'no map'
+                except Exception as ex:
+                    print ex
                 
                     
 
