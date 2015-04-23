@@ -63,7 +63,7 @@ class FaceMapper():
 
                 try:
                     listener = TransformListener()
-                    listener.waitForTransform("/map", "/camera_rgb_optical_frame", rospy.Time(0), rospy.Duration(2.0))
+                    listener.waitForTransform("/map", "/camera_rgb_optical_frame", rospy.Time(0), rospy.Duration(1.0))
                     ps = PointStamped()
                     ps.header.stamp = faces.header.stamp
                     ps.header.frame_id = faces.header.frame_id
@@ -77,9 +77,9 @@ class FaceMapper():
 
                 try:
                     listener = TransformListener()
-                    listener.waitForTransform("/map", "/camera_rgb_optical_frame", rospy.Time(0), rospy.Duration(2.0))
-                    #(trans, rot) = listener.lookupTransform('/map', '/camera_rgb_optical_frame', rospy.Time(0))
-                    (trans, rot) = listener.lookupTransform('/map', '/camera_rgb_optical_frame', faces.header.stamp)
+                    listener.waitForTransform("/map", "/camera_rgb_optical_frame", rospy.Time(0), rospy.Duration(1.0))
+                    (trans, rot) = listener.lookupTransform('/map', '/camera_rgb_optical_frame', rospy.Time(0))
+                    #(trans, rot) = listener.lookupTransform('/map', '/camera_rgb_optical_frame', faces.header.stamp)
                     print trans,rot
                 except Exception as ex:
                     print "e2"
