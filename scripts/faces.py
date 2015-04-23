@@ -72,6 +72,7 @@ class FaceMapper():
                     p = t.transformPoint('/map', ps)
                     print p
                 except Exception as ex:
+                    print "e1"
                     print ex
 
                 try:
@@ -81,6 +82,7 @@ class FaceMapper():
                     (trans, rot) = listener.lookupTransform('/map', '/camera_rgb_optical_frame', faces.header.stamp)
                     print trans,rot
                 except Exception as ex:
+                    print "e2"
                     print ex
 
                 #x1 = marker.pose.position.x+trans[0]*sin(rot[2])
