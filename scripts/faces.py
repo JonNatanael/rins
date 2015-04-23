@@ -28,6 +28,7 @@ class FaceMapper():
         n = len(faces.x)
 
         markers = MarkerArray()
+        app_points = MarkerArray()
 
         for i in xrange(0, n):
             u = faces.x[i] + faces.width[i] / 2
@@ -84,11 +85,15 @@ class FaceMapper():
                         if not in_range:	
                             if marker.pose.position.z > 0:
                               self.faces_list.append(marker)
-                              self.faces_locs.poses.append(Pose(Point(x1,y1,1), Quaternion(0,0,0,1)))
+                              pose = Pose(Point(x1,y1,1), Quaternion(0,0,0,1))
+                              self.faces_locs.poses.append(pose)
+                              self.app_points.append(self.addMarker(pose,faces.header))
                     else:
                         if marker.pose.position.z > 0:
-                           self.faces_list.append(marker)
-                           self.faces_locs.poses.append(Pose(Point(x1,y1,1), Quaternion(0,0,0,1)))
+                            self.faces_list.append(marker)
+                            pose = Pose(Point(x1,y1,1), Quaternion(0,0,0,1))
+                            self.faces_locs.poses.append(pose)
+                            self.app_points.append(self.addMarker(pose,faces.header))
 
         #add all previously detected faces
         for face in self.faces_list:
@@ -100,15 +105,32 @@ class FaceMapper():
         self.markers_pub.publish(markers)
         self.locations_pub.publish(self.faces_locs)
 
+        self.approach_point_pub.publish(self.app_points)
+
         self.message_counter = self.message_counter + 1
 
     def dist(self,x1,y1,x2,y2):
         return sqrt((x1-x2)*(x1-x2)+(y1-y2)*(y1-y2))
 
+    def createMarker(self,pose,header):
+    	mrkr = Marker()
+        mrkr.header.stamp = header.stamp
+        mrkr.header.frame_id = header.frame_id
+        mrkr.pose = pose
+        mrkr.type = Marker.CUBE
+        mrkr.action = Marker.ADD
+        mrkr.frame_locked = True
+        mrkr.lifetime = rospy.Time(0)
+        mrkr.id = len(self.faces_list)
+        mrkr.scale = Vector3(0.1, 0.1, 0.1)
+        mrkr.color = ColorRGBA(0, 1, 0, 1)
+        return mrkr
+
     def __init__(self):
         region_scope = rospy.get_param('~region', 3)
         markers_topic = rospy.get_param('~markers_topic', rospy.resolve_name('%s/markers' % rospy.get_name()))
         locations_topic = rospy.get_param('~locations_topic', rospy.resolve_name('%s/locations' % rospy.get_name()))
+        approach_point_topic = rospy.get_param('~approach_point_pub', rospy.resolve_name('%s/approach_points' % rospy.get_name()))
 
         faces_topic = rospy.get_param('~faces_topic', '/facedetector/faces')
         camera_topic = rospy.get_param('~camera_topic', '/camera/camera_info')      
@@ -127,6 +149,9 @@ class FaceMapper():
 
         self.locations_pub = rospy.Publisher(locations_topic, PoseArray)
         #self.locations_pub.publish(self.)
+
+        self.approach_point_pub = rospy.Publisher(approach_point_topic, MarkerArray)
+        self.approach_point_pub.publish([])
 
         self.message_counter = 0
 
