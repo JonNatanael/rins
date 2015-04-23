@@ -11,7 +11,7 @@ from localizer.srv import Localize
 from sensor_msgs.msg import CameraInfo
 from visualization_msgs.msg import Marker, MarkerArray
 from image_geometry import PinholeCameraModel
-from geometry_msgs.msg import Point, Vector3, PoseArray
+from geometry_msgs.msg import Point, Vector3, PoseArray, Pose, Quaternion
 from math import sin, cos, sqrt
 from tf import TransformListener
 from tf.transformations import euler_from_quaternion
@@ -69,7 +69,7 @@ class FaceMapper():
                 # transform to map coordinates
                 x1 = trans[0]+cos(rot[2])*x1
                 y1 = trans[1]+sin(rot[2])*y1
-                print x1,y1
+                #print x1,y1
 
 
                 # TODO compare these coordinates to all previously detected faces
@@ -79,16 +79,16 @@ class FaceMapper():
                         in_range = False
                         for j in xrange(0,len(self.faces_list)):
                             #if self.dist(self.faces_list[j].pose.position.x,self.faces_list[j].pose.position.y,resp.pose.position.x,resp.pose.position.y) < self.dist_limit:
-                            if self.dist(self.faces_locs.poses[j].x,self.faces_locs.poses[j].y,x1,y1) < self.dist_limit:
+                            if self.dist(self.faces_locs.poses[j].position.x, self.faces_locs.poses[j].position.y, x1, y1) < self.dist_limit:
                                 in_range = True
                         if not in_range:	
                             if marker.pose.position.z > 0:
                               self.faces_list.append(marker)
-                              self.faces_locs.poses.append(Point(x1,y1,1))
+                              self.faces_locs.poses.append(Pose(Point(x1,y1,1), Quaternion(0,0,0,1)))
                     else:
                         if marker.pose.position.z > 0:
                            self.faces_list.append(marker)
-                           self.faces_locs.poses.append(Point(x1,y1,1))
+                           self.faces_locs.poses.append(Pose(Point(x1,y1,1), Quaternion(0,0,0,1)))
 
         #add all previously detected faces
         for face in self.faces_list:
@@ -132,7 +132,7 @@ class FaceMapper():
 
         self.faces_list = []
         self.faces_locs = PoseArray(Header(),[])
-        self.dist_limit = 0.5
+        self.dist_limit = 0.8
         self.height_limit = 0.2
 
         # init transform listener

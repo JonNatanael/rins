@@ -38,9 +38,9 @@ from nav_msgs.msg import Odometry
 def face_callback(data):
     # global faces
     # global faces_i
-    #print data
+    # print data
     global faces
-    faces = data.markers
+    faces = data.poses
 
 class master_driver():
     #faces = []
@@ -87,9 +87,10 @@ class master_driver():
         loc.append(Pose(Point(0.129, 1.760, 0.000), Quaternion(0.000, 0.000, 0.978, 0.208)))
         loc.append(Pose(Point(-0.087, 1.855, 0.000), Quaternion(0.000, 0.000, 0.839, 0.544)))
 
-        loc.append(Pose(Point(1.1, 2.35, 0.000), Quaternion(0.000, 0.000, -0.182, 0.983)))
-        loc.append(Pose(Point(1.1, 2.35, 0.000), Quaternion(0.000, 0.000, 0.285, 0.959)))
+
         loc.append(Pose(Point(1.1, 2.35, 0.000), Quaternion(0.000, 0.000, 0.598, 0.802)))
+        loc.append(Pose(Point(1.1, 2.35, 0.000), Quaternion(0.000, 0.000, 0.285, 0.959)))
+        loc.append(Pose(Point(1.1, 2.35, 0.000), Quaternion(0.000, 0.000, -0.723, 0.691)))
 
         
         # Publisher to manually control the robot (e.g. to stop it)
@@ -108,7 +109,7 @@ class master_driver():
         #Subscribe to the facial recognition server
 
         #sub = rospy.Subscriber('/faces/markers', MarkerArray, face_callback, queue_size=10)
-        sub = rospy.Subscriber('/faces/locations', PoseArray, "", queue_size=10)
+        sub = rospy.Subscriber('/faces/locations', PoseArray, face_callback, queue_size=10)
 
         # Variables to keep track of success rate, running time,
         # and distance traveled
@@ -127,8 +128,10 @@ class master_driver():
         # Begin the main loop and run through a sequence of locations
         while not rospy.is_shutdown():
 
-            if i > n_loc:
+            if i >= n_loc:
+                rospy.loginfo("Visited all checkpoints!")
                 self.shutdown()
+                break
         
             self.move(loc[i])
 		            
@@ -153,9 +156,9 @@ class master_driver():
         self.goal.target_pose.header.stamp = rospy.Time.now()
         
         # Let the user know where the robot is going next
-        rospy.loginfo("Going to: " + str(location))
+        rospy.loginfo("Going to " + str(location))
 
-        self.move_base.send_goal(self.goal)
+        #self.move_base.send_goal(self.goal)
             
         # Allow 60 seconds to get there
         finished_within_time = self.move_base.wait_for_result(rospy.Duration(60)) 
@@ -179,8 +182,8 @@ class master_driver():
         # x1 = faces[index].pose.position.x
         # y1 = faces[index].pose.position.z
 
-        x1 = faces[index].x
-        y1 = faces[index].z
+        x1 = faces[index].position.x
+        y1 = faces[index].position.z
         
         dist = 0.35 # distance from face
         listener = TransformListener()
@@ -234,12 +237,11 @@ class master_driver():
         self.move_base.cancel_goal()
         rospy.sleep(2)
         #self.cmd_vel_pub.publish(Twist())
-        rospy.sleep(1)
      
-def trunc(f, n):
+#def trunc(f, n):
     # Truncates/pads a float f to n decimal places without rounding
-    slen = len('%.*f' % (n, f))
-    return float(str(f)[:slen])
+    #slen = len('%.*f' % (n, f))
+    #return float(str(f)[:slen])
 
 if __name__ == '__main__':
     try:
