@@ -89,13 +89,13 @@ class FaceMapper():
                               self.faces_list.append(marker)
                               pose = Pose(Point(x1, y1, 0.66), Quaternion(0, 0, 1, 0))
                               self.faces_locs.poses.append(pose)
-                              self.app_points.markers.append(self.createMarker(pose, Header()))
+                              self.app_points.markers.append(self.createMarker(pose, faces.header))
                     else:
                         if marker.pose.position.z > 0:
                             self.faces_list.append(marker)
                             pose = Pose(Point(x1, y1, 0.66), Quaternion(0, 0, 1, 0))
                             self.faces_locs.poses.append(pose)
-                            self.app_points.markers.append(self.createMarker(pose, Header()))
+                            self.app_points.markers.append(self.createMarker(pose, faces.header))
 
         #add all previously detected faces
         for face in self.faces_list:
