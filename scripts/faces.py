@@ -162,7 +162,7 @@ class FaceMapper():
 
         self.faces_list = []
         self.faces_locs = PoseArray(Header(),[])
-        self.dist_limit = 0.8
+        self.dist_limit = 0.5
         self.height_limit = 0.2
 
         # init transform listener
