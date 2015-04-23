@@ -12,8 +12,9 @@ from sensor_msgs.msg import CameraInfo
 from visualization_msgs.msg import Marker, MarkerArray
 from image_geometry import PinholeCameraModel
 from geometry_msgs.msg import Point, Vector3, PoseArray
-import math
+from math import sin, cos, sqrt
 from tf import TransformListener
+from tf.transformations import euler_from_quaternion
 
 # Node for face detection.
 class FaceMapper():
@@ -60,12 +61,15 @@ class FaceMapper():
                 listener.waitForTransform("/map", "/odom", rospy.Time(), rospy.Duration(10.0))
                 (trans, rot) = listener.lookupTransform('/map', '/odom', rospy.Time(0))
                 print trans,rot
+                (roll,pitch,yaw)=euler_from_quaternion(rot)
+                print yaw
                 # read current face position
                 x1 = marker.pose.position.x
                 y1 = marker.pose.position.z
                 # transform to map coordinates
-                #x1 = trans[0]+cos(rot[2])*x1
-                #y1 = trans[1]+sin(rot[2])*y1
+                x1 = trans[0]+cos(rot[2])*x1
+                y1 = trans[1]+sin(rot[2])*y1
+                print x1,y1
 
 
                 # TODO compare these coordinates to all previously detected faces
@@ -99,7 +103,7 @@ class FaceMapper():
         self.message_counter = self.message_counter + 1
 
     def dist(self,x1,y1,x2,y2):
-        return math.sqrt((x1-x2)*(x1-x2)+(y1-y2)*(y1-y2))
+        return sqrt((x1-x2)*(x1-x2)+(y1-y2)*(y1-y2))
 
     def __init__(self):
         region_scope = rospy.get_param('~region', 3)
