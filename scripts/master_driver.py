@@ -158,7 +158,7 @@ class master_driver():
         # Let the user know where the robot is going next
         rospy.loginfo("Going to " + str(location))
 
-        #self.move_base.send_goal(self.goal)
+        self.move_base.send_goal(self.goal)
             
         # Allow 60 seconds to get there
         finished_within_time = self.move_base.wait_for_result(rospy.Duration(60)) 
