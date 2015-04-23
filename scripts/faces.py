@@ -70,8 +70,10 @@ class FaceMapper():
                 except:
                     print 'exp'
 
-                x1 = marker.pose.position.x+trans[0]*sin(rot[2])
-                y1 = marker.pose.position.z+trans[1]*cos(rot[3])
+                #x1 = marker.pose.position.x+trans[0]*sin(rot[2])
+                #y1 = marker.pose.position.z+trans[1]*cos(rot[3])
+                x1 = trans[0]
+                y1 = trans[1]
                 print x1,y1,trans[2]
 
 
