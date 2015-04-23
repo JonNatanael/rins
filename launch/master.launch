@@ -4,7 +4,7 @@
 
   <!--<include file="$(find rins)/launch/amcl_demo.launch" />-->
 
-  <node name="map_server" pkg="map_server" type="map_server" args="$(find rins)/map/map.yaml"/>
+  <!--<node name="map_server" pkg="map_server" type="map_server" args="$(find rins)/map/map.yaml"/>-->
 
   <include file="$(find turtlebot_bringup)/launch/3dsensor.launch" />
   
