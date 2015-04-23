@@ -71,7 +71,7 @@ class FaceMapper():
                     print 'exp'
 
                 x1 = trans[0]+marker.pose.position.x
-                y1 = trans[1]+marker.pose.position.y
+                y1 = trans[1]+marker.pose.position.z
                 print x1,y1,trans[2]
 
 
@@ -83,7 +83,7 @@ class FaceMapper():
                         for j in xrange(0,len(self.faces_list)):
                             #if self.dist(self.faces_list[j].pose.position.x,self.faces_list[j].pose.position.y,resp.pose.position.x,resp.pose.position.y) < self.dist_limit:
                             if self.dist(self.faces_locs.poses[j].position.x, self.faces_locs.poses[j].position.y, x1, y1) < self.dist_limit:
-                                in_range = True
+                                in_range = False#True
                         if not in_range:	
                             if marker.pose.position.z > 0:
                               self.faces_list.append(marker)
