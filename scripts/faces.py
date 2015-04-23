@@ -63,7 +63,9 @@ class FaceMapper():
 
                 try:
                     listener = TransformListener()
-                    (trans, rot) = listener.lookupTransform('/map', '/camera_rgb_optical_frame', rospy.Time(0))
+                    listener.waitForTransform("/map", "/camera_rgb_optical_frame", rospy.Time(), rospy.Duration(2.0))
+                    #(trans, rot) = listener.lookupTransform('/map', '/camera_rgb_optical_frame', rospy.Time(0))
+                    (trans, rot) = listener.lookupTransform('/map', '/camera_rgb_optical_frame', faces.header.stamp)
                     print trans,rot
                 except:
                     print 'exp'
@@ -81,19 +83,19 @@ class FaceMapper():
                         for j in xrange(0,len(self.faces_list)):
                             #if self.dist(self.faces_list[j].pose.position.x,self.faces_list[j].pose.position.y,resp.pose.position.x,resp.pose.position.y) < self.dist_limit:
                             if self.dist(self.faces_locs.poses[j].position.x, self.faces_locs.poses[j].position.y, x1, y1) < self.dist_limit:
-                                in_range = False#True
+                                in_range = True
                         if not in_range:	
                             if marker.pose.position.z > 0:
                               self.faces_list.append(marker)
                               pose = Pose(Point(x1, y1, 0.66), Quaternion(0, 0, 1, 0))
                               self.faces_locs.poses.append(pose)
-                              self.app_points.markers.append(self.createMarker(pose, faces.header))
+                              self.app_points.markers.append(self.createMarker(pose, Header()))
                     else:
                         if marker.pose.position.z > 0:
                             self.faces_list.append(marker)
                             pose = Pose(Point(x1, y1, 0.66), Quaternion(0, 0, 1, 0))
                             self.faces_locs.poses.append(pose)
-                            self.app_points.markers.append(self.createMarker(pose, faces.header))
+                            self.app_points.markers.append(self.createMarker(pose, Header()))
 
         #add all previously detected faces
         for face in self.faces_list:
@@ -178,6 +180,8 @@ if __name__ == '__main__':
     rospy.init_node('facemapper')
     try:
         print "here"
+        listener = TransformListener()
+        listener.waitForTransform("/map", "/camera_rgb_optical_frame", rospy.Time(), rospy.Duration(10.0))
     	fd = FaceMapper()
         rospy.spin()    
     except rospy.ROSInterruptException: pass
