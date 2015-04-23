@@ -66,19 +66,18 @@ class FaceMapper():
                     listener.waitForTransform("/map", "/camera_rgb_optical_frame", rospy.Time(0), rospy.Duration(2.0))
                     #(trans, rot) = listener.lookupTransform('/map', '/camera_rgb_optical_frame', rospy.Time(0))
                     (trans, rot) = listener.lookupTransform('/map', '/camera_rgb_optical_frame', faces.header.stamp)
-                    ps = PointStamped()
-                    ps.header.stamp = faces.header.stamp
-                    ps.header.frame_id = faces.header.frame_id
-                    ps.point = marker.pose.position
-                    t = TransformerROS()
-                    p = t.transformPoint('/map', ps)
-                    print p
                     print trans,rot
                 except:
                     print 'exp'
 
-                
-                #print p
+                ps = PointStamped()
+                ps.header.stamp = faces.header.stamp
+                ps.header.frame_id = faces.header.frame_id
+                ps.point = marker.pose.position
+                t = TransformerROS()
+                p = t.transformPoint('/map', ps)
+                print p
+                    
 
                 #x1 = marker.pose.position.x+trans[0]*sin(rot[2])
                 #y1 = marker.pose.position.z+trans[1]*cos(rot[3])
