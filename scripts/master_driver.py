@@ -137,9 +137,9 @@ class master_driver():
 		            
             #Check if we found any faces and approach them
             while len(faces) > faces_i:
-                self.approach(faces_i)
+                #self.approach(faces_i)
                 faces_i += 1
-                self.move(loc[i])
+                #self.move(loc[i])
 		#self.shutdown()
 		#exit()
 
