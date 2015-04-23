@@ -13,7 +13,7 @@ from visualization_msgs.msg import Marker, MarkerArray
 from image_geometry import PinholeCameraModel
 from geometry_msgs.msg import Point, Vector3, PoseArray, Pose, Quaternion, PointStamped
 from math import sin, cos, sqrt
-from tf import TransformListener, TransformPoint
+from tf import TransformListener, TransformerROS
 from tf.transformations import euler_from_quaternion
 
 # Node for face detection.
@@ -74,7 +74,8 @@ class FaceMapper():
                 ps.header.stamp = faces.header.stamp
                 ps.header.frame_id = faces.header.frame_id
                 ps.point = marker.pose.position
-                p = TransformPoint('/map', ps)
+                t = TransformerROS()
+                p = t.transformPoint('/map', ps)
                 print p
 
                 #x1 = marker.pose.position.x+trans[0]*sin(rot[2])
