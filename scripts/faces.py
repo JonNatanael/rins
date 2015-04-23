@@ -60,6 +60,7 @@ class FaceMapper():
                 
                 trans = (0,0,0)
                 rot = (0,0,1,0)
+                p = PointStamped()
 
                 try:
                     listener = TransformListener()
