@@ -63,7 +63,7 @@ class FaceMapper():
 
                 try:
                     listener = TransformListener()
-                    listener.waitForTransform("/map", "/camera_rgb_optical_frame", rospy.Time(), rospy.Duration(2.0))
+                    #listener.waitForTransform("/map", "/camera_rgb_optical_frame", rospy.Time(), rospy.Duration(2.0))
                     #(trans, rot) = listener.lookupTransform('/map', '/camera_rgb_optical_frame', rospy.Time(0))
                     (trans, rot) = listener.lookupTransform('/map', '/camera_rgb_optical_frame', faces.header.stamp)
                     print trans,rot
@@ -180,8 +180,8 @@ if __name__ == '__main__':
     rospy.init_node('facemapper')
     try:
         print "here"
-        listener = TransformListener()
-        listener.waitForTransform("/map", "/camera_rgb_optical_frame", rospy.Time(), rospy.Duration(10.0))
+        #listener = TransformListener()
+        #listener.waitForTransform("/map", "/camera_rgb_optical_frame", rospy.Time(), rospy.Duration(10.0))
     	fd = FaceMapper()
         rospy.spin()    
     except rospy.ROSInterruptException: pass
