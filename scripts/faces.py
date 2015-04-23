@@ -70,8 +70,8 @@ class FaceMapper():
                 except:
                     print 'exp'
 
-                x1 = trans[0]+marker.pose.position.x
-                y1 = trans[1]+marker.pose.position.z
+                x1 = marker.pose.position.x-trans[0]
+                y1 = marker.pose.position.z-trans[1]
                 print x1,y1,trans[2]
 
 
@@ -118,8 +118,8 @@ class FaceMapper():
     def createMarker(self,pose,header):
     	mrkr = Marker()
         mrkr.header.stamp = header.stamp
-        mrkr.header.frame_id = header.frame_id
-        #mrkr.header.frame_id = 'map'
+        #mrkr.header.frame_id = header.frame_id
+        mrkr.header.frame_id = 'map'
         mrkr.pose = pose
         mrkr.type = Marker.CUBE
         mrkr.action = Marker.ADD
