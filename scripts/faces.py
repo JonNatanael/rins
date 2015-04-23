@@ -78,7 +78,7 @@ class FaceMapper():
                     print 'exp'
 
                 
-                print p
+                #print p
 
                 #x1 = marker.pose.position.x+trans[0]*sin(rot[2])
                 #y1 = marker.pose.position.z+trans[1]*cos(rot[3])
