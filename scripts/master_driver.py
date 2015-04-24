@@ -237,11 +237,6 @@ class master_driver():
         self.move_base.cancel_goal()
         rospy.sleep(2)
         #self.cmd_vel_pub.publish(Twist())
-     
-#def trunc(f, n):
-    # Truncates/pads a float f to n decimal places without rounding
-    #slen = len('%.*f' % (n, f))
-    #return float(str(f)[:slen])
 
 if __name__ == '__main__':
     try:
