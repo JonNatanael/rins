@@ -153,9 +153,10 @@ class master_driver():
                 #twist.linear.z = 0
                 #twist.angular.x = 0
                 #twist.angular.y = 0
-                twist.angular.z = 0.8
+                twist.angular.z = 2.8
                 turning.publish(twist)
                 rospy.sleep(0.2)
+                turning.publish(Twist())
 
             #Check if we found any faces and approach them
             #print len(faces_locs)
@@ -168,7 +169,7 @@ class master_driver():
                             neobiskan = False
                             continue
                     if neobiskan:
-                        approachTarget = calculateApproach(pose.position.x, pose.position.y)
+                        approachTarget = self.calculateApproach(pose.position.x, pose.position.y)
                         if approachTarget is not None:
                             #rospy.sleep(4)
                             obiskaniObrazi.append((pose.position.x, pose.position.y))
