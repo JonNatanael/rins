@@ -261,13 +261,13 @@ def makeFaceClusters(self, hits):
                 continue
 
             #get the distance from the center point
-            dst = dist(marker.point.x, marker.point.y, contender.point.x, contender.point.y)
+            dst = dist(marker.position.x, marker.position.y, contender.position.x, contender.position.y)
             if dst < spread: #if it's inside the spread add to the cluster size counter 
                 points_in_range += 1
-                points_cluster_xy.append((contender.point.x, contender.point.y))
+                points_cluster_xy.append((contender.position.x, contender.position.y))
 
         if points_in_range > num_closest: #if we had enough nearby points to consider this a cluster
-            raw.append((marker.point.x, marker.point.y, points_in_range, points_cluster_xy)) #add our initial center and number of points in cloud
+            raw.append((marker.position.x, marker.position.y, points_in_range, points_cluster_xy)) #add our initial center and number of points in cloud
 
     #we should now have a list of all cluster centers stored in raw[]
     #we need to define our logic for what the best clusters are. In this instance I assume the tightest one as in lowest max_dist
