@@ -149,25 +149,23 @@ class master_driver():
 
             while len(faces) > faces_i:
                 for pose in faces:
-                    approachTarget = calculateApproach(pose.position.x, pose.position.y)
-                    if approachTarget is not None:
-                        neobiskan = True
-                    else:
-                        continue # zaradi tega se lahko zacikla!
+                    neobiskan = True
                     for (faceX,faceY) in obiskaniObrazi:
                         if (dist(pose.position.x, pose.position.y, faceX, faceY) < 0.5):
                             neobiskan = False
                             continue
                     if neobiskan:
-                        #rospy.sleep(4)
-                        print "approaching face number: " + str(faces_i)
-                        print faces_locs
-                        #self.approach(faces_i)
-                        self.move(faces_locs[faces_i])
-                        faces_i += 1
-                        #self.move(loc[i])
-		        #self.shutdown()
-		        #exit()
+                        approachTarget = calculateApproach(pose.position.x, pose.position.y)
+                        if approachTarget is not None:
+                            #rospy.sleep(4)
+                            obiskaniObrazi.append((pose.position.x, pose.position.y))
+                            print "approaching face number: " + str(faces_i)
+                            print faces_locs
+                            self.move(faces_locs[faces_i])
+                            faces_i += 1
+                            #self.move(loc[i])
+                            #self.shutdown()
+                            #exit()
 
             #while len(faces_locs) > faces_i:
             #    print "approaching face number: " + str(faces_i)
