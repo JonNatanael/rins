@@ -141,9 +141,6 @@ class FaceMapper():
 
         self.message_counter = self.message_counter + 1
 
-    def dist(self,x1,y1,x2,y2):
-        return sqrt((x1-x2)*(x1-x2)+(y1-y2)*(y1-y2))
-
     def createMarker(self,pose,header):
     	mrkr = Marker()
         mrkr.header.stamp = header.stamp
@@ -237,6 +234,9 @@ class FaceMapper():
         #(trans,rot)=self.listener.lookupTransform('/map', '/odom', rospy.Time(0))
         #print trans,rot
         #rospy.sleep(2.0)
+
+def dist(self,x1,y1,x2,y2):
+    return sqrt((x1-x2)*(x1-x2)+(y1-y2)*(y1-y2))
 
 def makeFaceClusters(self, hits):
 # spremenjena verzija, bo mogoce boljsi preformance
