@@ -118,11 +118,7 @@ class FaceMapper():
                     if abs(resp.pose.position.y) < self.height_limit:
                         pose = Pose(Point(x1, y1, 0.66), Quaternion(0, 0, 1, 0))
                         self.allDetected.poses.append(pose)
-                        clusteringResults = PoseArray(Header(),[])
-                        clusteringResults.header.frame_id = 'map'
-                        for (xCluster, yCluster) in makeFaceClusters(self, self.allDetected):
-                            clusteringResults.poses.append(Pose(Point(xCluster, yCluster, 0.50), Quaternion(0, 0, 1, 0)))
-
+                
                 except Exception as ex:
                     print "e"
                     print ex
@@ -134,6 +130,11 @@ class FaceMapper():
 
         print len(self.faces_list)
         #print markers
+
+        clusteringResults = PoseArray(Header(),[])
+        clusteringResults.header.frame_id = 'map'
+        for (xCluster, yCluster) in makeFaceClusters(self, self.allDetected):
+            clusteringResults.poses.append(Pose(Point(xCluster, yCluster, 0.50), Quaternion(0, 0, 1, 0)))
 
         self.markers_pub.publish(markers)
         self.locations_pub.publish(clusteringResults)
