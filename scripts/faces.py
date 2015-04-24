@@ -146,7 +146,7 @@ class FaceMapper():
         mrkr.color = ColorRGBA(0, 1, 0, 1)
         return mrkr
 
-    def calculateApproach(faceIndex):
+    def calculateApproach(fself,faceIndex):
         try:
             listener = TransformListener()
             listener.waitForTransform("/map", "/base_link", rospy.Time(0), rospy.Duration(2.0))
