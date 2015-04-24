@@ -1,6 +1,6 @@
 
 def makeClusters(self, hits):
-    
+
     num_closest = 15 #how many must be in the desired range to be consisered a cluster
     spread = 0.35 #how small must the cluster be
     threshold = 0.5 #how close can clusters be one another
@@ -40,11 +40,15 @@ def makeClusters(self, hits):
     for i in xrange(1, len(sorted_raw)):
 
         #for each contending cluster check if there isn't one (tighter, better) added to the list withun its range 
+        below_thresh = false
         for appoved_cluster in clusters:
             dst = dist(appoved_cluster[0], appoved_cluster[1], sorted_raw[i][0], sorted_raw[i][1])
 
             if dst < threshold: 
-                clusters.append(sorted_raw[i])
+                below_thresh=True
+
+        if not below_thresh:
+            clusters.append(sorted_raw[i])
 
     return clusters #returns a list of tuples: tup(cluster_center.x, cluster_center.y, cluster_sperad/2)
 
