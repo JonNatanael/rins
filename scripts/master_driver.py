@@ -146,7 +146,7 @@ class master_driver():
             
             # rotate in place for detection
             
-            for twCounter in range(1, 10):
+            for twCounter in range(1, 20):
                 twist = Twist()
                 #twist.linear.x = 0
                 #twist.linear.y = 0
@@ -157,7 +157,7 @@ class master_driver():
                 turning.publish(twist)
                 rospy.sleep(0.4)
                 turning.publish(Twist())
-                rospy.sleep(0.1)
+                rospy.sleep(0.25)
 
             #Check if we found any faces and approach them
             #print len(faces_locs)
