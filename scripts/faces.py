@@ -37,6 +37,7 @@ class FaceMapper():
             point = Point(((u - camera_model.cx()) - camera_model.Tx()) / camera_model.fx(),
                  ((v - camera_model.cy()) - camera_model.Ty()) / camera_model.fy(), 1)
             
+            clusteringResults = PoseArray(Header(),[])
             #print point
             resp = self.localize(faces.header, point, 3)
             if resp:
@@ -112,6 +113,15 @@ class FaceMapper():
                                 if pose is not None:
                                     self.app_points.markers.append(self.createMarker(pose, faces.header))
 
+                    # CLUSTERING
+                    if abs(resp.pose.position.y) < self.height_limit:
+                        pose = Pose(Point(x1, y1, 0.66), Quaternion(0, 0, 1, 0))
+                        self.allDetected.poses.append(pose)
+                        clusters = makeFaceClusters(self.allDetected)
+                        clusteringResults = PoseArray(Header(),[])
+                        for (xCluster, yCluster, unused1, unused2) in cluster:
+                            clusteringResults.poses.append(Pose(xCluster, YCluster, 0.50), Quaternion(0, 0, 1, 0))
+
                 except Exception as ex:
                     print "e"
                     print ex
@@ -125,7 +135,7 @@ class FaceMapper():
         #print markers
 
         self.markers_pub.publish(markers)
-        self.locations_pub.publish(self.faces_locs)
+        self.locations_pub.publish(self.clusteringResults)
 
         self.approach_point_pub.publish(self.app_points)
 
@@ -206,7 +216,7 @@ class FaceMapper():
         self.markers_pub.publish([])
 
         self.locations_pub = rospy.Publisher(locations_topic, PoseArray)
-        #self.locations_pub.publish(self.)
+        self.locations_pub.publish(Header(), [])
 
         self.approach_point_pub = rospy.Publisher(approach_point_topic, MarkerArray)
         self.approach_point_pub.publish([])
@@ -217,6 +227,7 @@ class FaceMapper():
 
         self.faces_list = []
         self.faces_locs = PoseArray(Header(),[])
+        self.allDetected = PoseArray(Header(),[])
         self.dist_limit = 1.3
         self.height_limit = 0.2
 
