@@ -117,7 +117,7 @@ class master_driver():
 
         #sub = rospy.Subscriber('/faces/markers', MarkerArray, face_callback, queue_size=10)
         sub = rospy.Subscriber('/faces/locations', PoseArray, face_callback, queue_size=10)
-        sub2 = rospy.Subscriber('/faces/approach_point', MarkerArray, approach_locs_callback, queue_size=10)
+        sub2 = rospy.Subscriber('/faces/approach_points', MarkerArray, approach_locs_callback, queue_size=10)
 
         # Variables to keep track of success rate, running time,
         # and distance traveled
