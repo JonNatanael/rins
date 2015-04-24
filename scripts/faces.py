@@ -93,8 +93,8 @@ class FaceMapper():
                         if len(self.faces_list)>0:
                             in_range = False
                             for j in xrange(0,len(self.faces_list)):
-                                #if self.dist(self.faces_list[j].pose.position.x,self.faces_list[j].pose.position.y,resp.pose.position.x,resp.pose.position.y) < self.dist_limit:
-                                if self.dist(self.faces_locs.poses[j].position.x, self.faces_locs.poses[j].position.y, x1, y1) < self.dist_limit:
+                                #if dist(self.faces_list[j].pose.position.x,self.faces_list[j].pose.position.y,resp.pose.position.x,resp.pose.position.y) < self.dist_limit:
+                                if dist(self.faces_locs.poses[j].position.x, self.faces_locs.poses[j].position.y, x1, y1) < self.dist_limit:
                                     in_range = True
                             if not in_range:	
                                 if marker.pose.position.z > 0:
