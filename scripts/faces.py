@@ -75,40 +75,41 @@ class FaceMapper():
                     p = listener.transformPoint('/map', ps)
                     print p
                     #print trans,rot
+
+                    #x1 = marker.pose.position.x+trans[0]*sin(rot[2])
+                    #y1 = marker.pose.position.z+trans[1]*cos(rot[3])
+                    #x1 = trans[0]+p.point.x
+                    x1 = p.point.x
+                    y1 = p.point.y
+                    #y1 = trans[1]+p.point.y
+                    print x1,y1,trans[2]
+
+
+                    # TODO compare these coordinates to all previously detected faces
+
+                    if abs(resp.pose.position.y) < self.height_limit:
+                        if len(self.faces_list)>0:
+                            in_range = False
+                            for j in xrange(0,len(self.faces_list)):
+                                #if self.dist(self.faces_list[j].pose.position.x,self.faces_list[j].pose.position.y,resp.pose.position.x,resp.pose.position.y) < self.dist_limit:
+                                if self.dist(self.faces_locs.poses[j].position.x, self.faces_locs.poses[j].position.y, x1, y1) < self.dist_limit:
+                                    in_range = True
+                            if not in_range:	
+                                if marker.pose.position.z > 0:
+                                  self.faces_list.append(marker)
+                                  pose = Pose(Point(x1, y1, 0.66), Quaternion(0, 0, 1, 0))
+                                  self.faces_locs.poses.append(pose)
+                                  self.app_points.markers.append(self.createMarker(pose, faces.header))
+                        else:
+                            if marker.pose.position.z > 0:
+                                self.faces_list.append(marker)
+                                pose = Pose(Point(x1, y1, 0.66), Quaternion(0, 0, 1, 0))
+                                self.faces_locs.poses.append(pose)
+                                self.app_points.markers.append(self.createMarker(pose, faces.header))
+
                 except Exception as ex:
                     print "e"
                     print ex
-
-                #x1 = marker.pose.position.x+trans[0]*sin(rot[2])
-                #y1 = marker.pose.position.z+trans[1]*cos(rot[3])
-                #x1 = trans[0]+p.point.x
-                x1 = p.point.x
-                y1 = p.point.y
-                #y1 = trans[1]+p.point.y
-                print x1,y1,trans[2]
-
-
-                # TODO compare these coordinates to all previously detected faces
-
-                if abs(resp.pose.position.y) < self.height_limit:
-                    if len(self.faces_list)>0:
-                        in_range = False
-                        for j in xrange(0,len(self.faces_list)):
-                            #if self.dist(self.faces_list[j].pose.position.x,self.faces_list[j].pose.position.y,resp.pose.position.x,resp.pose.position.y) < self.dist_limit:
-                            if self.dist(self.faces_locs.poses[j].position.x, self.faces_locs.poses[j].position.y, x1, y1) < self.dist_limit:
-                                in_range = True
-                        if not in_range:	
-                            if marker.pose.position.z > 0:
-                              self.faces_list.append(marker)
-                              pose = Pose(Point(x1, y1, 0.66), Quaternion(0, 0, 1, 0))
-                              self.faces_locs.poses.append(pose)
-                              self.app_points.markers.append(self.createMarker(pose, faces.header))
-                    else:
-                        if marker.pose.position.z > 0:
-                            self.faces_list.append(marker)
-                            pose = Pose(Point(x1, y1, 0.66), Quaternion(0, 0, 1, 0))
-                            self.faces_locs.poses.append(pose)
-                            self.app_points.markers.append(self.createMarker(pose, faces.header))
 
         #add all previously detected faces
         for face in self.faces_list:
