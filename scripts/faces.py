@@ -28,6 +28,7 @@ class FaceMapper():
         n = len(faces.x)
 
         markers = MarkerArray()
+        clusteringResults = PoseArray(Header(),[])
 
         for i in xrange(0, n):
             u = faces.x[i] + faces.width[i] / 2
@@ -35,9 +36,8 @@ class FaceMapper():
             # TODO limit detections on y coordinate
             #print u, v
             point = Point(((u - camera_model.cx()) - camera_model.Tx()) / camera_model.fx(),
-                 ((v - camera_model.cy()) - camera_model.Ty()) / camera_model.fy(), 1)
+                 ((v - camera_model.cy()) - camera_model.Ty()) / camera_model.fy(), 1)            
             
-            clusteringResults = PoseArray(Header(),[])
             #print point
             resp = self.localize(faces.header, point, 3)
             if resp:
@@ -135,7 +135,7 @@ class FaceMapper():
         #print markers
 
         self.markers_pub.publish(markers)
-        self.locations_pub.publish(self.clusteringResults)
+        self.locations_pub.publish(clusteringResults)
 
         self.approach_point_pub.publish(self.app_points)
 
