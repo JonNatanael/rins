@@ -153,11 +153,11 @@ class master_driver():
                 #twist.linear.z = 0
                 #twist.angular.x = 0
                 #twist.angular.y = 0
-                twist.angular.z = 0.8
+                twist.angular.z = 1.8
                 turning.publish(twist)
                 rospy.sleep(0.4)
                 turning.publish(Twist())
-                rospy.sleep(0.4)
+                rospy.sleep(1.0)
 
             #Check if we found any faces and approach them
             #print len(faces_locs)
