@@ -121,7 +121,7 @@ class FaceMapper():
                         clusteringResults = PoseArray(Header(),[])
                         clusteringResults.header.frame_id = 'map'
                         for (xCluster, yCluster, unused1, unused2) in makeFaceClusters(self, self.allDetected):
-                            clusteringResults.poses.append(Point(xCluster, yCluster, 0.50), Quaternion(0, 0, 1, 0))
+                            clusteringResults.poses.append(Pose(Point(xCluster, yCluster, 0.50), Quaternion(0, 0, 1, 0)))
 
                 except Exception as ex:
                     print "e"
