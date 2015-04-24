@@ -193,6 +193,7 @@ class master_driver():
 if __name__ == '__main__':
     try:
         faces = []
+        faces_locs = []
         master_driver()
         rospy.spin()
     except rospy.ROSInterruptException:
