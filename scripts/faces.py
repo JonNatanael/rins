@@ -240,10 +240,10 @@ def dist(x1,y1,x2,y2):
     return sqrt((x1-x2)*(x1-x2)+(y1-y2)*(y1-y2))
 
 def makeFaceClusters(self, hits):
-# spremenjena verzija, bo mogoce boljsi preformance
-# zdaj prejmo PoseArray, ne MarkerArray
+    # spremenjena verzija, bo mogoce boljsi preformance
+    # zdaj prejmo PoseArray, ne MarkerArray
 
-    num_closest = 5 #how many must be in the desired range to be consisered a cluster
+    num_closest = 8 #how many must be in the desired range to be consisered a cluster
     spread = 0.5 #how small must the cluster be
     threshold = 0.8 #how close can clusters be one another
 
@@ -276,9 +276,17 @@ def makeFaceClusters(self, hits):
 
     clusters = []
     if len(sorted_raw) > 0:
+        center = clusterCenter(sorted_raw[0][3])
+        adjustedFace = sorted_raw[0]
+        adjustedFace[0] = center[0]
+        adjustedFace[1] = center[1]
         clusters.append(sorted_raw[0]) #the tightest one if we have one can automatically be added
 
-    for i in xrange(1, len(sorted_raw)):
+    for i in xrange(1, len(sorted_raw)):        
+        center = clusterCenter(sorted_raw[i][3])
+        adjustedFace = sorted_raw[i]
+        adjustedFace[0] = center[0]
+        adjustedFace[1] = center[1]
 
         #for each contending cluster check if there isn't one (tighter, better) added to the list withun its range 
         below_thresh = False
@@ -291,10 +299,18 @@ def makeFaceClusters(self, hits):
         if not below_thresh:
             clusters.append(sorted_raw[i])
 
-    return clusters #returns a list of tuples: tup(cluster_center.x, cluster_center.y, cluster_sperad/2)
+    return clusters #returns a list of tuples: tup(cluster_center.x, cluster_center.y, point number, (x,y) #coorinates of all points)
 
-
-
+def clusterCenter(points_cluster_xy):
+    centerX = 0.0
+    centerY = 0.0
+    for (newX, newY) in points_cluster_xy:
+        centerX += newX
+        centerY += newY
+    centerX /= len(points_cluster_xy)
+    centerY /= len(points_cluster_xy)
+    
+    return (centerX, centerY)
 
 # Main function.    
 if __name__ == '__main__':
