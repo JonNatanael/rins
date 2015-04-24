@@ -142,6 +142,7 @@ class master_driver():
 		            
             #Check if we found any faces and approach them
             while len(faces) > faces_i:
+                rospy.sleep(4)
                 print "approaching face number: " + str(faces_i)
                 print faces_locs
                 #self.approach(faces_i)
