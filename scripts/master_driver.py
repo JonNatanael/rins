@@ -154,7 +154,7 @@ class master_driver():
                 #twist.angular.x = 0
                 #twist.angular.y = 0
                 twist.angular.z = 0.5
-                turtning.publish(twist)
+                turning.publish(twist)
 
             #Check if we found any faces and approach them
             #print len(faces_locs)
