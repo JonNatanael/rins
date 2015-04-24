@@ -173,7 +173,7 @@ class master_driver():
         self.move_base.send_goal(self.goal)
             
         # Allow 60 seconds to get there
-        finished_within_time = self.move_base.wait_for_result(rospy.Duration(60)) 
+        finished_within_time = self.move_base.wait_for_result(rospy.Duration(10)) 
             
         # Check for success or failure
         if not finished_within_time:
