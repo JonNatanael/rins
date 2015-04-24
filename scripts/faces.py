@@ -150,8 +150,9 @@ class FaceMapper():
         try:
             listener = TransformListener()
             #listener.waitForTransform("/map", "/base_link", rospy.Time(0), rospy.Duration(2.0))
-            time = listener.getLatestCommonTime("/map", "/base_link")
-            (trans, rot) = listener.lookupTransform('/map', '/base_link', time)
+            if listener.canTransform("/map", "/base_link",rospy.Time())
+            #time = listener.getLatestCommonTime("/map", "/base_link")
+            (trans, rot) = listener.lookupTransform('/map', '/base_link', rospy.Time())
             print trans
         except Exception as ex:
             print "fail"
