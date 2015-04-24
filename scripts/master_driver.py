@@ -38,7 +38,6 @@ from nav_msgs.msg import Odometry
 def face_callback(data):
     # global faces
     # global faces_i
-    print data
     global faces
     faces = data.poses
 
