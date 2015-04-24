@@ -143,6 +143,7 @@ class master_driver():
             #Check if we found any faces and approach them
             while len(faces) > faces_i:
                 print "approaching face number: " + str(faces_i)
+                print faces_locs
                 #self.approach(faces_i)
                 self.move(faces_locs[faces_i])
                 faces_i += 1
