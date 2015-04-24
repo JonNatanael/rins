@@ -65,7 +65,7 @@ class FaceMapper():
                 try:
                     listener = TransformListener()
                     listener.waitForTransform("/map", "/camera_rgb_optical_frame", rospy.Time(0), rospy.Duration(2.0))
-                    (trans, rot) = listener.lookupTransform('/map', '/camera_rgb_optical_frame', rospy.Time()-rospy.Duration(2.0))
+                    (trans, rot) = listener.lookupTransform('/map', '/camera_rgb_optical_frame', rospy.Time()+rospy.Duration(1.0))
                     #(trans, rot) = listener.lookupTransform('/map', '/camera_rgb_optical_frame', faces.header.stamp)
                     ps = PointStamped()
                     ps.header.stamp = rospy.Time()
