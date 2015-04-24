@@ -44,10 +44,7 @@ def face_callback(data):
 
 def approach_locs_callback(data):
     global faces_locs
-    faces_locs = []
-    for marker in data.markers:
-        faces_locs.append(marker.pose)
-    #faces_locs =
+    faces_locs = data.pose
 
 class master_driver():
     #faces = []
