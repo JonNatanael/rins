@@ -142,10 +142,11 @@ class master_driver():
              #   self.shutdown()
               #  break
         
-            #self.move(loc[i])
+            self.move(loc[i])
 		            
             #Check if we found any faces and approach them
             #print len(faces_locs)
+<<<<<<< HEAD
             while len(faces_locs) > faces_i:
                 for pose in faces_locs:
                     neobiskan = True
@@ -166,6 +167,19 @@ class master_driver():
 
                         # Increment the counter
                         i += 1
+=======
+            #while len(faces_locs) > faces_i:
+            #    print "approaching face number: " + str(faces_i)
+            #    print faces_locs
+            #    self.move(faces_locs[faces_i])
+            #    faces_i += 1
+                #self.move(loc[i])
+		#self.shutdown()
+		#exit()
+
+            # Increment the counter
+            i += 1
+>>>>>>> ae3e6fa8f5c873801b65251aded26f6ed5efcda6
             
             rospy.sleep(self.rest_time)
 
@@ -182,7 +196,7 @@ class master_driver():
         self.move_base.send_goal(self.goal)
             
         # Allow 60 seconds to get there
-        finished_within_time = self.move_base.wait_for_result(rospy.Duration(10)) 
+        finished_within_time = self.move_base.wait_for_result(rospy.Duration(30)) 
             
         # Check for success or failure
         if not finished_within_time:
