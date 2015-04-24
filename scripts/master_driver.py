@@ -130,7 +130,7 @@ class master_driver():
         start_time = rospy.Time.now()
         global faces_i
         faces_i = 0
-
+        turning = rospy.Publisher('cmd_vel', Twist)
 
         rospy.loginfo("Starting navigation")
         
@@ -144,6 +144,18 @@ class master_driver():
             
             self.move(loc[i])
             
+            # rotate in place for detection
+            
+            for i in range(1, 6):
+                twist = Twist()
+                #twist.linear.x = 0
+                #twist.linear.y = 0
+                #twist.linear.z = 0
+                #twist.angualr.x = 0
+                #twist.angualr.y = 0
+                twist.angualr.z = 0.5
+                turtning.publish(twist)
+
             #Check if we found any faces and approach them
             #print len(faces_locs)
 
