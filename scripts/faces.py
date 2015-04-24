@@ -120,7 +120,7 @@ class FaceMapper():
                         self.allDetected.poses.append(pose)
                         clusteringResults = PoseArray(Header(),[])
                         clusteringResults.header.frame_id = 'map'
-                        for (xCluster, yCluster, unused1, unused2) in makeFaceClusters(self, self.allDetected):
+                        for (xCluster, yCluster) in makeFaceClusters(self, self.allDetected):
                             clusteringResults.poses.append(Pose(Point(xCluster, yCluster, 0.50), Quaternion(0, 0, 1, 0)))
 
                 except Exception as ex:
@@ -276,30 +276,24 @@ def makeFaceClusters(self, hits):
 
     clusters = []
     if len(sorted_raw) > 0:
-        center = clusterCenter(sorted_raw[0][3])
-        adjustedFace = sorted_raw[0]
-        adjustedFace[0] = center[0]
-        adjustedFace[1] = center[1]
-        clusters.append(sorted_raw[0]) #the tightest one if we have one can automatically be added
+        adjustedFace = clusterCenter(sorted_raw[0][3])
+        clusters.append(adjustedFace) #the tightest one if we have one can automatically be added
 
     for i in xrange(1, len(sorted_raw)):        
-        center = clusterCenter(sorted_raw[i][3])
-        adjustedFace = sorted_raw[i]
-        adjustedFace[0] = center[0]
-        adjustedFace[1] = center[1]
+        adjustedFace = clusterCenter(sorted_raw[i][3])
 
         #for each contending cluster check if there isn't one (tighter, better) added to the list withun its range 
         below_thresh = False
         for appoved_cluster in clusters:
-            dst = dist(appoved_cluster[0], appoved_cluster[1], sorted_raw[i][0], sorted_raw[i][1])
+            dst = dist(appoved_cluster[0], appoved_cluster[1], adjustedFace[0], adjustedFace[1])
 
             if dst < threshold: 
                 below_thresh=True
 
         if not below_thresh:
-            clusters.append(sorted_raw[i])
+            clusters.append(adjustedFace)
 
-    return clusters #returns a list of tuples: tup(cluster_center.x, cluster_center.y, point number, (x,y) #coorinates of all points)
+    return clusters #returns a list of tuples: tup(cluster_center.x, cluster_center.y)
 
 def clusterCenter(points_cluster_xy):
     centerX = 0.0
