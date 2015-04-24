@@ -157,7 +157,7 @@ class master_driver():
                 turning.publish(twist)
                 rospy.sleep(0.4)
                 turning.publish(Twist())
-                rospy.sleep(1.0)
+                rospy.sleep(2.5)
 
             #Check if we found any faces and approach them
             #print len(faces_locs)
