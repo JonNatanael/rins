@@ -25,7 +25,7 @@ class FaceMapper():
         camera_model = PinholeCameraModel()
         camera_model.fromCameraInfo(camera)
 
-        n = len(faces.x)
+        n = len(faces.x) ##faces ... .x ?!
 
         markers = MarkerArray()
 
@@ -118,12 +118,13 @@ class FaceMapper():
         print len(self.faces_list)
         #print markers
 
-        self.markers_pub.publish(markers)
-        self.locations_pub.publish(self.faces_locs)
-
-        self.approach_point_pub.publish(self.app_points)
+        self.markers_pub.publish(markers) #to so markerji ki jih pustimo rvizu transformirat
+        self.locations_pub.publish(self.faces_locs) #to so VSI markerji, samo da jih mi transformiramo na mapo?
+        #self.approach_point_pub.publish(makeClusters(self.app_points))
+        self.approach_point_pub.publish(self.app_points) #kako je to drugace od faces_locs? mogoce bi blo dobro mojo neumnost preimenovat...
 
         self.message_counter = self.message_counter + 1
+
 
     def dist(self,x1,y1,x2,y2):
         return sqrt((x1-x2)*(x1-x2)+(y1-y2)*(y1-y2))
