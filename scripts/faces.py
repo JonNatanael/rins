@@ -100,14 +100,15 @@ class FaceMapper():
                                   pose = Pose(Point(x1, y1, 0.66), Quaternion(0, 0, 1, 0))
                                   self.faces_locs.poses.append(pose)
                                   #self.app_points.markers.append(self.createMarker(pose, faces.header))
-                                  self.calculateApproach(self.faces_locs.poses[len(self.faces_locs.poses)-1])
+                                  pose = self.calculateApproach(self.faces_locs.poses[len(self.faces_locs.poses)-1])
+                                  self.app_points.markers.append(self.createMarker(pose, faces.header))
                         else:
                             if marker.pose.position.z > 0:
                                 self.faces_list.append(marker)
                                 pose = Pose(Point(x1, y1, 0.66), Quaternion(0, 0, 1, 0))
                                 self.faces_locs.poses.append(pose)
-                                self.calculateApproach(self.faces_locs.poses[len(self.faces_locs.poses)-1])
-                                #self.app_points.markers.append(self.createMarker(pose, faces.header))
+                                pose = self.calculateApproach(self.faces_locs.poses[len(self.faces_locs.poses)-1])
+                                self.app_points.markers.append(self.createMarker(pose, faces.header))
 
                 except Exception as ex:
                     print "e"
@@ -153,7 +154,29 @@ class FaceMapper():
             #if listener.canTransform("/map", "/base_link",rospy.Time()):
             #time = listener.getLatestCommonTime("/map", "/base_link")
             (trans, rot) = listener.lookupTransform('/map', '/base_link', rospy.Time())
-            print trans
+
+            dist = 0.35 # distance from face
+            x2 = trans[0]
+            y2 = trans[1]
+            if (abs((x2 - x1)**2 + (y2 - y1)**2) < dist):
+                x3 = x2
+                y3 = y2
+            else:
+                m = abs((y2-y1)/(x2-x1)) # slope
+                offsetX = dist * 1/sqrt(1 + m**2)
+                offsetY = dist * m/sqrt(1 + m**2)
+                if (x2 > x1):
+                    x3 = x1 + offsetX
+                else:
+                    x3 = x1 - offsetX
+                if (y2 > y1):
+                    y3 = y1 + offsetY
+                else:
+                    y3 = y1 - offsetY
+
+            m = (trans[1]-y1)/(trans[0]-x1) # slope
+            theta = atan(m)
+            return Pose(Point(x3, y3, 0.000), Quaternion(0.000, 0.000, sin(theta/2), cos(theta/2)))
         except Exception as ex:
             print "fail"
             print ex
