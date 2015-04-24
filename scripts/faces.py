@@ -149,8 +149,9 @@ class FaceMapper():
     def calculateApproach(fself,faceIndex):
         try:
             listener = TransformListener()
-            listener.waitForTransform("/map", "/base_link", rospy.Time(0), rospy.Duration(2.0))
-            (trans, rot) = listener.lookupTransform('/map', '/base_link', rospy.Time.now()+rospy.Duration(3.0))
+            #listener.waitForTransform("/map", "/base_link", rospy.Time(0), rospy.Duration(2.0))
+            time = listener.getLatestCommonTime("/map", "/base_link")
+            (trans, rot) = listener.lookupTransform('/map', '/base_link', time)
             print trans
         except Exception as ex:
             print "fail"
