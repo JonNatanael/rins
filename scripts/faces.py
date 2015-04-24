@@ -146,14 +146,14 @@ class FaceMapper():
         mrkr.color = ColorRGBA(0, 1, 0, 1)
         return mrkr
 
-    def calculateApproach(fself,faceIndex):
+    def calculateApproach(self,faceIndex):
         try:
             listener = TransformListener()
-            #listener.waitForTransform("/map", "/base_link", rospy.Time(0), rospy.Duration(2.0))
-            if listener.canTransform("/map", "/base_link",rospy.Time()):
+            listener.waitForTransform("/map", "/base_link", rospy.Time(), rospy.Duration(4.0))
+            #if listener.canTransform("/map", "/base_link",rospy.Time()):
             #time = listener.getLatestCommonTime("/map", "/base_link")
-                (trans, rot) = listener.lookupTransform('/map', '/base_link', rospy.Time())
-                print trans
+            (trans, rot) = listener.lookupTransform('/map', '/base_link', rospy.Time())
+            print trans
         except Exception as ex:
             print "fail"
             print ex
