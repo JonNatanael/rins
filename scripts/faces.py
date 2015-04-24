@@ -117,7 +117,7 @@ class FaceMapper():
                     if abs(resp.pose.position.y) < self.height_limit:
                         pose = Pose(Point(x1, y1, 0.66), Quaternion(0, 0, 1, 0))
                         self.allDetected.poses.append(pose)
-                        clusters = makeFaceClusters(self.allDetected)
+                        clusters = clusters.makeFaceClusters(self.allDetected)
                         clusteringResults = PoseArray(Header(),[])
                         for (xCluster, yCluster, unused1, unused2) in cluster:
                             clusteringResults.poses.append(Pose(xCluster, YCluster, 0.50), Quaternion(0, 0, 1, 0))
