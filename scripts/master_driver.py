@@ -169,9 +169,6 @@ class master_driver():
 		        #self.shutdown()
 		        #exit()
 
-                        # Increment the counter
-                        i += 1
-
             #while len(faces_locs) > faces_i:
             #    print "approaching face number: " + str(faces_i)
             #    print faces_locs
