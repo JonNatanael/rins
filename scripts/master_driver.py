@@ -146,7 +146,7 @@ class master_driver():
 		            
             #Check if we found any faces and approach them
             #print len(faces_locs)
-<<<<<<< HEAD
+
             while len(faces_locs) > faces_i:
                 for pose in faces_locs:
                     neobiskan = True
@@ -167,7 +167,7 @@ class master_driver():
 
                         # Increment the counter
                         i += 1
-=======
+
             #while len(faces_locs) > faces_i:
             #    print "approaching face number: " + str(faces_i)
             #    print faces_locs
@@ -179,7 +179,6 @@ class master_driver():
 
             # Increment the counter
             i += 1
->>>>>>> ae3e6fa8f5c873801b65251aded26f6ed5efcda6
             
             rospy.sleep(self.rest_time)
 
