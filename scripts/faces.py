@@ -12,7 +12,7 @@ from sensor_msgs.msg import CameraInfo
 from visualization_msgs.msg import Marker, MarkerArray
 from image_geometry import PinholeCameraModel
 from geometry_msgs.msg import Point, Vector3, PoseArray, Pose, Quaternion, PointStamped
-from math import sin, cos, sqrt
+from math import sin, cos, sqrt, atan
 from tf import TransformListener, TransformerROS
 from tf.transformations import euler_from_quaternion
 
