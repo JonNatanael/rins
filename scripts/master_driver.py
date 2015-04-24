@@ -38,7 +38,7 @@ from nav_msgs.msg import Odometry
 def face_callback(data):
     # global faces
     # global faces_i
-    # print data
+    print data
     global faces
     faces = data.poses
 
@@ -145,7 +145,7 @@ class master_driver():
 		            
             #Check if we found any faces and approach them
             while len(faces) > faces_i:
-                rospy.sleep(4)
+                #rospy.sleep(4)
                 print "approaching face number: " + str(faces_i)
                 print faces_locs
                 #self.approach(faces_i)
