@@ -138,18 +138,22 @@ class master_driver():
         while not rospy.is_shutdown():
 
             #if i >= n_loc:
-             #   rospy.loginfo("Visited all checkpoints!")
-             #   self.shutdown()
-              #  break
-        
+            #    rospy.loginfo("Visited all checkpoints!")
+            #    self.shutdown()
+            #    break
+            
             self.move(loc[i])
-		            
+            
             #Check if we found any faces and approach them
             #print len(faces_locs)
 
-            while len(faces_locs) > faces_i:
-                for pose in faces_locs:
-                    neobiskan = True
+            while len(faces) > faces_i:
+                for pose in faces:
+                    approachTarget = calculateApproach(pose.position.x, pose.position.y)
+                    if approachTarget is not None:
+                        neobiskan = True
+                    else:
+                        continue # zaradi tega se lahko zacikla!
                     for (faceX,faceY) in obiskaniObrazi:
                         if (dist(pose.position.x, pose.position.y, faceX, faceY) < 0.5):
                             neobiskan = False
