@@ -280,7 +280,7 @@ def makeFaceClusters(self, hits):
     for i in xrange(1, len(sorted_raw)):
 
         #for each contending cluster check if there isn't one (tighter, better) added to the list withun its range 
-        below_thresh = false
+        below_thresh = False
         for appoved_cluster in clusters:
             dst = dist(appoved_cluster[0], appoved_cluster[1], sorted_raw[i][0], sorted_raw[i][1])
 
