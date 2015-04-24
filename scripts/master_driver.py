@@ -31,7 +31,7 @@ from geometry_msgs.msg import Pose, PoseWithCovarianceStamped, Point, Quaternion
 from move_base_msgs.msg import MoveBaseAction, MoveBaseGoal
 from visualization_msgs.msg import Marker, MarkerArray
 from random import sample
-from math import pow, sqrt, sin, cos
+from math import pow, sqrt, sin, cos, atan
 from tf import TransformListener, ConnectivityException, Exception, LookupException
 from nav_msgs.msg import Odometry
 
@@ -146,7 +146,7 @@ class master_driver():
             
             # rotate in place for detection
             
-            for twCounter in range(1, 20):
+            for twCounter in range(1, 25):
                 twist = Twist()
                 #twist.linear.x = 0
                 #twist.linear.y = 0
@@ -157,7 +157,7 @@ class master_driver():
                 turning.publish(twist)
                 rospy.sleep(0.4)
                 turning.publish(Twist())
-                rospy.sleep(0.25)
+                rospy.sleep(0.4)
 
             #Check if we found any faces and approach them
             #print len(faces_locs)
