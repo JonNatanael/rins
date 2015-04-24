@@ -1,3 +1,4 @@
+from faces import dist
 
 def makeFaceClusters(self, hits):
 # spremenjena verzija, bo mogoce boljsi preformance
