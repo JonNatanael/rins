@@ -146,7 +146,7 @@ class master_driver():
             
             # rotate in place for detection
             
-            for twCounter in range(1, 20):
+            for twCounter in range(1, 10):
                 twist = Twist()
                 #twist.linear.x = 0
                 #twist.linear.y = 0
