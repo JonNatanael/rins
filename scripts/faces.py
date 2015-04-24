@@ -15,6 +15,7 @@ from geometry_msgs.msg import Point, Vector3, PoseArray, Pose, Quaternion, Point
 from math import sin, cos, sqrt, atan
 from tf import TransformListener, TransformerROS
 from tf.transformations import euler_from_quaternion
+from clusters import makeFaceClusters
 
 # Node for face detection.
 class FaceMapper():
@@ -118,7 +119,7 @@ class FaceMapper():
                         pose = Pose(Point(x1, y1, 0.66), Quaternion(0, 0, 1, 0))
                         self.allDetected.poses.append(pose)
                         clusteringResults = PoseArray(Header(),[])
-                        for (xCluster, yCluster, unused1, unused2) in clusters.makeFaceClusters(self.allDetected):
+                        for (xCluster, yCluster, unused1, unused2) in makeFaceClusters(self.allDetected):
                             clusteringResults.poses.append(Pose(xCluster, YCluster, 0.50), Quaternion(0, 0, 1, 0))
 
                 except Exception as ex:
