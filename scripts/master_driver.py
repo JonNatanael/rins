@@ -99,6 +99,8 @@ class master_driver():
         loc.append(Pose(Point(1.1, 2.35, 0.000), Quaternion(0.000, 0.000, -0.723, 0.691)))
 
         
+        obiskaniObrazi = [] # array (x,y) tuplov; koordinate ze obiskanih obrazov 
+        
         # Publisher to manually control the robot (e.g. to stop it)
         #self.cmd_vel_pub = rospy.Publisher('cmd_vel', Twist)
         
@@ -145,18 +147,25 @@ class master_driver():
             #Check if we found any faces and approach them
             #print len(faces_locs)
             while len(faces_locs) > faces_i:
-                #rospy.sleep(4)
-                print "approaching face number: " + str(faces_i)
-                print faces_locs
-                #self.approach(faces_i)
-                self.move(faces_locs[faces_i])
-                faces_i += 1
-                #self.move(loc[i])
-		#self.shutdown()
-		#exit()
+                for pose in faces_locs:
+                    neobiskan = True
+                    for (faceX,faceY) in obiskaniObrazi:
+                        if (dist(pose.position.x, pose.position.y, faceX, faceY) < 0.5):
+                            neobiskan = False
+                            continue
+                    if neobiskan:
+                        #rospy.sleep(4)
+                        print "approaching face number: " + str(faces_i)
+                        print faces_locs
+                        #self.approach(faces_i)
+                        self.move(faces_locs[faces_i])
+                        faces_i += 1
+                        #self.move(loc[i])
+		        #self.shutdown()
+		        #exit()
 
-            # Increment the counter
-            i += 1
+                        # Increment the counter
+                        i += 1
             
             rospy.sleep(self.rest_time)
 
@@ -186,6 +195,40 @@ class master_driver():
                 rospy.loginfo("State:" + str(state))
             else:
               rospy.loginfo("Goal failed with error code: " + str(goal_states[state]))
+
+
+    def calculateApproach(x1,y1):
+        try:
+            listener = TransformListener()
+            listener.waitForTransform("/map", "/base_link", rospy.Time(), rospy.Duration(4.0))
+            (trans, rot) = listener.lookupTransform('/map', '/base_link', rospy.Time())
+
+            dist = 0.35 # distance from face
+            x2 = trans[0]
+            y2 = trans[1]
+            if (abs((x2 - x1)**2 + (y2 - y1)**2) < dist):
+                x3 = x2
+                y3 = y2
+            else:
+                m = abs((y2-y1)/(x2-x1)) # slope
+                offsetX = dist * 1/sqrt(1 + m**2)
+                offsetY = dist * m/sqrt(1 + m**2)
+                if (x2 > x1):
+                    x3 = x1 + offsetX
+                else:
+                    x3 = x1 - offsetX
+                if (y2 > y1):
+                    y3 = y1 + offsetY
+                else:
+                    y3 = y1 - offsetY
+
+            m = (trans[1]-y1)/(trans[0]-x1) # slope
+            theta = atan(m)
+            return Pose(Point(x3, y3, 0.000), Quaternion(0.000, 0.000, sin(theta/2), cos(theta/2)))
+        except Exception as ex:
+            print "fail"
+            print ex
+        return None
 
     def shutdown(self):
         rospy.loginfo("Stopping the robot...")
