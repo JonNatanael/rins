@@ -15,7 +15,7 @@ from geometry_msgs.msg import Point, Vector3, PoseArray, Pose, Quaternion, Point
 from math import sin, cos, sqrt, atan
 from tf import TransformListener, TransformerROS
 from tf.transformations import euler_from_quaternion
-from clusters import makeFaceClusters
+#from clusters import makeFaceClusters
 
 # Node for face detection.
 class FaceMapper():
@@ -237,8 +237,6 @@ class FaceMapper():
         #(trans,rot)=self.listener.lookupTransform('/map', '/odom', rospy.Time(0))
         #print trans,rot
         #rospy.sleep(2.0)
-
-from faces import dist
 
 def makeFaceClusters(self, hits):
 # spremenjena verzija, bo mogoce boljsi preformance
