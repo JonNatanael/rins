@@ -82,8 +82,8 @@ class master_driver():
         loc.append(Pose(Point(1.644, -0.241, 0.000), Quaternion(0.000, 0.000, -0.643, 0.765)))
         #loc.append(Pose(Point(1.644, -0.241, 0.000), Quaternion(0.000, 0.000, -0.291, 0.957)))
 
-        loc.append(Pose(Point(1.546, 0.554, 0.000), Quaternion(0.000, 0.000, 0.534, 0.845)))
-        #loc.append(Pose(Point(1.546, 0.554, 0.000), Quaternion(0.000, 0.000, 0.966, -0.258)))
+        #loc.append(Pose(Point(1.546, 0.554, 0.000), Quaternion(0.000, 0.000, 0.534, 0.845)))
+        loc.append(Pose(Point(1.546, 0.554, 0.000), Quaternion(0.000, 0.000, 0.966, -0.258)))
 
         loc.append(Pose(Point(0.180, 0.843, 0.000), Quaternion(0.000, 0.000, -0.382, 0.924)))
 
@@ -91,7 +91,7 @@ class master_driver():
         #loc.append(Pose(Point(0.380, 1.197, 0.000), Quaternion(0.000, 0.000, 0.987, -0.163)))
 
         loc.append(Pose(Point(0.129, 1.760, 0.000), Quaternion(0.000, 0.000, 0.978, 0.208)))
-        loc.append(Pose(Point(-0.087, 1.855, 0.000), Quaternion(0.000, 0.000, 0.839, 0.544)))
+        #loc.append(Pose(Point(-0.087, 1.855, 0.000), Quaternion(0.000, 0.000, 0.839, 0.544)))
 
 
         #loc.append(Pose(Point(1.1, 2.35, 0.000), Quaternion(0.000, 0.000, 0.598, 0.802)))
@@ -137,10 +137,9 @@ class master_driver():
         # Begin the main loop and run through a sequence of locations
         while not rospy.is_shutdown():
 
-            #if i >= n_loc:
-            #    rospy.loginfo("Visited all checkpoints!")
-            #    self.shutdown()
-            #    break
+            if i > len(loc):
+                turning.publish(Twist())
+                break
             
             self.move(loc[i])
             
