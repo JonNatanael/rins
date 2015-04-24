@@ -42,6 +42,13 @@ def face_callback(data):
     global faces
     faces = data.poses
 
+def approach_locs_callback(data):
+    global faces_locs
+    faces_locs = []
+    for marker in data.markers:
+        faces_locs.append(marker.pose)
+    #faces_locs =
+
 class master_driver():
     #faces = []
 
@@ -110,6 +117,7 @@ class master_driver():
 
         #sub = rospy.Subscriber('/faces/markers', MarkerArray, face_callback, queue_size=10)
         sub = rospy.Subscriber('/faces/locations', PoseArray, face_callback, queue_size=10)
+        sub = rospy.Subscriber('/faces/approach_point', MarkerArray, approach_locs_callback, queue_size=10)
 
         # Variables to keep track of success rate, running time,
         # and distance traveled
@@ -133,11 +141,12 @@ class master_driver():
                 self.shutdown()
                 break
         
-            self.move(loc[i])
+            #self.move(loc[i])
 		            
             #Check if we found any faces and approach them
             while len(faces) > faces_i:
                 #self.approach(faces_i)
+                self.move(faces_locs[faces_i])
                 faces_i += 1
                 #self.move(loc[i])
 		#self.shutdown()
@@ -174,63 +183,6 @@ class master_driver():
                 rospy.loginfo("State:" + str(state))
             else:
               rospy.loginfo("Goal failed with error code: " + str(goal_states[state]))
-
-
-    def approach(self, index):
-    	print "approaching face nr.:" + str(index)
-        
-        # x1 = faces[index].pose.position.x
-        # y1 = faces[index].pose.position.z
-
-        x1 = faces[index].position.x
-        y1 = faces[index].position.z
-        
-        dist = 0.35 # distance from face
-        listener = TransformListener()
-        rospy.sleep(2.0)
-        (trans, rot) = listener.lookupTransform('/map', '/odom', rospy.Time.now())
-
-
-        #print trans[0],trans[1]
-        #robo = loc[i]
-        #x1 = trans[0]+cos(rot[2])*x1
-        #y1 = trans[1]+sin(rot[2])*y1
-        x2 = trans[0]
-        y2 = trans[1]
-        #print x2,y2
-        if (abs((x2 - x1)**2 + (y2 - y1)**2) < dist):
-            x3 = x2
-            y3 = y2
-        else:
-            m = abs((y2-y1)/(x2-x1)) # slope
-            #x3 = x1 + dist * 1/sqrt(1 + m**2)
-            #y3 = y1 + dist * m/sqrt(1 + m**2)
-            offsetX = dist * 1/sqrt(1 + m**2)
-            offsetY = dist * m/sqrt(1 + m**2)
-            if (x2 > x1):
-                x3 = x1 + offsetX
-            else:
-                x3 = x1 - offsetX
-            if (y2 > y1):
-                y3 = y1 + offsetY
-            else:
-                y3 = y1 - offsetY
-        
-        print "current face"
-        print str(x1) + "  " + str(y1)
-        #print faces[index]
-        #print "current position"
-        #print str(x2) + "  " + str(y2)
-        print "target position"
-        print str(x3) + "  " + str(y3)
-        self.move(Pose(Point(x3, y3, 0.000), Quaternion(0.000, 0.000, 0.0, 1.0)))
-        
-        # angle correction for approach
-        #(trans, rot) = listener.lookupTransform('/map', '/odom', rospy.Time.now())
-        #
-        #m = (trans[1]-y1)/(trans[0]-x1) # slope
-        #theta = atan(m)
-        #self.move(Pose(Point(x3, y3, 0.000), Quaternion(0.000, 0.000, sin(theta/2), cos(theta/2))))
 
     def shutdown(self):
         rospy.loginfo("Stopping the robot...")
