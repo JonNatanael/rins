@@ -100,7 +100,7 @@ class FaceMapper():
                                   pose = Pose(Point(x1, y1, 0.66), Quaternion(0, 0, 1, 0))
                                   self.faces_locs.poses.append(pose)
                                   #self.app_points.markers.append(self.createMarker(pose, faces.header))
-                                  pose = self.calculateApproach(self.faces_locs.poses[len(self.faces_locs.poses)-1])
+                                  pose = self.calculateApproach(self.faces_locs.poses[len(self.faces_locs.poses)-1]x1,y1)
                                   if pose is not None:
                                     self.app_points.markers.append(self.createMarker(pose, faces.header))
                         else:
@@ -108,7 +108,7 @@ class FaceMapper():
                                 self.faces_list.append(marker)
                                 pose = Pose(Point(x1, y1, 0.66), Quaternion(0, 0, 1, 0))
                                 self.faces_locs.poses.append(pose)
-                                pose = self.calculateApproach(self.faces_locs.poses[len(self.faces_locs.poses)-1])
+                                pose = self.calculateApproach(self.faces_locs.poses[len(self.faces_locs.poses)-1],x1,y1)
                                 if pose is not None:
                                     self.app_points.markers.append(self.createMarker(pose, faces.header))
 
@@ -149,7 +149,7 @@ class FaceMapper():
         mrkr.color = ColorRGBA(0, 1, 0, 1)
         return mrkr
 
-    def calculateApproach(self,faceIndex):
+    def calculateApproach(self,faceIndex,x1,y1):
         try:
             listener = TransformListener()
             listener.waitForTransform("/map", "/base_link", rospy.Time(), rospy.Duration(4.0))
