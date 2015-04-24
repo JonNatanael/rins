@@ -101,14 +101,16 @@ class FaceMapper():
                                   self.faces_locs.poses.append(pose)
                                   #self.app_points.markers.append(self.createMarker(pose, faces.header))
                                   pose = self.calculateApproach(self.faces_locs.poses[len(self.faces_locs.poses)-1])
-                                  self.app_points.markers.append(self.createMarker(pose, faces.header))
+                                  if pose not None:
+                                    self.app_points.markers.append(self.createMarker(pose, faces.header))
                         else:
                             if marker.pose.position.z > 0:
                                 self.faces_list.append(marker)
                                 pose = Pose(Point(x1, y1, 0.66), Quaternion(0, 0, 1, 0))
                                 self.faces_locs.poses.append(pose)
                                 pose = self.calculateApproach(self.faces_locs.poses[len(self.faces_locs.poses)-1])
-                                self.app_points.markers.append(self.createMarker(pose, faces.header))
+                                if pose not None:
+                                    self.app_points.markers.append(self.createMarker(pose, faces.header))
 
                 except Exception as ex:
                     print "e"
@@ -180,6 +182,7 @@ class FaceMapper():
         except Exception as ex:
             print "fail"
             print ex
+        return None
 
     def __init__(self):
         region_scope = rospy.get_param('~region', 3)
