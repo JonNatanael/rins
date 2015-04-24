@@ -135,10 +135,10 @@ class master_driver():
         # Begin the main loop and run through a sequence of locations
         while not rospy.is_shutdown():
 
-            if i >= n_loc:
-                rospy.loginfo("Visited all checkpoints!")
-                self.shutdown()
-                break
+            #if i >= n_loc:
+             #   rospy.loginfo("Visited all checkpoints!")
+             #   self.shutdown()
+              #  break
         
             #self.move(loc[i])
 		            
