@@ -45,6 +45,7 @@ def face_callback(data):
 def approach_locs_callback(data):
     global faces_locs
     faces_locs = []
+    print data
     for marker in data.markers:
         faces_locs.append(marker.pose)
 
