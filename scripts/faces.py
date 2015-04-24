@@ -101,7 +101,7 @@ class FaceMapper():
                                   self.faces_locs.poses.append(pose)
                                   #self.app_points.markers.append(self.createMarker(pose, faces.header))
                                   pose = self.calculateApproach(self.faces_locs.poses[len(self.faces_locs.poses)-1])
-                                  if pose not None:
+                                  if pose is not None:
                                     self.app_points.markers.append(self.createMarker(pose, faces.header))
                         else:
                             if marker.pose.position.z > 0:
@@ -109,7 +109,7 @@ class FaceMapper():
                                 pose = Pose(Point(x1, y1, 0.66), Quaternion(0, 0, 1, 0))
                                 self.faces_locs.poses.append(pose)
                                 pose = self.calculateApproach(self.faces_locs.poses[len(self.faces_locs.poses)-1])
-                                if pose not None:
+                                if pose is not None:
                                     self.app_points.markers.append(self.createMarker(pose, faces.header))
 
                 except Exception as ex:
