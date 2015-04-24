@@ -130,9 +130,8 @@ class master_driver():
         start_time = rospy.Time.now()
         global faces_i
         faces_i = 0
-        turning = rospy.Publisher('cmd_vel', Twist)
+        turning = rospy.Publisher('cmd_vel_mux/input/teleop', Twist)
         
-        rospy.init_node('move')
         rospy.loginfo("Starting navigation")
         
         # Begin the main loop and run through a sequence of locations
