@@ -244,7 +244,7 @@ def makeFaceClusters(self, hits):
     # spremenjena verzija, bo mogoce boljsi preformance
     # zdaj prejmo PoseArray, ne MarkerArray
 
-    num_closest = 8 #how many must be in the desired range to be consisered a cluster
+    num_closest = 5 #how many must be in the desired range to be consisered a cluster
     spread = 0.5 #how small must the cluster be
     threshold = 0.8 #how close can clusters be one another
 
