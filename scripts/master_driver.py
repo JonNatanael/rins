@@ -146,7 +146,7 @@ class master_driver():
             
             # rotate in place for detection
             
-            for twCounter in range(1, 20):
+            for twCounter in range(1, 10):
                 twist = Twist()
                 #twist.linear.x = 0
                 #twist.linear.y = 0
@@ -223,7 +223,7 @@ class master_driver():
               rospy.loginfo("Goal failed with error code: " + str(goal_states[state]))
 
 
-    def calculateApproach(x1,y1):
+    def calculateApproach(self, x1,y1):
         try:
             listener = TransformListener()
             listener.waitForTransform("/map", "/base_link", rospy.Time(), rospy.Duration(4.0))
