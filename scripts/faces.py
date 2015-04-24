@@ -25,7 +25,7 @@ class FaceMapper():
         camera_model = PinholeCameraModel()
         camera_model.fromCameraInfo(camera)
 
-        n = len(faces.x) ##faces ... .x ?!
+        n = len(faces.x)
 
         markers = MarkerArray()
 
@@ -65,7 +65,7 @@ class FaceMapper():
                 try:
                     listener = TransformListener()
                     listener.waitForTransform("/map", "/camera_rgb_optical_frame", rospy.Time(0), rospy.Duration(2.0))
-                    (trans, rot) = listener.lookupTransform('/map', '/camera_rgb_optical_frame', faces.header.stamp+rospy.Duration(2.0))
+                    (trans, rot) = listener.lookupTransform('/map', '/camera_rgb_optical_frame', rospy.Time(0))
                     #(trans, rot) = listener.lookupTransform('/map', '/camera_rgb_optical_frame', faces.header.stamp)
                     ps = PointStamped()
                     ps.header.stamp = rospy.Time()
@@ -96,7 +96,7 @@ class FaceMapper():
                         for j in xrange(0,len(self.faces_list)):
                             #if self.dist(self.faces_list[j].pose.position.x,self.faces_list[j].pose.position.y,resp.pose.position.x,resp.pose.position.y) < self.dist_limit:
                             if self.dist(self.faces_locs.poses[j].position.x, self.faces_locs.poses[j].position.y, x1, y1) < self.dist_limit:
-                                in_range = False#True
+                                in_range = True
                         if not in_range:	
                             if marker.pose.position.z > 0:
                               self.faces_list.append(marker)
@@ -118,13 +118,12 @@ class FaceMapper():
         print len(self.faces_list)
         #print markers
 
-        self.markers_pub.publish(markers) #to so markerji ki jih pustimo rvizu transformirat
-        self.locations_pub.publish(self.faces_locs) #to so VSI markerji, samo da jih mi transformiramo na mapo?
-        #self.approach_point_pub.publish(makeClusters(self.app_points))
-        self.approach_point_pub.publish(self.app_points) #kako je to drugace od faces_locs? mogoce bi blo dobro mojo neumnost preimenovat...
+        self.markers_pub.publish(markers)
+        self.locations_pub.publish(self.faces_locs)
+
+        self.approach_point_pub.publish(self.app_points)
 
         self.message_counter = self.message_counter + 1
-
 
     def dist(self,x1,y1,x2,y2):
         return sqrt((x1-x2)*(x1-x2)+(y1-y2)*(y1-y2))
