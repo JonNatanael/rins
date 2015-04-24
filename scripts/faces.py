@@ -73,7 +73,7 @@ class FaceMapper():
                     ps.point = marker.pose.position
                     #t = TransformerROS()
                     p = listener.transformPoint('/map', ps)
-                    print p
+                    #print p
                     #print trans,rot
 
                     #x1 = marker.pose.position.x+trans[0]*sin(rot[2])
@@ -82,7 +82,7 @@ class FaceMapper():
                     x1 = p.point.x
                     y1 = p.point.y
                     #y1 = trans[1]+p.point.y
-                    print x1,y1,trans[2]
+                    #print x1,y1,trans[2]
 
 
                     # TODO compare these coordinates to all previously detected faces
@@ -99,13 +99,15 @@ class FaceMapper():
                                   self.faces_list.append(marker)
                                   pose = Pose(Point(x1, y1, 0.66), Quaternion(0, 0, 1, 0))
                                   self.faces_locs.poses.append(pose)
-                                  self.app_points.markers.append(self.createMarker(pose, faces.header))
+                                  #self.app_points.markers.append(self.createMarker(pose, faces.header))
+                                  calculateApproach(faces_locs[len(faces_locs)])
                         else:
                             if marker.pose.position.z > 0:
                                 self.faces_list.append(marker)
                                 pose = Pose(Point(x1, y1, 0.66), Quaternion(0, 0, 1, 0))
                                 self.faces_locs.poses.append(pose)
-                                self.app_points.markers.append(self.createMarker(pose, faces.header))
+                                calculateApproach(faces_locs[len(faces_locs)])
+                                #self.app_points.markers.append(self.createMarker(pose, faces.header))
 
                 except Exception as ex:
                     print "e"
@@ -143,6 +145,16 @@ class FaceMapper():
         mrkr.scale = Vector3(0.1, 0.1, 0.1)
         mrkr.color = ColorRGBA(0, 1, 0, 1)
         return mrkr
+
+    def calculateApproach(faceIndex):
+        try:
+            listener = TransformListener()
+            listener.waitForTransform("/map", "/base_link", rospy.Time(0), rospy.Duration(2.0))
+            (trans, rot) = listener.lookupTransform('/map', '/base_link', rospy.Time.now())
+            print trans
+        except Exception as ex:
+            print "fail"
+            print ex
 
     def __init__(self):
         region_scope = rospy.get_param('~region', 3)
