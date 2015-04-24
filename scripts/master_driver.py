@@ -263,6 +263,9 @@ class master_driver():
         rospy.sleep(2)
         #self.cmd_vel_pub.publish(Twist())
 
+def dist(x1,y1,x2,y2):
+    return sqrt((x1-x2)*(x1-x2)+(y1-y2)*(y1-y2))
+
 if __name__ == '__main__':
     try:
         faces = []
