@@ -151,9 +151,9 @@ class master_driver():
                 #twist.linear.x = 0
                 #twist.linear.y = 0
                 #twist.linear.z = 0
-                #twist.angualr.x = 0
-                #twist.angualr.y = 0
-                twist.angualr.z = 0.5
+                #twist.angualar.x = 0
+                #twist.angualar.y = 0
+                twist.angualar.z = 0.5
                 turtning.publish(twist)
 
             #Check if we found any faces and approach them
