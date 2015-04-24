@@ -38,14 +38,13 @@ from nav_msgs.msg import Odometry
 def face_callback(data):
     # global faces
     # global faces_i
-    print data
     global faces
     faces = data.poses
 
 def approach_locs_callback(data):
     global faces_locs
     faces_locs = []
-    print data
+    #print data
     for marker in data.markers:
         faces_locs.append(marker.pose)
 
@@ -117,7 +116,7 @@ class master_driver():
 
         #sub = rospy.Subscriber('/faces/markers', MarkerArray, face_callback, queue_size=10)
         sub = rospy.Subscriber('/faces/locations', PoseArray, face_callback, queue_size=10)
-        sub2 = rospy.Subscriber('/faces/approach_point', MarkerArray, approach_locs_callback, queue_size=10)
+        sub2 = rospy.Subscriber('/faces/approach_points', MarkerArray, approach_locs_callback, queue_size=10)
 
         # Variables to keep track of success rate, running time,
         # and distance traveled
@@ -136,15 +135,16 @@ class master_driver():
         # Begin the main loop and run through a sequence of locations
         while not rospy.is_shutdown():
 
-            if i >= n_loc:
-                rospy.loginfo("Visited all checkpoints!")
-                self.shutdown()
-                break
+            #if i >= n_loc:
+             #   rospy.loginfo("Visited all checkpoints!")
+             #   self.shutdown()
+              #  break
         
             #self.move(loc[i])
 		            
             #Check if we found any faces and approach them
-            while len(faces) > faces_i:
+            #print len(faces_locs)
+            while len(faces_locs) > faces_i:
                 #rospy.sleep(4)
                 print "approaching face number: " + str(faces_i)
                 print faces_locs
@@ -173,7 +173,7 @@ class master_driver():
         self.move_base.send_goal(self.goal)
             
         # Allow 60 seconds to get there
-        finished_within_time = self.move_base.wait_for_result(rospy.Duration(60)) 
+        finished_within_time = self.move_base.wait_for_result(rospy.Duration(10)) 
             
         # Check for success or failure
         if not finished_within_time:
