@@ -28,6 +28,7 @@ class CyllinderDetector():
 	#([25, 80,  0], [35, 255,255]), #yellow
 	([95, 80,  0], [130, 255,255])	#blue
 	]
+
 	# def image_callback(self, image, camera):
 	def image_callback(self, image):
 		#we need to bringup minimal.launch
@@ -68,20 +69,29 @@ class CyllinderDetector():
 			cont_img = mask_cleaned.copy()
 			contours, hierarchy = cv2.findContours(cont_img, cv2.RETR_EXTERNAL, cv2.CHAIN_APPROX_SIMPLE)
 
+			cyllinderContour = np.array([]);
+			cArea = 0
 			for cnt in contours:
 				area = cv2.contourArea(cnt)
 
 				if area < 4000:
 					continue
+				# if len(cnt) < 5:
+				# 	continue
+				if cArea < area:
+					cyllinderContour = cnt
+					cArea = area
+			
+			if cArea > 0:
+				print cArea
 
-				if len(cnt) < 5:
-					continue
-
-				ellipse = cv2.fitEllipse(cnt)
-				cv2.ellipse(cv_image, ellipse, (0,255,0), 2)
+			if cyllinderContour.any():
+				# ellipse = cv2.fitEllipse(cnt)
+				# cv2.ellipse(cv_image, ellipse, (0,255,0), 2)
+				cv2.drawContours(cv_image, [cyllinderContour], -1, [0,255,0]) 
 
 			output = cv2.bitwise_and(cv_image, cv_image, mask = mask_cleaned) #display original image masked with the provided parameters
-			cv2.imshow("Image window", output)
+			cv2.imshow("Image window", cv_image)
 			cv2.waitKey(3)
 
 
@@ -117,6 +127,7 @@ class CyllinderDetector():
 		# self.markers_pub.publish(markers)
 
 		self.message_counter = self.message_counter + 1
+
 
 	def __init__(self):
 		#laufat mora rosrun usb_camera usb_cam_node za debuganje preko webCama
