@@ -19,18 +19,25 @@ from geometry_msgs.msg import Point, Vector3
 class CyllinderDetector():
 	
 	
-						    #[H/2,   S,  V]	
-	#lower_red = np.array([150, 80,  0],dtype=np.uint8)
+						 #[H/2,   S,  V]	
+	#lower_red = np.array([150, 80,   0],dtype=np.uint8)
 	#upper_red = np.array([180, 255,255],dtype=np.uint8)
 	boundaries = [
-	#([165, 80,  0], [180, 255,255]), #red
-	#([55, 80,  0], [70, 255,255]), #green
-	#([25, 80,  0], [35, 255,255]), #yellow
-	([95, 80,  0], [130, 255,255])	#blue
+	([165, 80,  0], [180, 255,255]), #red
+	([35, 50,  0], [70, 255,255]), #green
+	([15, 100,  0], [35, 255,255]), #yellow
+	([85, 35,  80], [150, 255,255])	#blue
 	]
 
-	# def image_callback(self, image, camera):
-	def image_callback(self, image):
+	colors = [
+	[0, 0,  255], #red
+	[0, 255,  0], #green
+	[0, 255,255], #yellow
+	[255, 0,  0]	#blue
+	]
+
+	def image_callback(self, image, camera):
+	#def image_callback(self, image):
 		#we need to bringup minimal.launch
 		#we need to bringup 3dsensor.launch
 
@@ -39,12 +46,14 @@ class CyllinderDetector():
 		except CvBridgeError, e:
 			print e
 
-		#(rows,cols,channels) = cv_image.shape
-		#if cols > 60 and rows > 60 :
-		#	cv2.circle(cv_image, (50,50), 10, 255)
+		camera_model = PinholeCameraModel()
+		camera_model.fromCameraInfo(camera)
 
+		(height,width,channels) = cv_image.shape
 		hsv = cv2.cvtColor(cv_image,cv2.COLOR_BGR2HSV) #convert to hsv for analisys
 		
+		i=0
+
 		for (lower, upper) in self.boundaries: #parse all boundaries
 			# create np arrays from the boundaries
 			lower = np.array(lower, dtype = "uint8")
@@ -74,29 +83,40 @@ class CyllinderDetector():
 			for cnt in contours:
 				area = cv2.contourArea(cnt)
 
-				if area < 4000:
+				if area < 3000: #minimal size 
 					continue
-				# if len(cnt) < 5:
-				# 	continue
-				if cArea < area:
-					cyllinderContour = cnt
-					cArea = area
+				if len(cnt) < 5:
+				 	continue
+				if cArea < area: #if we don't have a bigger field selected already
+					ell = cv2.fitEllipse(cnt)
+
+					u = int(ell[0][0])
+					v = int(ell[0][1])
+					point = Point(((u - camera_model.cx()) - camera_model.Tx()) / camera_model.fx(),
+					         ((v - camera_model.cy()) - camera_model.Ty()) / camera_model.fy(), 1)
+					resp = self.localize(image.header, point, 10)
+					#if ell[0][1] > (2 * height/3):
+					if resp:
+						if resp.pose.position.y == 0 and resp.pose.position.x == 0 and resp.pose.position.y == 0:
+							continue
+						if abs(resp.pose.position.y) < 0.2:
+							cyllinderContour = cnt
+							cArea = area
 			
-			if cArea > 0:
-				print cArea
+			#if cArea > 0:
+			#	print cArea
 
 			if cyllinderContour.any():
-				# ellipse = cv2.fitEllipse(cnt)
-				# cv2.ellipse(cv_image, ellipse, (0,255,0), 2)
-				cv2.drawContours(cv_image, [cyllinderContour], -1, [0,255,0]) 
-
-			output = cv2.bitwise_and(cv_image, cv_image, mask = mask_cleaned) #display original image masked with the provided parameters
-			cv2.imshow("Image window", cv_image)
-			cv2.waitKey(3)
-
-
-		# camera_model = PinholeCameraModel()
-		# camera_model.fromCameraInfo(camera)
+				ellipse = cv2.fitEllipse(cyllinderContour)
+				#print "Center:   " 
+				#print ellipse[0]
+				cv2.ellipse(cv_image, ellipse, self.colors[i], 2)
+				cv2.drawContours(cv_image, [cyllinderContour], -1, self.colors[i]) 
+			i+=1
+		
+		#output = cv2.bitwise_and(cv_image, cv_image, mask = mask_cleaned) #display original image masked with the provided parameters
+		cv2.imshow("Image window", cv_image)
+		cv2.waitKey(3)
 
 		# n = len(faces.x)
 
@@ -135,24 +155,21 @@ class CyllinderDetector():
 
 		region_scope = rospy.get_param('~region', 3)
 		markers_topic = rospy.get_param('~markers_topic', rospy.resolve_name('%s/markers' % rospy.get_name()))
-		#image_topic = rospy.get_param('~image_topic', '/camera/rgb/image_color') #kinect
-		image_topic = rospy.get_param('~image_topic', '/usb_cam/image_raw') #webcam
-		camera_topic = rospy.get_param('~camera_topic', '/camera/camera_info')		
+		image_topic = rospy.get_param('~image_topic', '/camera/rgb/image_color') #kinect
+		#image_topic = rospy.get_param('~image_topic', '/usb_cam/image_raw') #webcam
+		camera_topic = rospy.get_param('~camera_topic', '/camera/rgb/camera_info')		
 
-		#rospy.wait_for_service('localizer/localize')
+		rospy.wait_for_service('localizer/localize')
 		self.localize = rospy.ServiceProxy('localizer/localize', Localize)
 
 		cv2.namedWindow("Image window", 1) #Control window
 		self.bridge = CvBridge()
 
-		self.image_sub = rospy.Subscriber(image_topic, Image, self.image_callback, queue_size=1)
-		#self.image_sub = message_filters.Subscriber(image_topic, CameraInfo)
-		#self.camera_sub = message_filters.Subscriber(camera_topic, CameraInfo)
-		#self.joined_sub = message_filters.TimeSynchronizer([self.image_sub, self.camera_sub], 30)
-		#self.joined_sub.registerCallback(self.image_callback)
-
-
-		#self.localize = rospy.ServiceProxy('localizer/localize', Localize)
+		#self.image_sub = rospy.Subscriber(image_topic, Image, self.image_callback, queue_size=1)
+		self.image_sub = message_filters.Subscriber(image_topic, Image)
+		self.camera_sub = message_filters.Subscriber(camera_topic, CameraInfo)
+		self.joined_sub = message_filters.TimeSynchronizer([self.image_sub, self.camera_sub], 10)
+		self.joined_sub.registerCallback(self.image_callback)
 
 		self.markers_pub = rospy.Publisher(markers_topic, MarkerArray, queue_size=10)
 
