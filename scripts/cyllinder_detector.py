@@ -13,7 +13,8 @@ from localizer.srv import Localize
 from sensor_msgs.msg import CameraInfo, Image
 from visualization_msgs.msg import Marker, MarkerArray
 from image_geometry import PinholeCameraModel
-from geometry_msgs.msg import Point, Vector3
+from geometry_msgs.msg import Point, Vector3, PointStamped
+from tf import TransformListener
 
 # Node for cyllinder detection.
 class CyllinderDetector():
@@ -40,6 +41,9 @@ class CyllinderDetector():
 	#def image_callback(self, image):
 		#we need to bringup minimal.launch
 		#we need to bringup 3dsensor.launch
+		#amcl_demo.launch
+		#localizer/localizer
+		#rosrun mas_server map_server map/map.yaml
 
 		try:
 			cv_image = self.bridge.imgmsg_to_cv2(image, "bgr8")
@@ -54,7 +58,9 @@ class CyllinderDetector():
 		
 		i=0
 
-		for (lower, upper) in self.boundaries: #parse all boundaries
+		markers = MarkerArray()
+
+		for (lower, upper) in self.boundaries: #parse all colors
 			# create np arrays from the boundaries
 			lower = np.array(lower, dtype = "uint8")
 			upper = np.array(upper, dtype = "uint8")
@@ -83,7 +89,7 @@ class CyllinderDetector():
 			for cnt in contours:
 				area = cv2.contourArea(cnt)
 
-				if area < 3000: #minimal size 
+				if area < 2000: #minimal size 
 					continue
 				if len(cnt) < 5:
 				 	continue
@@ -99,55 +105,79 @@ class CyllinderDetector():
 					if resp:
 						if resp.pose.position.y == 0 and resp.pose.position.x == 0 and resp.pose.position.y == 0:
 							continue
-						if abs(resp.pose.position.y) < 0.2:
+						if resp.pose.position.y > 0:
 							cyllinderContour = cnt
 							cArea = area
 			
 			#if cArea > 0:
 			#	print cArea
 
-			if cyllinderContour.any():
+			if cyllinderContour.any(): #we got a hit!!!
 				ellipse = cv2.fitEllipse(cyllinderContour)
 				#print "Center:   " 
 				#print ellipse[0]
+				u = int(ell[0][0])
+				v = int(ell[0][1])
+				point = Point(((u - camera_model.cx()) - camera_model.Tx()) / camera_model.fx(),
+					         ((v - camera_model.cy()) - camera_model.Ty()) / camera_model.fy(), 1)
+				resp = self.localize(image.header, point, 10)
+
+				#print resp
+
+				try:
+
+					mkr = self.makeMarker(resp.pose, self.colors[i], self.message_counter)
+					#self.message_counter * len(self.colors) +  i 
+					
+					#(trans, rot) = listener.lookupTransform("map", '/camera_rgb_optical_frame', rospy.Time(0))
+					#(trans, rot) = listener.lookupTransform('/map', '/camera_rgb_optical_frame', faces.header.stamp)
+					ps = PointStamped()
+					ps.header.stamp = rospy.Time()
+					ps.header.frame_id = mkr.header.frame_id
+					ps.point = mkr.pose.position
+					#t = TransformerROS()
+					p = self.listener.transformPoint("map", ps)
+
+					print "P ", p
+
+					mkr.pose.position = ps.point
+					self.all_cyllinders.markers.append(mkr)
+
+				except Exception as ex:
+					print "ERROR"
+					print ex
+
 				cv2.ellipse(cv_image, ellipse, self.colors[i], 2)
 				cv2.drawContours(cv_image, [cyllinderContour], -1, self.colors[i]) 
+
 			i+=1
 		
 		#output = cv2.bitwise_and(cv_image, cv_image, mask = mask_cleaned) #display original image masked with the provided parameters
 		cv2.imshow("Image window", cv_image)
 		cv2.waitKey(3)
 
-		# n = len(faces.x)
+		self.markers_pub.publish(self.all_cyllinders)
 
-		# markers = MarkerArray()
-
-		# for i in xrange(0, n):
-		# 	u = faces.x[i] + faces.width[i] / 2
-		# 	v = faces.y[i] + faces.height[i] / 2
-		# 	#print u, v
-		# 	point = Point(((u - camera_model.cx()) - camera_model.Tx()) / camera_model.fx(),
-		#          ((v - camera_model.cy()) - camera_model.Ty()) / camera_model.fy(), 1)
-		# 	#print point
-		# 	resp = self.localize(faces.header, point, 3)
-		# 	if resp:
-		# 		marker = Marker()
-		# 		marker.header.stamp = faces.header.stamp
-		# 		marker.header.frame_id = faces.header.frame_id
-		# 		marker.pose = resp.pose
-		# 		marker.type = Marker.CUBE
-		# 		marker.action = Marker.ADD
-		# 		marker.frame_locked = False
-		# 		marker.lifetime = rospy.Time(0)
-		# 		marker.id = i
-		# 		marker.scale = Vector3(0.1, 0.1, 0.1)
-		# 		marker.color = ColorRGBA(1, 0, 0, 1)
-		# 		markers.markers.append(marker)
-
-		# self.markers_pub.publish(markers)
+		#print self.all_cyllinders
 
 		self.message_counter = self.message_counter + 1
 
+	def makeMarker(self, pose, color, id):
+		marker = Marker()
+		#marker.header.stamp = header.stamp
+		marker.header.stamp = rospy.Time.now()
+		marker.header.frame_id = "camera_rgb_optical_frame"
+		marker.pose = pose
+		marker.type = Marker.CUBE
+		marker.action = Marker.ADD
+		marker.frame_locked = False
+		marker.lifetime = rospy.Time(0)
+		marker.id = id
+		marker.scale = Vector3(0.05, 0.05, 0.05)
+		#marker.color = ColorRGBA(1, 1, 1, 1)
+		marker.color = ColorRGBA(color[2], color[1], color[0], 1)
+
+		return marker;
 
 	def __init__(self):
 		#laufat mora rosrun usb_camera usb_cam_node za debuganje preko webCama
@@ -159,8 +189,14 @@ class CyllinderDetector():
 		#image_topic = rospy.get_param('~image_topic', '/usb_cam/image_raw') #webcam
 		camera_topic = rospy.get_param('~camera_topic', '/camera/rgb/camera_info')		
 
+		self.all_cyllinders = MarkerArray()
+
 		rospy.wait_for_service('localizer/localize')
 		self.localize = rospy.ServiceProxy('localizer/localize', Localize)
+
+
+		self.listener = TransformListener()
+		self.listener.waitForTransform("map", "/camera_rgb_optical_frame", rospy.Time(0), rospy.Duration(5.0))		
 
 		cv2.namedWindow("Image window", 1) #Control window
 		self.bridge = CvBridge()
