@@ -80,6 +80,8 @@ class CyllinderDetector():
 			#ret3, mask_cleaned = cv2.threshold(blur, (kernel_size*kernel_size)/2, 255, cv2.THRESH_BINARY)
 			kernel = np.ones((3,3),np.uint8)
 			mask_cleaned = cv2.morphologyEx(mask,cv2.MORPH_OPEN, kernel, iterations = 4)
+			mask_cleaned = cv2.morphologyEx(mask,cv2.MORPH_CLOSE, kernel, iterations = 2)
+			mask_cleaned = cv2.dilate(mask,kernel,iterations = 1)
 
 			cont_img = mask_cleaned.copy()
 			contours, hierarchy = cv2.findContours(cont_img, cv2.RETR_EXTERNAL, cv2.CHAIN_APPROX_SIMPLE)
@@ -138,8 +140,7 @@ class CyllinderDetector():
 					#t = TransformerROS()
 					p = self.listener.transformPoint("map", ps)
 
-					print "P ", p
-
+					#print "P ", p
 					mkr.pose.position = ps.point
 					self.all_cyllinders.markers.append(mkr)
 
@@ -194,7 +195,6 @@ class CyllinderDetector():
 		rospy.wait_for_service('localizer/localize')
 		self.localize = rospy.ServiceProxy('localizer/localize', Localize)
 
-
 		self.listener = TransformListener()
 		self.listener.waitForTransform("map", "/camera_rgb_optical_frame", rospy.Time(0), rospy.Duration(5.0))		
 
@@ -206,7 +206,7 @@ class CyllinderDetector():
 		self.camera_sub = message_filters.Subscriber(camera_topic, CameraInfo)
 		self.joined_sub = message_filters.TimeSynchronizer([self.image_sub, self.camera_sub], 10)
 		self.joined_sub.registerCallback(self.image_callback)
-
+		
 		self.markers_pub = rospy.Publisher(markers_topic, MarkerArray, queue_size=10)
 
 		self.message_counter = 0
