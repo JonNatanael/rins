@@ -27,7 +27,7 @@ class ImageSaver():
 		#we need to bringup 3dsensor.launch
 		#amcl_demo.launch
 		#localizer/localizer
-		#rosrun mas_server map_server map/map.yaml
+		#rosrun map_server map_server map/map.yaml
 
 		#print image
 		N = 15
