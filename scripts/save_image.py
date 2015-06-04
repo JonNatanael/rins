@@ -17,11 +17,11 @@ from geometry_msgs.msg import Point, Vector3, PointStamped
 from tf import TransformListener
 import random
 import string
-
+from facedetector.msg import Detection
 
 class ImageSaver():
 
-	def image_callback(self,image, camera):
+	def image_callback(self,image, camera, faces):
 	#def image_callback(self, image):
 		#we need to bringup minimal.launch
 		#we need to bringup 3dsensor.launch
@@ -31,20 +31,29 @@ class ImageSaver():
 
 		#print image
 		N = 15
+		print faces.x[0],faces.y[0]
 
 		try:
-			cv_image = self.bridge.imgmsg_to_cv2(image, "bgr8")	
-			#print cv_image		
-			cv2.imshow("Image window", cv_image)
-			key = cv2.waitKey(3)
-			if key==10:
-				name = ''.join(random.choice(string.ascii_uppercase + string.digits + string.ascii_lowercase) for _ in range(N))
-				name ='images/'+name+'.jpg'
-				print name
-				cv2.imwrite(name, cv_image)
+			for i in xrange(0,len(faces.x)):		
+				cv_image = self.bridge.imgmsg_to_cv2(image, "bgr8")	
+				#print cv_image		
+				cv_image=cv_image[faces.y[i]:faces.y[i]+faces.height[i],faces.x[i]:faces.x[i]+faces.width[i]]
+				cv2.imshow("Image window", cv_image)
+				key = cv2.waitKey()
+				if key==10:
+					name = ''.join(random.choice(string.ascii_uppercase + string.digits + string.ascii_lowercase) for _ in range(N))
+					#name ='images/'+name+'.jpg'
+
+					name = '/home/team_beta/ROS/src/rins/images/'+name+'.jpg'
+					print name
+					#try:
+					print cv2.imwrite(name, cv_image)
+					#except e:
+					#		print "saving failed"
 
 		except CvBridgeError, e:
 			print e
+		#rospy.sleep(1)
 
 
 	def __init__(self):
@@ -53,12 +62,14 @@ class ImageSaver():
 
 		image_topic = rospy.get_param('~image_topic', '/camera/rgb/image_color')
 		camera_topic = rospy.get_param('~camera_topic', '/camera/rgb/camera_info')		
+		faces_topic = rospy.get_param('~faces_topic', '/facedetector/faces')
 
 		
-
+		self.faces_sub = message_filters.Subscriber(faces_topic, Detection)
 		self.image_sub = message_filters.Subscriber(image_topic, Image)
 		self.camera_sub = message_filters.Subscriber(camera_topic, CameraInfo)
-		self.joined_sub = message_filters.TimeSynchronizer([self.image_sub, self.camera_sub], 10)
+		#self.joined_sub = message_filters.TimeSynchronizer([self.image_sub, self.camera_sub], 10)
+		self.joined_sub = message_filters.TimeSynchronizer([self.image_sub, self.camera_sub, self.faces_sub], 20)
 		self.joined_sub.registerCallback(self.image_callback)
 
 

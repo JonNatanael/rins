@@ -1,7 +1,7 @@
 #!/usr/bin/env python
 import roslib
 #roslib.load_manifest('facedetector')
-import rospy 
+import rospy, math
 import numpy as np
 import sys, select, termios, tty
 from std_msgs.msg import String, Bool, ColorRGBA
@@ -24,10 +24,10 @@ class CyllinderDetector():
 	#lower_red = np.array([150, 80,   0],dtype=np.uint8)
 	#upper_red = np.array([180, 255,255],dtype=np.uint8)
 	boundaries = [
-	([165, 80,  0], [180, 255,255]), #red
-	([35, 50,  0], [70, 255,255]), #green
-	([15, 100,  0], [35, 255,255]), #yellow
-	([85, 35,  80], [150, 255,255])	#blue
+	([165, 80,  30], [180, 255,255]), #red
+	([35, 80,  30], [70, 255,255]), #green
+	([15, 100,  30], [35, 255,255]), #yellow
+	([85, 60,  60], [150, 255,255])	#blue
 	]
 
 	colors = [
@@ -37,6 +37,8 @@ class CyllinderDetector():
 	[255, 0,  0]	#blue
 	]
 
+	markers_by_color = [[],[],[],[]]
+
 	def image_callback(self, image, camera):
 	#def image_callback(self, image):
 		#we need to bringup minimal.launch
@@ -45,7 +47,7 @@ class CyllinderDetector():
 		#localizer/localizer
 		#rosrun map_server map_server map/map.yaml
 
-		print "Got callback", image.header.stamp
+		#print "Got callback", image.header.stamp
 
 		try:
 			cv_image = self.bridge.imgmsg_to_cv2(image, "bgr8")
@@ -70,50 +72,114 @@ class CyllinderDetector():
 				ellipse = cv2.fitEllipse(cyllinderContour)
 				#print "Center:   " 
 				#print ellipse[0]
-				u = int(ellipse[0][0])
-				v = int(ellipse[0][1])
-				point = Point(((u - camera_model.cx()) - camera_model.Tx()) / camera_model.fx(),
-					         ((v - camera_model.cy()) - camera_model.Ty()) / camera_model.fy(), 1)
-				resp = self.localize(image.header, point, 10)
+				
+				marker = self.markerFromCoutourEllipse(ellipse, i, image, camera_model)
+				if marker:
+					#self.all_cyllinders.markers.append(mkr)
 
-				#print resp
-
-				try:
-
-					mkr = self.makeMarker(resp.pose, self.colors[i], self.message_counter)
-					#self.message_counter * len(self.colors) +  i 
-
-					ps = PointStamped()
-					ps.header.stamp = rospy.Time()
-					ps.header.frame_id = mkr.header.frame_id
-					ps.point = mkr.pose.position
-					#t = TransformerROS()
-					p = self.listener.transformPoint("map", ps)
-
-					#print "P ", p
-					mkr.pose.position = ps.point
-					self.all_cyllinders.markers.append(mkr)
-
-				except Exception as ex:
-					print "ERROR"
-					print ex
+					if len(self.markers_by_color[i]) < 1000: #lets not clog the memory and burden the clusterer shall we
+						self.markers_by_color[i].append(marker)
 
 				cv2.ellipse(cv_image, ellipse, self.colors[i], 2)
 				cv2.drawContours(cv_image, [cyllinderContour], -1, self.colors[i]) 
 
 			i+=1
-		
-		#output = cv2.bitwise_and(cv_image, cv_image, mask = mask_cleaned) #display original image masked with the provided parameters
-		# cv2.imshow("Image window", cv_image)
-		# cv2.waitKey(3)
 
-		self.markers_pub.publish(self.all_cyllinders)
+		all_cyllinders = MarkerArray()
+		for x in range(len(self.markers_by_color)):
+			self.DBSCAN_markers(self.markers_by_color[x], 0.05, 10)
 
-		#print self.all_cyllinders
+			all_cyllinders.markers += self.markers_by_color[x]
+
+		cv2.imshow("Image window", cv_image)
+		cv2.waitKey(3)
+
+		self.markers_pub.publish(all_cyllinders)
 
 		self.message_counter = self.message_counter + 1
 
-	# def markerCenters(self, ):
+	def DBSCAN_markers(self, markers, eps, MinPts):
+		tag = 1
+		tags = [ -1 for x in range(len(markers)) ] # -1 unvisited, 0 noise, 1+ visited and in cluster
+		
+		for x in range(len(markers)):
+			if tags[x] > 0:
+				continue
+
+			tags[x] == 1
+			nearbyMarkerIndexes = self.nearbyMarkers(x, eps, markers)
+			if len(nearbyMarkerIndexes) < MinPts:
+				tags[x] = 0
+			else:
+				tag += 1
+				self.expandCluster(x, nearbyMarkerIndexes, tag, eps, MinPts, markers, tags)
+
+		clusters = [[] for x in range(tag+1)]
+		for x in tags:
+			this_tag = tags[x]
+			if this_tag >= 0: #we could ignore the noise
+				clusters[this_tag].append(markers[x])
+
+		for x in range(len(clusters)):
+			print "Tag:", x
+			print len(clusters[x])
+
+	def expandCluster(self, P, NeighborPts, tag, eps, MinPts, markers, tags):
+		tags[P] = tag    #we add the current point to the cluster
+		todo = NeighborPts
+		done = []
+		while todo:
+			added = []
+			for point in todo:
+				if tags[point] < 0:
+					tags[point] = 0
+					pointContenders = self.nearbyMarkers(point, eps, markers)
+					if len(pointContenders) >= MinPts:
+						added += pointContenders
+				if tags[point] <= 0:
+					tags[point] = tag
+			done+= todo
+			todo = added
+
+	def nearbyMarkers(self, seed_point, eps, markers):
+		seed = markers[seed_point].pose.position
+		nearby = [seed_point]
+
+		for x in range(len(markers)):
+			p = markers[x].pose.position
+			dist = math.sqrt( (seed.x-p.x)*(seed.x-p.x) + (seed.y-p.y)*(seed.y-p.y) + (seed.z-p.z)*(seed.z-p.z) )
+			if dist < eps:
+				nearby.append(x)
+
+		return nearby #return all markers in eps range of point
+
+
+
+	def markerFromCoutourEllipse(self, ellipse, color_idx, image, camera_model):
+		u = int(ellipse[0][0])
+		v = int(ellipse[0][1])
+		point = Point(((u - camera_model.cx()) - camera_model.Tx()) / camera_model.fx(),
+			         ((v - camera_model.cy()) - camera_model.Ty()) / camera_model.fy(), 1)
+		resp = self.localize(image.header, point, 10)
+
+		#print resp
+
+		try:
+			mkr = self.makeMarker(resp.pose, self.colors[color_idx], self.message_counter * len(self.colors) +  color_idx )
+
+			ps = PointStamped()
+			ps.header.stamp = rospy.Time()
+			ps.header.frame_id = mkr.header.frame_id
+			ps.point = mkr.pose.position
+			p = self.listener.transformPoint("map", ps)
+
+			mkr.pose.position = ps.point
+			return mkr
+
+		except Exception as ex:
+			print "ERROR"
+			print ex
+			return None
 
 	def findCyllinderContour(self,hsv, lower, upper, image, camera_model):
 		# create np arrays from the boundaries
@@ -123,16 +189,8 @@ class CyllinderDetector():
 			# find the colors within the specified boundaries and apply the mask
 			mask = cv2.inRange(hsv, lower, upper)
 			#output = cv2.bitwise_and(hsv, hsv, mask = mask)
-
-			#create the wanted kernel
-			# kernel_size = 20
-			# kernel = np.ones((kernel_size, kernel_size)) / (kernel_size*kernel_size)
 			
 			#apply the filter / buch of filters
-			#cv2.filter2D(src, ddepth, kernel[, dst[, anchor[, delta[, borderType]]]])
-			#blur = cv2.filter2D(mask, -1, kernel, anchor = (-1, -1), delta = 1)
-			#mask_cleaned = cv2.adaptiveThreshold(mask,255,cv2.ADAPTIVE_THRESH_GAUSSIAN_C, cv2.THRESH_BINARY, 11,0)
-			#ret3, mask_cleaned = cv2.threshold(blur, (kernel_size*kernel_size)/2, 255, cv2.THRESH_BINARY)
 			kernel = np.ones((3,3),np.uint8)
 			mask_cleaned = cv2.morphologyEx(mask,cv2.MORPH_OPEN, kernel, iterations = 4)
 			mask_cleaned = cv2.morphologyEx(mask,cv2.MORPH_CLOSE, kernel, iterations = 2)
@@ -161,13 +219,14 @@ class CyllinderDetector():
 					#if ell[0][1] > (2 * height/3):
 					if resp:
 						if resp.pose.position.y == 0 and resp.pose.position.x == 0 and resp.pose.position.y == 0:
-							continue
-						if resp.pose.position.y > 0:
+							continue #response for object too close/too far
+						if resp.pose.position.y < 0 and resp.pose.position.y > -0.2:
 							cyllinderContour = cnt
 							cArea = area
 			
 			#if cArea > 0:
 			#	print cArea
+
 			return cyllinderContour
 
 	def makeMarker(self, pose, color, id):
@@ -196,8 +255,6 @@ class CyllinderDetector():
 		image_topic = rospy.get_param('~image_topic', '/camera/rgb/image_color') #kinect
 		#image_topic = rospy.get_param('~image_topic', '/usb_cam/image_raw') #webcam
 		camera_topic = rospy.get_param('~camera_topic', '/camera/rgb/camera_info')		
-
-		self.all_cyllinders = MarkerArray()
 
 		print "Waiting for localizer..."
 		rospy.wait_for_service('localizer/localize')
