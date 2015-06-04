@@ -41,9 +41,11 @@ class CyllinderDetector():
 	#def image_callback(self, image):
 		#we need to bringup minimal.launch
 		#we need to bringup 3dsensor.launch
-		#amcl_demo.launch
+		#rins amcl_demo.launch this launch is in conflict with 3dsensor
 		#localizer/localizer
-		#rosrun mas_server map_server map/map.yaml
+		#rosrun map_server map_server map/map.yaml
+
+		print "Got callback", image.header.stamp
 
 		try:
 			cv_image = self.bridge.imgmsg_to_cv2(image, "bgr8")
@@ -61,7 +63,60 @@ class CyllinderDetector():
 		markers = MarkerArray()
 
 		for (lower, upper) in self.boundaries: #parse all colors
-			# create np arrays from the boundaries
+			
+			cyllinderContour = self.findCyllinderContour(hsv, lower, upper, image, camera_model)
+
+			if cyllinderContour.any(): #we got a hit!!!
+				ellipse = cv2.fitEllipse(cyllinderContour)
+				#print "Center:   " 
+				#print ellipse[0]
+				u = int(ellipse[0][0])
+				v = int(ellipse[0][1])
+				point = Point(((u - camera_model.cx()) - camera_model.Tx()) / camera_model.fx(),
+					         ((v - camera_model.cy()) - camera_model.Ty()) / camera_model.fy(), 1)
+				resp = self.localize(image.header, point, 10)
+
+				#print resp
+
+				try:
+
+					mkr = self.makeMarker(resp.pose, self.colors[i], self.message_counter)
+					#self.message_counter * len(self.colors) +  i 
+
+					ps = PointStamped()
+					ps.header.stamp = rospy.Time()
+					ps.header.frame_id = mkr.header.frame_id
+					ps.point = mkr.pose.position
+					#t = TransformerROS()
+					p = self.listener.transformPoint("map", ps)
+
+					#print "P ", p
+					mkr.pose.position = ps.point
+					self.all_cyllinders.markers.append(mkr)
+
+				except Exception as ex:
+					print "ERROR"
+					print ex
+
+				cv2.ellipse(cv_image, ellipse, self.colors[i], 2)
+				cv2.drawContours(cv_image, [cyllinderContour], -1, self.colors[i]) 
+
+			i+=1
+		
+		#output = cv2.bitwise_and(cv_image, cv_image, mask = mask_cleaned) #display original image masked with the provided parameters
+		# cv2.imshow("Image window", cv_image)
+		# cv2.waitKey(3)
+
+		self.markers_pub.publish(self.all_cyllinders)
+
+		#print self.all_cyllinders
+
+		self.message_counter = self.message_counter + 1
+
+	# def markerCenters(self, ):
+
+	def findCyllinderContour(self,hsv, lower, upper, image, camera_model):
+		# create np arrays from the boundaries
 			lower = np.array(lower, dtype = "uint8")
 			upper = np.array(upper, dtype = "uint8")
 
@@ -113,55 +168,7 @@ class CyllinderDetector():
 			
 			#if cArea > 0:
 			#	print cArea
-
-			if cyllinderContour.any(): #we got a hit!!!
-				ellipse = cv2.fitEllipse(cyllinderContour)
-				#print "Center:   " 
-				#print ellipse[0]
-				u = int(ell[0][0])
-				v = int(ell[0][1])
-				point = Point(((u - camera_model.cx()) - camera_model.Tx()) / camera_model.fx(),
-					         ((v - camera_model.cy()) - camera_model.Ty()) / camera_model.fy(), 1)
-				resp = self.localize(image.header, point, 10)
-
-				#print resp
-
-				try:
-
-					mkr = self.makeMarker(resp.pose, self.colors[i], self.message_counter)
-					#self.message_counter * len(self.colors) +  i 
-					
-					#(trans, rot) = listener.lookupTransform("map", '/camera_rgb_optical_frame', rospy.Time(0))
-					#(trans, rot) = listener.lookupTransform('/map', '/camera_rgb_optical_frame', faces.header.stamp)
-					ps = PointStamped()
-					ps.header.stamp = rospy.Time()
-					ps.header.frame_id = mkr.header.frame_id
-					ps.point = mkr.pose.position
-					#t = TransformerROS()
-					p = self.listener.transformPoint("map", ps)
-
-					#print "P ", p
-					mkr.pose.position = ps.point
-					self.all_cyllinders.markers.append(mkr)
-
-				except Exception as ex:
-					print "ERROR"
-					print ex
-
-				cv2.ellipse(cv_image, ellipse, self.colors[i], 2)
-				cv2.drawContours(cv_image, [cyllinderContour], -1, self.colors[i]) 
-
-			i+=1
-		
-		#output = cv2.bitwise_and(cv_image, cv_image, mask = mask_cleaned) #display original image masked with the provided parameters
-		cv2.imshow("Image window", cv_image)
-		cv2.waitKey(3)
-
-		self.markers_pub.publish(self.all_cyllinders)
-
-		#print self.all_cyllinders
-
-		self.message_counter = self.message_counter + 1
+			return cyllinderContour
 
 	def makeMarker(self, pose, color, id):
 		marker = Marker()
@@ -192,15 +199,18 @@ class CyllinderDetector():
 
 		self.all_cyllinders = MarkerArray()
 
+		print "Waiting for localizer..."
 		rospy.wait_for_service('localizer/localize')
 		self.localize = rospy.ServiceProxy('localizer/localize', Localize)
 
+		print "Waiting for transform listener..."
 		self.listener = TransformListener()
 		self.listener.waitForTransform("map", "/camera_rgb_optical_frame", rospy.Time(0), rospy.Duration(5.0))		
 
 		cv2.namedWindow("Image window", 1) #Control window
 		self.bridge = CvBridge()
 
+		print "Creating time synced sub..."
 		#self.image_sub = rospy.Subscriber(image_topic, Image, self.image_callback, queue_size=1)
 		self.image_sub = message_filters.Subscriber(image_topic, Image)
 		self.camera_sub = message_filters.Subscriber(camera_topic, CameraInfo)
@@ -210,6 +220,8 @@ class CyllinderDetector():
 		self.markers_pub = rospy.Publisher(markers_topic, MarkerArray, queue_size=10)
 
 		self.message_counter = 0
+
+		print "Waiting for callbacks..."
 
 # Main function.    
 if __name__ == '__main__':
