@@ -1,6 +1,5 @@
 #!/usr/bin/env python
 import roslib
-#roslib.load_manifest('facedetector')
 import rospy, math
 import numpy as np
 import sys, select, termios, tty
@@ -52,7 +51,7 @@ class CyllinderDetector():
 		#localizer/localizer
 		#rosrun map_server map_server map/map.yaml
 
-		#print "Got callback", image.header.stamp
+		print "Got callback", image.header.stamp
 
 		try:
 			cv_image = self.bridge.imgmsg_to_cv2(image, "bgr8")
@@ -83,32 +82,41 @@ class CyllinderDetector():
 				if marker:
 					#self.all_cyllinders.markers.append(mkr)
 
-					if len(self.markers_by_color[i]) < 5000: #lets not clog the memory and burden the clusterer shall we
-						self.markers_by_color[i].append(marker)
+					if len(self.markers_by_color[i]) > 3000: #lets not clog the memory and burden the clusterer shall we
+						del self.markers_by_color[i][0:100]  #purge old markers
+					self.markers_by_color[i].append(marker)
+
+
 
 				cv2.ellipse(cv_image, ellipse, self.colors[i], 2)
 				cv2.drawContours(cv_image, [cyllinderContour], -1, self.colors[i]) 
 
 			i+=1
 
-		if self.message_counter % 100 == 0:
+		if self.message_counter % 50 == 0:
 
 			self.all_cyllinders = MarkerArray()
 			#print " "
 			#print "Counter:", self.message_counter
 			for x in range(len(self.markers_by_color)): #iterate through markers of all colors
-				#print "Current color:", self.color_names[x], "markers in bag:", len(self.markers_by_color[x])
-				clusters = self.DBSCAN_markers(self.markers_by_color[x], 0.03, 15)
+				print "Current color:", self.color_names[x], "markers in bag:", len(self.markers_by_color[x])
+				if (len(self.markers_by_color[x]) == 0):
+					continue
 
-				center = self.centerOfProminentCluster(clusters)
-				if center:
-					mkr = self.markers_by_color[x][1] #take random properly colored marker
+				clusters = self.DBSCAN_markers(self.markers_by_color[x], 0.1, 20)
+
+				center = []
+				if len(clusters) > 0:
+					center = self.centerOfProminentCluster(clusters)
+					#print center
+				if len(center) > 0:
+					mkr = self.markers_by_color[x][0] #take random properly colored marker
 					mkr.pose.position.x = center[0]
 					mkr.pose.position.y = center[1]
 					mkr.pose.position.z = center[2]
 					mkr.scale = Vector3(0.2, 0.2, 0.2)
 					self.all_cyllinders.markers.append(mkr)
-				#all_cyllinders.markers += self.markers_by_color[x] #add whole color to all_cyllinders
+				#self.all_cyllinders.markers += self.markers_by_color[x] #add whole color to all_cyllinders
 
 		cv2.imshow("Image window", cv_image)
 		cv2.waitKey(3)
@@ -203,11 +211,10 @@ class CyllinderDetector():
 			if temp > count:
 				i_max = x
 				count = temp
-				print i_max, count
 
 		#find its center
 		if count > 0:
-			#print "Biggest cluster is", i_max
+			#print "Biggest cluster is", i_max, count
 			x = 0
 			y = 0
 			z = 0
@@ -222,10 +229,10 @@ class CyllinderDetector():
 			return [x,y,z]
 
 		else:
-			return None
+			return []
 
 	def DBSCAN_markers(self, markers, eps, MinPts):
-		tag = 1
+		tag = 0
 		tags = [ -1 for x in range(len(markers)) ] # -1 unvisited, 0 noise, 1+ visited and in cluster
 		
 		for x in range(len(markers)):
@@ -238,20 +245,23 @@ class CyllinderDetector():
 				tags[x] = 0
 			else:
 				tag += 1
-				self.expandCluster(x, nearbyMarkerIndexes, tag, eps, MinPts, markers, tags)
+				tags = self.expandCluster(x, nearbyMarkerIndexes, tag, eps, MinPts, markers, tags)
+
 
 		clusters = [[] for x in range(tag+1)]
-		for x in tags:
+		for x in range(len(tags)):
 			this_tag = tags[x]
 			if this_tag >= 0: #we could ignore the noise
 				clusters[this_tag].append(markers[x])
 
-		for x in range(len(clusters)):
-			print "Tag:", x
-			print len(clusters[x])
+		#for x in range(len(clusters)):
+		#	print "Tag:", x, ":", len(clusters[x])
+
+		return clusters[1:]
 
 	def expandCluster(self, P, NeighborPts, tag, eps, MinPts, markers, tags):
-		tags[P] = tag    #we add the current point to the cluster
+		#print "Tagging seed with", tag
+		tags[P] = tag    #we tag the current point
 		todo = NeighborPts
 		done = []
 		while todo:
@@ -263,9 +273,11 @@ class CyllinderDetector():
 					if len(pointContenders) >= MinPts:
 						added += pointContenders
 				if tags[point] <= 0:
+					#print "Tagging link with", tag
 					tags[point] = tag
 			done+= todo
 			todo = added
+		return tags
 
 	def nearbyMarkers(self, seed_point, eps, markers):
 		seed = markers[seed_point].pose.position
@@ -296,7 +308,7 @@ class CyllinderDetector():
 		marker.color = ColorRGBA(color[2], color[1], color[0], 1)
 
 		return marker;
-		
+
 
 	def __init__(self):
 		#laufat mora rosrun usb_camera usb_cam_node za debuganje preko webCama
