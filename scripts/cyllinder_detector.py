@@ -117,36 +117,6 @@ class CyllinderDetector():
 
 		self.message_counter = self.message_counter + 1
 
-	def centerOfProminentCluster(self, clusters):
-		#find biggest cluster
-		count = -1
-		i_max = -1
-		for x in range(len(clusters)):
-			temp = len(clusters[x])
-			if temp > count:
-				i_max = x
-				count = temp
-				print i_max, count
-
-		#find its center
-		if count > 0:
-			#print "Biggest cluster is", i_max
-			x = 0
-			y = 0
-			z = 0
-			for marker in clusters[i_max]:
-				x+=marker.pose.position.x
-				y+=marker.pose.position.y
-				z+=marker.pose.position.z
-			x /= count
-			y /= count
-			z /= count
-			#print "REAL Center is ", x,y,z
-			return [x,y,z]
-
-		else:
-			return None
-
 	def markerFromCoutourEllipse(self, ellipse, color_idx, image, camera_model):
 		u = int(ellipse[0][0])
 		v = int(ellipse[0][1])
@@ -157,7 +127,7 @@ class CyllinderDetector():
 		#print resp
 
 		try:
-			resp.pose.position.z += 0.12 # r/2 of the cyllinder
+			resp.pose.position.z += 0.12 # r/2 of the cyllinder added to the depth
 			mkr = self.makeMarker(resp.pose, self.colors[color_idx], self.message_counter * len(self.colors) +  color_idx )
 
 			ps = PointStamped()
@@ -223,6 +193,36 @@ class CyllinderDetector():
 			#	print cArea
 
 			return cyllinderContour
+
+	def centerOfProminentCluster(self, clusters):
+		#find biggest cluster
+		count = -1
+		i_max = -1
+		for x in range(len(clusters)):
+			temp = len(clusters[x])
+			if temp > count:
+				i_max = x
+				count = temp
+				print i_max, count
+
+		#find its center
+		if count > 0:
+			#print "Biggest cluster is", i_max
+			x = 0
+			y = 0
+			z = 0
+			for marker in clusters[i_max]:
+				x+=marker.pose.position.x
+				y+=marker.pose.position.y
+				z+=marker.pose.position.z
+			x /= count
+			y /= count
+			z /= count
+			#print "REAL Center is ", x,y,z
+			return [x,y,z]
+
+		else:
+			return None
 
 	def DBSCAN_markers(self, markers, eps, MinPts):
 		tag = 1
