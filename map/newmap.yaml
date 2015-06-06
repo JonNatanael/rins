@@ -1,4 +1,4 @@
-image: /home/team_beta/ROS/src/rins/map/newmap.pgm
+image: /home/team_beta/ROS/src/rins/map/newmap_clean.pgm
 resolution: 0.050000
 origin: [-1.000000, -11.500000, 0.000000]
 negate: 0
