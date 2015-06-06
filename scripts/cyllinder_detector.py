@@ -157,6 +157,7 @@ class CyllinderDetector():
 		#print resp
 
 		try:
+			resp.pose.position.z += 0.12 # r/2 of the cyllinder
 			mkr = self.makeMarker(resp.pose, self.colors[color_idx], self.message_counter * len(self.colors) +  color_idx )
 
 			ps = PointStamped()
@@ -222,6 +223,62 @@ class CyllinderDetector():
 			#	print cArea
 
 			return cyllinderContour
+
+	def DBSCAN_markers(self, markers, eps, MinPts):
+		tag = 1
+		tags = [ -1 for x in range(len(markers)) ] # -1 unvisited, 0 noise, 1+ visited and in cluster
+		
+		for x in range(len(markers)):
+			if tags[x] > 0:
+				continue
+
+			tags[x] == 1
+			nearbyMarkerIndexes = self.nearbyMarkers(x, eps, markers)
+			if len(nearbyMarkerIndexes) < MinPts:
+				tags[x] = 0
+			else:
+				tag += 1
+				self.expandCluster(x, nearbyMarkerIndexes, tag, eps, MinPts, markers, tags)
+
+		clusters = [[] for x in range(tag+1)]
+		for x in tags:
+			this_tag = tags[x]
+			if this_tag >= 0: #we could ignore the noise
+				clusters[this_tag].append(markers[x])
+
+		for x in range(len(clusters)):
+			print "Tag:", x
+			print len(clusters[x])
+
+	def expandCluster(self, P, NeighborPts, tag, eps, MinPts, markers, tags):
+		tags[P] = tag    #we add the current point to the cluster
+		todo = NeighborPts
+		done = []
+		while todo:
+			added = []
+			for point in todo:
+				if tags[point] < 0:
+					tags[point] = 0
+					pointContenders = self.nearbyMarkers(point, eps, markers)
+					if len(pointContenders) >= MinPts:
+						added += pointContenders
+				if tags[point] <= 0:
+					tags[point] = tag
+			done+= todo
+			todo = added
+
+	def nearbyMarkers(self, seed_point, eps, markers):
+		seed = markers[seed_point].pose.position
+		nearby = [seed_point]
+
+		for x in range(len(markers)):
+			p = markers[x].pose.position
+			dist = math.sqrt( (seed.x-p.x)*(seed.x-p.x) + (seed.y-p.y)*(seed.y-p.y) + (seed.z-p.z)*(seed.z-p.z) )
+			if dist < eps:
+				nearby.append(x)
+
+		return nearby #return all markers in eps range of point
+
 
 	def makeMarker(self, pose, color, id):
 		marker = Marker()
