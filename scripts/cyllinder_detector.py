@@ -296,67 +296,7 @@ class CyllinderDetector():
 		marker.color = ColorRGBA(color[2], color[1], color[0], 1)
 
 		return marker;
-
-	def DBSCAN_markers(self, markers, eps, MinPts):
-		tag = 0
-		global tags
-		self.tags = [ -1 for x in range(len(markers)) ] # -1 unvisited, 0 noise, 1+ visited and in cluster
 		
-		for x in range(len(markers)):
-			if self.tags[x] > 0:
-				continue
-
-			self.tags[x] == 0
-			nearbyMarkerIndexes = self.nearbyMarkers(x, eps, markers)
-			if len(nearbyMarkerIndexes) < MinPts:
-				self.tags[x] = 0
-			else:
-				tag += 1
-				self.expandCluster(x, nearbyMarkerIndexes, tag, eps, MinPts, markers)
-
-		clusters = [[] for x in range(tag)]
-
-		for x in range(len(self.tags)):
-			this_tag = self.tags[x]
-			if x > 0: #ignore the noise
-				clusters[this_tag - 1 ].append(markers[x])
-
-		#for x in range(len(clusters)):
-			#print "Tag:", x, len(clusters[x])
-
-		return clusters;
-
-	def expandCluster(self, P, NeighborPts, tag, eps, MinPts, markers):
-		global tags
-		self.tags[P] = tag    #we add the current point to the cluster
-		todo = NeighborPts
-		done = []
-		while todo:
-			added = []
-			for point in todo:
-				if self.tags[point] < 0: #unvisited
-					self.tags[point] = 0
-					pointContenders = self.nearbyMarkers(point, eps, markers)
-					#print len(pointContenders)
-					if len(pointContenders) >= MinPts:
-						added += pointContenders
-				if self.tags[point] == 0: #previously tagged as noise
-					self.tags[point] = tag
-			done+= todo
-			todo = added
-
-	def nearbyMarkers(self, seed_point, eps, markers):
-		seed = markers[seed_point].pose.position
-		nearby = [seed_point]
-
-		for x in range(len(markers)):
-			p = markers[x].pose.position
-			dist = math.sqrt( (seed.x-p.x)*(seed.x-p.x) + (seed.y-p.y)*(seed.y-p.y) + (seed.z-p.z)*(seed.z-p.z) )
-			if dist < eps:
-				nearby.append(x)
-
-		return nearby #return all markers in eps range of point
-
 
 	def __init__(self):
 		#laufat mora rosrun usb_camera usb_cam_node za debuganje preko webCama
