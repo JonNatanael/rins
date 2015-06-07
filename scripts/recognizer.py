@@ -23,31 +23,15 @@ class FaceRecognizer():
 		#amcl_demo.launch
 		#localizer/localizer
 		#rosrun map_server map_server map/map.yaml
-
-
+		
 		try:
 			for i in xrange(0,len(faces.x)):	
-
-				#im = self.bridge.imgmsg_to_cv2(image, "mono8")
 				im = self.bridge.imgmsg_to_cv2(faces.image[i], "bgr8")
-				#im = np.array(faces.image[i])
-				#print faces.image[i]
-				#im=cv2.cv.fromarray(im)
-
-				
-				#im = cv2.imread(sl)
-
 				im = cv2.cvtColor(im, cv2.COLOR_BGR2GRAY)
-				#cv2.imshow("test",im)
-				#cv2.waitKey(1)
 				im = np.asarray(im)
-				#print im
-				#print len(im)
 				im = imresize(im, (128,128),'bilinear')
-				#print im.size
 				im = np.reshape(im, (128*128,1),'F') 
 				ty = np.dot(np.matrix.transpose(self.U),(im-self.Mu))
-				#print ty
 				ty = np.dot(np.matrix.transpose(self.V),(ty-self.MM))
 
 				mi = 1e10
@@ -62,7 +46,6 @@ class FaceRecognizer():
 
 		except CvBridgeError, e:
 			print e
-		#rospy.sleep(1)
 
 
 	def __init__(self):
@@ -77,7 +60,6 @@ class FaceRecognizer():
 		self.faces_sub = message_filters.Subscriber(faces_topic, Detection)
 		self.image_sub = message_filters.Subscriber(image_topic, Image)
 		self.camera_sub = message_filters.Subscriber(camera_topic, CameraInfo)
-		#self.joined_sub = message_filters.TimeSynchronizer([self.image_sub, self.camera_sub], 10)
 		self.joined_sub = message_filters.TimeSynchronizer([self.image_sub, self.camera_sub, self.faces_sub], 20)
 		self.joined_sub.registerCallback(self.image_callback)
 

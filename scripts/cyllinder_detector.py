@@ -13,6 +13,7 @@ from sensor_msgs.msg import CameraInfo, Image
 from visualization_msgs.msg import Marker, MarkerArray
 from image_geometry import PinholeCameraModel
 from geometry_msgs.msg import Point, Vector3, PointStamped
+from nav_msgs.msg import OccupancyGrid
 from tf import TransformListener
 
 # Node for cyllinder detection.
@@ -42,6 +43,8 @@ class CyllinderDetector():
 
 	all_cyllinders = None
 
+	map_metadata = None
+	bloated_map = np.array([])
 
 	def image_callback(self, image, camera):
 	#def image_callback(self, image):
@@ -70,13 +73,10 @@ class CyllinderDetector():
 
 		for (lower, upper) in self.boundaries: #parse all colors
 			
-			#print "Checking ", self.color_names[i]
+			#Find contours of each color
 			cyllinderContour = self.findCyllinderContour(hsv, lower, upper, image, camera_model)
-
 			if cyllinderContour.any(): #we got a hit!!!
 				ellipse = cv2.fitEllipse(cyllinderContour)
-				#print "Center:   " 
-				#print ellipse[0]
 				
 				marker = self.markerFromCoutourEllipse(ellipse, i, image, camera_model)
 				if marker:
@@ -110,8 +110,9 @@ class CyllinderDetector():
 					mkr = self.markers_by_color[x][0] #take random properly colored marker
 					mkr.pose.position.x = center[0]
 					mkr.pose.position.y = center[1]
-					mkr.pose.position.z = center[2]
-					mkr.scale = Vector3(0.2, 0.2, 0.2)
+					mkr.pose.position.z = 0.2
+					mkr.scale = Vector3(0.24, 0.24, 0.4)
+					mkr.type = Marker.CYLINDER
 					self.all_cyllinders.markers.append(mkr)
 				#self.all_cyllinders.markers += self.markers_by_color[x] #add whole color to all_cyllinders
 
@@ -137,11 +138,12 @@ class CyllinderDetector():
 
 			ps = PointStamped()
 			ps.header.stamp = rospy.Time()
-			ps.header.frame_id = mkr.header.frame_id
+			ps.header.frame_id = "camera_rgb_optical_frame"
 			ps.point = mkr.pose.position
 			p = self.listener.transformPoint("map", ps)
 
-			mkr.pose.position = ps.point
+			mkr.header.frame_id = "map"
+			mkr.pose.position = p.point
 			return mkr
 
 		except Exception as ex:
@@ -168,7 +170,7 @@ class CyllinderDetector():
 			contours, hierarchy = cv2.findContours(cont_img, cv2.RETR_EXTERNAL, cv2.CHAIN_APPROX_SIMPLE)
 
 			cyllinderContour = np.array([]);
-			cArea = 0
+			max_contour_area = 0
 			for cnt in contours:
 				area = cv2.contourArea(cnt)
 
@@ -176,28 +178,72 @@ class CyllinderDetector():
 					continue
 				if len(cnt) < 5:
 				 	continue
-				if cArea < area: #if we don't have a bigger field selected already
-					ell = cv2.fitEllipse(cnt)
-
-					u = int(ell[0][0])
-					v = int(ell[0][1])
-					point = Point(((u - camera_model.cx()) - camera_model.Tx()) / camera_model.fx(),
-					         ((v - camera_model.cy()) - camera_model.Ty()) / camera_model.fy(), 1)
-					resp = self.localize(image.header, point, 10)
-					#if ell[0][1] > (2 * height/3):
-					if resp and ell[0][1] > 0 and ell[0][0] > 0:
-						if resp.pose.position.y == 0 and resp.pose.position.x == 0 and resp.pose.position.y == 0:
-							#print "Too close", ell[0]
-							continue #response for object too close/too far
-						elif resp.pose.position.y > 0 and resp.pose.position.y < 0.2:
-							#print "Added", resp.pose.position
-							cyllinderContour = cnt
-							cArea = area
+				if max_contour_area < area: #if we don't have a bigger field selected already
+					if self.contourIsValidContender(cnt, camera_model, image.header):
+						#print "Added", resp.pose.position
+						cyllinderContour = cnt
+						max_contour_area = area
 			
 			#if cArea > 0:
 			#	print cArea
 
 			return cyllinderContour
+
+	def contourIsValidContender(self, cnt, camera_model, header):
+		ell = cv2.fitEllipse(cnt)
+		u = int(ell[0][0]) #get the center of the elipse
+		v = int(ell[0][1])
+		point = Point(((u - camera_model.cx()) - camera_model.Tx()) / camera_model.fx(),
+		         ((v - camera_model.cy()) - camera_model.Ty()) / camera_model.fy(), 1)
+		resp = self.localize(header, point, 10)
+
+		#if ell[0][1] > (2 * height/3):
+		if resp and ell[0][1] > 0 and ell[0][0] > 0:
+			#check if the response is valid. Cmon, it's never gonna be exactly 0,0,0, REALLY
+			if resp.pose.position.y == 0 and resp.pose.position.x == 0 and resp.pose.position.y == 0:
+				#print "Too close", ell[0]
+				return False #response for object too close/too far
+			elif self.pointIsInsideMap(resp):
+				return True
+
+	def pointIsInsideMap(self, localizerResponse):
+		resp = localizerResponse
+		try:
+			resp.pose.position.z += 0.12 # r/2 of the cyllinder added to the depth
+			ps = PointStamped()
+			ps.header.stamp = rospy.Time()
+			ps.header.frame_id = "camera_rgb_optical_frame"
+			ps.point = resp.pose.position
+			p = self.listener.transformPoint("map", ps)
+
+			#filters
+			if p.point.z > 0.4: #above cylinder height
+				return False
+			if p.point.z < 0: #ehm...underground?
+				return False
+
+			#print p.point
+			#print self.mappixelOfPoint(p.point)
+			if self.mappixelOfPoint(p.point) > 0: #playfield is absolutely white
+				return False
+
+			return True
+
+		except Exception as ex:
+			print "ERROR in pointIsInsideMap"
+			print ex
+			return False
+
+	def mappixelOfPoint(self,point):
+		x = -self.map_metadata.origin.position.x/self.map_metadata.resolution  +  point.x/self.map_metadata.resolution
+		x = int(round(x))
+		y = -self.map_metadata.origin.position.y/self.map_metadata.resolution  +  point.y/self.map_metadata.resolution
+		y = self.map_metadata.height - int(round(y)) #images are reversed
+
+		img = np.copy(self.bloated_map)
+		cv2.circle(img, (x,y), 1, 150, 2)
+		cv2.imshow("Bloated map", img)
+		return self.bloated_map[x][y]
 
 	def centerOfProminentCluster(self, clusters):
 		#find biggest cluster
@@ -296,16 +342,49 @@ class CyllinderDetector():
 		marker.header.frame_id = "camera_rgb_optical_frame"
 		marker.pose = pose
 		marker.type = Marker.CUBE
-		marker.action = Marker.CYLINDER
+		marker.action = Marker.ADD
 		marker.frame_locked = False
 		marker.lifetime = rospy.Time(0)
 		marker.id = id
-		marker.scale = Vector3(0.05, 0.05, 0.1)
+		marker.scale = Vector3(0.05, 0.05, 0.05)
 		#marker.color = ColorRGBA(1, 1, 1, 1)
 		marker.color = ColorRGBA(color[2], color[1], color[0], 1)
 
 		return marker;
 
+	def map_callback(self, grid):
+		#std_msgs/Header header
+		#nav_msgs/MapMetaData info
+		#int8[] data
+
+		self.map_metadata = grid.info
+		print self.map_metadata
+		#time map_load_time
+		#float32 resolution
+		#uint32 width
+		#uint32 height
+		#geometry_msgs/Pose origin
+
+		#np_arr = []
+		#for x in costmap.data:
+		#	if x < 0:
+		#		np_arr.append(0)
+		#	else:
+		#		np_arr.append(x)
+
+		np_arr = np.reshape(grid.data, (grid.info.height, grid.info.width))
+		cv_image = np.asarray(np_arr, np.uint8)
+		cv_image = cv2.flip(cv_image,0)
+		cv_image = (255-cv_image)
+
+		kernel = np.ones((2,2),np.uint8)
+		cv_image = cv2.morphologyEx(cv_image,cv2.MORPH_OPEN, kernel, iterations = 2)
+		cv_image = cv2.morphologyEx(cv_image,cv2.MORPH_CLOSE, kernel, iterations = 2)
+		cv_image = cv2.erode(cv_image,kernel,iterations = 5)
+		cv_image = cv2.threshold(cv_image, 200, 255, cv2.THRESH_BINARY) #100 is an arbitrary number between 155-255, 155 is the original grayness
+		retval, self.bloated_map = cv_image
+		#cv2.imshow("Bloated map", self.bloated_map)
+		#cv2.imwrite("cv_map.png",cv_image)
 
 	def __init__(self):
 		#laufat mora rosrun usb_camera usb_cam_node za debuganje preko webCama
@@ -316,6 +395,15 @@ class CyllinderDetector():
 		image_topic = rospy.get_param('~image_topic', '/camera/rgb/image_color') #kinect
 		#image_topic = rospy.get_param('~image_topic', '/usb_cam/image_raw') #webcam
 		camera_topic = rospy.get_param('~camera_topic', '/camera/rgb/camera_info')		
+
+		map_topic = rospy.get_param('~map_topic', '/map')
+		try:
+			self.map_sub = rospy.Subscriber(map_topic, OccupancyGrid, self.map_callback)
+			rospy.wait_for_message(map_topic, OccupancyGrid, timeout=2)
+		except(rospy.ROSException), e:
+			print "Map topic is not available, aborting..."
+			print "Error message: ", e
+		print "Got map"
 
 		print "Waiting for localizer..."
 		rospy.wait_for_service('localizer/localize')

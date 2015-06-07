@@ -64,16 +64,11 @@ class ImageSaver():
 		camera_topic = rospy.get_param('~camera_topic', '/camera/rgb/camera_info')		
 		faces_topic = rospy.get_param('~faces_topic', '/facedetector/faces')
 
-		
 		self.faces_sub = message_filters.Subscriber(faces_topic, Detection)
 		self.image_sub = message_filters.Subscriber(image_topic, Image)
 		self.camera_sub = message_filters.Subscriber(camera_topic, CameraInfo)
-		#self.joined_sub = message_filters.TimeSynchronizer([self.image_sub, self.camera_sub], 10)
 		self.joined_sub = message_filters.TimeSynchronizer([self.image_sub, self.camera_sub, self.faces_sub], 20)
 		self.joined_sub.registerCallback(self.image_callback)
-
-
-
 
 
 # Main function.    

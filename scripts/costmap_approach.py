@@ -88,7 +88,9 @@ class CostmapApproach():
 		points = np.transpose(np.where(scan==255)) #we get array of coordinates where the circle is
 												  #in a [y, x] manner
 		min_coord = []
-		min_value = 95	#map value treshold, what is acceptable
+		min_value = 50	#map value treshold, what is acceptable
+					#127 is definitely not in collision, as per http://wiki.ros.org/costmap_2d
+					#we could scale the color balance graph of the image or just scale 0-255 on 0-100
 		for coord in points:
 			cur_value = self.costmap[coord[0]][coord[1]] #costmap value of one of the points on the circle
 			if (cur_value < min_value):
@@ -105,17 +107,18 @@ class CostmapApproach():
 	def refresh_costmap(self):
 
 		color_img = cv2.cvtColor(self.costmap, cv.CV_GRAY2RGB)
+		max_scan_size = 10
 		for x in self.locations:
-			cv2.circle(color_img, (x[0], x[1]), 6, (255,255,255))
+			cv2.circle(color_img, (x[0], x[1]), max_scan_size, (150,150,150))
 			
 			appc = []
 			scansize = 1
-			while (len(appc) == 0) and scansize < 6:
+			while (len(appc) == 0) and scansize < max_scan_size:
 				appc = self.calculate_approach(x[0], x[1], scansize)
 				scansize+=1
 
 			if len(appc) > 0:
-				cv2.circle(color_img, (appc[1], appc[0]), 1, (0,255,0))
+				cv2.circle(color_img, (appc[1], appc[0]), 1, (0,255,0), 2)
 		cv2.imshow("Enhanced costmap", color_img)
 		cv2.waitKey(3)
 
