@@ -51,7 +51,7 @@ class CyllinderDetector():
 		#localizer/localizer
 		#rosrun map_server map_server map/map.yaml
 
-		print "Got callback", image.header.stamp
+		#print "Got callback", image.header.stamp
 
 		try:
 			cv_image = self.bridge.imgmsg_to_cv2(image, "bgr8")
@@ -86,15 +86,12 @@ class CyllinderDetector():
 						del self.markers_by_color[i][0:100]  #purge old markers
 					self.markers_by_color[i].append(marker)
 
-
-
 				cv2.ellipse(cv_image, ellipse, self.colors[i], 2)
 				cv2.drawContours(cv_image, [cyllinderContour], -1, self.colors[i]) 
 
 			i+=1
 
-		if self.message_counter % 50 == 0:
-
+		if self.message_counter % 50 == 0: #calculate clusters every 50 messages...about 2s?
 			self.all_cyllinders = MarkerArray()
 			#print " "
 			#print "Counter:", self.message_counter
@@ -299,11 +296,11 @@ class CyllinderDetector():
 		marker.header.frame_id = "camera_rgb_optical_frame"
 		marker.pose = pose
 		marker.type = Marker.CUBE
-		marker.action = Marker.ADD
+		marker.action = Marker.CYLINDER
 		marker.frame_locked = False
 		marker.lifetime = rospy.Time(0)
 		marker.id = id
-		marker.scale = Vector3(0.05, 0.05, 0.05)
+		marker.scale = Vector3(0.05, 0.05, 0.1)
 		#marker.color = ColorRGBA(1, 1, 1, 1)
 		marker.color = ColorRGBA(color[2], color[1], color[0], 1)
 

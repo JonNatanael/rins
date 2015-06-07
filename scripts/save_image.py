@@ -39,7 +39,7 @@ class ImageSaver():
 				#print cv_image		
 				cv_image=cv_image[faces.y[i]:faces.y[i]+faces.height[i],faces.x[i]:faces.x[i]+faces.width[i]]
 				cv2.imshow("Image window", cv_image)
-				key = cv2.waitKey()
+				key = cv2.waitKey(1)
 				if key==10:
 					name = ''.join(random.choice(string.ascii_uppercase + string.digits + string.ascii_lowercase) for _ in range(N))
 					#name ='images/'+name+'.jpg'
