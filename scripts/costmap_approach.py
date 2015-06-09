@@ -24,8 +24,8 @@ class CostmapApproach():
 	base_costmap = np.array([])
 	costmap = np.array([])
 	locations = []
-	f_app = None
-	cy_app = None
+	f_app = None #disfigured markers to pixelspace
+	cy_app = None #disfigured markers to pixelspace
 
 	def costmap_callback(self, costmap):
 		self.width = costmap.info.width
@@ -82,39 +82,27 @@ class CostmapApproach():
 		self.refresh_costmap()
 
 	def cylinders_callback(self, marker_array):
-		self.cy_app = MarkerArray()
-		for marker in marker_array.markers
-			point = self.point_on_map(marker.position)
-			orientation = self.quaternion_to_look_from_to(point, marker.pose.position)
-
-			marker.scale = Vector3(marker.scale.x, marker.scale.y, 0)
-			marker.pose.position = point
-			marker.pose.orientation = orientation
-			marker.type = 0 #arrow
-			self.cy_app.markers.append(marker)
-			#print "Cylinder added to Points", point.x, point.y
+		self.cy_app = marker_array
 		self.refresh_costmap()
 
 	def faces_callback(self, marker_array):
-		self.f_app = MarkerArray()
-		for marker in marker_array.markers
-			point = self.point_on_map(marker.pose.position)
-			orientation = self.quaternion_to_look_from_to(point, marker.pose.position)
-
-			marker.scale = Vector3(marker.scale.x, marker.scale.y, 0)
-			marker.pose.position = point
-			marker.pose.orientation = orientation
-			marker.type = 0 #arrow
-			self.f_app.markers.append(marker)
-			#print "Face added to Points", point.x, point.y
+		self.f_app = marker_array
 		self.refresh_costmap()
 
 	def point_on_map(self, point):
-		x = -self.map_metadata.origin.position.x/self.map_metadata.resolution  +  point.x/self.map_metadata.resolution
+		res = self.map_metadata.resolution
+		x = (-self.map_metadata.origin.position.x+point.x)/res
 		x = int(round(x))
-		y = -self.map_metadata.origin.position.y/self.map_metadata.resolution  +  point.y / self.map_metadata.resolution
+		y = (-self.map_metadata.origin.position.y+point.y)/res
 		y = self.height - int(round(y)) 
-		return Point(x, y, 0)
+		return [x,y]
+
+	def point_in_world(self, point):
+		res = self.map_metadata.resolution
+		x = point[0]*res + self.map_metadata.origin.position.x
+		point[1] = self.height - point[1]
+		y = point[1]*res + self.map_metadata.origin.position.y
+		return Point(x,y,0)
 
 	def quaternion_to_look_from_to(self, from_point, to_point):
 		delta_x = to_point.x - from_point.x
@@ -123,7 +111,7 @@ class CostmapApproach():
 		return Quaternion(0, 0, sin(theta), cos(theta))
 
 		
-	def calculate_approach(self, x, y, diameter):
+	def calculate_approach_xy(self, x, y, diameter):
 		scan = np.zeros((self.width, self.height),np.uint8)
 		cv2.circle(scan, (x,y), diameter/2, 255, diameter)
 		points = np.transpose(np.where(scan==255)) #we get array of coordinates where the circle is
@@ -149,30 +137,78 @@ class CostmapApproach():
 
 		color_img = cv2.cvtColor(self.costmap, cv.CV_GRAY2RGB)
 		max_scan_size = 10
+
 		for x in self.locations: #clicked points
 			cv2.circle(color_img, (x[0], x[1]), max_scan_size, (150,150,150))
 			
 			appc = []
 			scansize = 1
 			while (len(appc) == 0) and scansize < max_scan_size:
-				appc = self.calculate_approach(x[0], x[1], scansize)
+				appc = self.calculate_approach_xy(x[0], x[1], scansize)
 				scansize+=1
 
 			if len(appc) > 0:
 				cv2.circle(color_img, (appc[1], appc[0]), 1, (0,255,0), 2)
 		
-		for f in self.f_app: #face approach markers
-			cv2.circle(color_img, (f.pose.position.x, f.pose.position.y), max_scan_size, f.color / 2)
+
+		faces_MA = MarkerArray()
+		for f in self.f_app.markers: #face approach markers
+
+			point = self.point_on_map(f.pose.position)
+			#marker.pose.position = point
+			#self.f_app.markers.append(marker)
+			#print "Face added to Points", point.x, point.y
+			cv2.circle(color_img, (point.x, point.y), max_scan_size, f.color / 2)
 			
 			appc = []
 			scansize = 1
 			while (len(appc) == 0) and scansize < max_scan_size:
-				appc = self.calculate_approach(f.pose.position.x, f.pose.position.y, scansize)
+				appc = self.calculate_approach_xy(point[0], point[1], scansize)
 				scansize+=1
 
 			if len(appc) > 0:
 				cv2.circle(color_img, (appc[1], appc[0]), 1, f.color, 2)
 
+				point = self.point_in_world(appc)
+				orientation = self.quaternion_to_look_from_to(f.pose.position, point)
+				
+				f.pose.position = point
+				f.pose.orientation = orientation
+				f.scale = Vector3(marker.scale.x, marker.scale.y, 0)
+				f.type = 0 #arrow
+				faces_MA.markers.append(f)
+		if len(faces_MA.markers) > 0:
+			self.app_faces_pub.publish(faces_MA)
+
+
+		cylinders_MA = MarkerArray()
+		for cy in self.cy_app.markers: #face approach markers
+
+			point = self.point_on_map(cy.pose.position)
+			#marker.pose.position = point
+			#self.f_app.markers.append(marker)
+			#print "Face added to Points", point.x, point.y
+			cv2.circle(color_img, (point.x, point.y), max_scan_size, cy.color / 2)
+			
+			appc = []
+			scansize = 1
+			while (len(appc) == 0) and scansize < max_scan_size:
+				appc = self.calculate_approach_xy(point[0], point[1], scansize)
+				scansize+=1
+
+			if len(appc) > 0:
+				cv2.circle(color_img, (appc[1], appc[0]), 1, f.color, 2)
+
+				point = self.point_in_world(appc)
+				orientation = self.quaternion_to_look_from_to(cy.pose.position, point)
+				
+				cy.pose.position = point
+				cy.pose.orientation = orientation
+				cy.scale = Vector3(marker.scale.x, marker.scale.y, 0)
+				cy.type = 0 #arrow
+				cylinders_MA.markers.append(cy)
+		if len(cylinders_MA.markers) > 0:
+			self.app_faces_pub.publish(cylinders_MA)
 
 		cv2.imshow("Enhanced costmap", color_img)
 		cv2.waitKey(3)
