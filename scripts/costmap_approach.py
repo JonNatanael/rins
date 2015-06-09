@@ -181,19 +181,7 @@ class CostmapApproach():
 					point = self.point_in_world(appc)
 					orientation = self.quaternion_to_look_from_to(f.pose.position, point)
 					
-					mkr = Marker()
-					mkr.header.seq = f.header.seq
-					mkr.header.stamp = rospy.Time.now()
-					mkr.header.frame_id = 'map'
-					mkr.color = f.color
-					mkr.pose.position = point
-					mkr.pose.orientation = orientation
-					mkr.scale = Vector3(f.scale.x, f.scale.y, 0.01)
-					mkr.type = 0 #arrow
-					mkr.action = Marker.ADD
-					mkr.frame_locked = False
-					mkr.lifetime = rospy.Time(0)
-					mkr.id = f.id
+					mkr = self.makeArrow(point, orientation, f)
 
 					faces_MA.markers.append(f)
 			if len(faces_MA.markers) > 0:
@@ -221,20 +209,7 @@ class CostmapApproach():
 					point = self.point_in_world([appc[1], appc[0]])
 					orientation = self.quaternion_to_look_from_to(cy.pose.position, point)
 					
-					mkr = Marker()
-					mkr.header.seq = cy.header.seq
-					mkr.header.stamp = rospy.Time.now()
-					mkr.header.frame_id = 'map'
-					mkr.color = cy.color
-					mkr.pose.position = point
-					mkr.pose.orientation = orientation
-					mkr.scale = Vector3(cy.scale.x, cy.scale.y, 0.01)
-					mkr.type = 0 #arrow
-					mkr.action = Marker.ADD
-					mkr.frame_locked = False
-					mkr.lifetime = rospy.Time(0)
-					mkr.id = cy.id
-
+					mkr = self.makeArrow(point, orientation, cy)
 					cylinders_MA.markers.append(mkr)
 
 			if len(cylinders_MA.markers) > 0:
@@ -242,6 +217,22 @@ class CostmapApproach():
 
 		cv2.imshow("Enhanced costmap", color_img)
 		cv2.waitKey(3)
+
+	def makeArrow(self, point, orientation, original_marker):
+		mkr = Marker()
+		mkr.header.seq = original_marker.header.seq
+		mkr.header.stamp = rospy.Time.now()
+		mkr.header.frame_id = 'map'
+		mkr.color = original_marker.color
+		mkr.pose.position = point
+		mkr.pose.orientation = orientation
+		mkr.scale = Vector3(original_marker.scale.x, original_marker.scale.y, 0.01)
+		mkr.type = 0 #arrow
+		mkr.action = Marker.ADD
+		mkr.frame_locked = False
+		mkr.lifetime = rospy.Time(0)
+		mkr.id = original_marker.id
+		return mkr
 
 	def __init__(self):
 		costmap_topic = rospy.get_param('~costmap_topic', '/move_base/global_costmap/costmap')
