@@ -13,6 +13,7 @@ from scipy.io.matlab.mio import loadmat
 from scipy.misc import imresize
 from scipy.spatial import distance
 import glob
+from std_msgs.msg import String
 
 class FaceRecognizer():
 
@@ -42,7 +43,8 @@ class FaceRecognizer():
 					if dist<mi:
 						mind = i
 						mi = dist
-				print self.osebe[mind]
+				#print self.osebe[mind]
+				self.person_topic.publish(String(self.osebe[mind]))
 
 		except CvBridgeError, e:
 			print e
@@ -53,8 +55,10 @@ class FaceRecognizer():
 		self.bridge = CvBridge()
 
 		image_topic = rospy.get_param('~image_topic', '/camera/rgb/image_color')
-		camera_topic = rospy.get_param('~camera_topic', '/camera/rgb/camera_info')		
+		camera_topic = rospy.get_param('~camera_topic', '/camera/rgb/camera_info')
 		faces_topic = rospy.get_param('~faces_topic', '/facedetector/faces')
+
+		self.person_topic = rospy.Publisher('/recognizer', String, queue_size=10)
 
 		
 		self.faces_sub = message_filters.Subscriber(faces_topic, Detection)
@@ -76,7 +80,6 @@ class FaceRecognizer():
 
 # Main function.    
 if __name__ == '__main__':
-
 		print "Starting.."
 		rospy.init_node('image_saver')
 		try:

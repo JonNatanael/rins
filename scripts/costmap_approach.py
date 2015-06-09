@@ -1,6 +1,7 @@
 #!/usr/bin/env python
 import roslib
 import rospy, math
+from math import sin, cos
 import numpy as np
 import sys, select, termios, tty
 from std_msgs.msg import String, Bool, ColorRGBA
@@ -10,7 +11,7 @@ import cv2, cv
 from cv_bridge import CvBridge, CvBridgeError
 from localizer.srv import Localize
 from visualization_msgs.msg import Marker, MarkerArray
-from geometry_msgs.msg import Point, Vector3, PointStamped
+from geometry_msgs.msg import Point, Vector3, PointStamped, Quaternion
 from nav_msgs.msg import OccupancyGrid
 from map_msgs.msg import OccupancyGridUpdate
 from tf import TransformListener
@@ -45,6 +46,7 @@ class CostmapApproach():
 		#cv_image = (255-cv_image)
 
 		self.base_costmap = cv_image
+		self.costmap = cv_image
 		#print costmap.data
 		#print np_arr
 		#cv2.imshow("Initial costmap", cv_image)
@@ -76,17 +78,19 @@ class CostmapApproach():
 
 	def clicked_callback(self, stamped_point):
 		point = self.point_on_map(stamped_point.point)
-		print "Pixel added to Points", point.x, point.y
+		print "Pixel added to Points", point[0], point[1]
 		
-		self.locations.append([x , y])
+		self.locations.append([point[0], point[1]])
 		self.refresh_costmap()
 
 	def cylinders_callback(self, marker_array):
 		self.cy_app = marker_array
+		print "Newly added cylinder to database"
 		self.refresh_costmap()
 
 	def faces_callback(self, marker_array):
 		self.f_app = marker_array
+		print "Newly added face to database"
 		self.refresh_costmap()
 
 	def point_on_map(self, point):
@@ -106,8 +110,8 @@ class CostmapApproach():
 
 	def quaternion_to_look_from_to(self, from_point, to_point):
 		delta_x = to_point.x - from_point.x
-		delta_y = -( to_point.y - from_point.y ) #y je obrnjen
-		theta = np.arctan( delta_y/delta_x )
+		delta_y = to_point.y - from_point.y
+		theta = np.arctan( delta_x/delta_y )
 		return Quaternion(0, 0, sin(theta), cos(theta))
 
 		
@@ -135,11 +139,14 @@ class CostmapApproach():
 
 	def refresh_costmap(self):
 
-		color_img = cv2.cvtColor(self.costmap, cv.CV_GRAY2RGB)
+		#color_img = cv2.cvtColor(self.costmap, cv.CV_GRAY2RGB)
+		color_img = np.copy(self.costmap)
 		max_scan_size = 10
+		scansize = 5
+
 
 		for x in self.locations: #clicked points
-			cv2.circle(color_img, (x[0], x[1]), max_scan_size, (150,150,150))
+			cv2.circle(color_img, (x[0], x[1]), max_scan_size, 150)
 			
 			appc = []
 			scansize = 1
@@ -148,67 +155,86 @@ class CostmapApproach():
 				scansize+=1
 
 			if len(appc) > 0:
-				cv2.circle(color_img, (appc[1], appc[0]), 1, (0,255,0), 2)
+				cv2.circle(color_img, (appc[1], appc[0]), 1, 200, 2)
 		
-
-		faces_MA = MarkerArray()
-		for f in self.f_app.markers: #face approach markers
-
-			point = self.point_on_map(f.pose.position)
-			#marker.pose.position = point
-			#self.f_app.markers.append(marker)
-			#print "Face added to Points", point.x, point.y
-			cv2.circle(color_img, (point.x, point.y), max_scan_size, f.color / 2)
-			
-			appc = []
-			scansize = 1
-			while (len(appc) == 0) and scansize < max_scan_size:
-				appc = self.calculate_approach_xy(point[0], point[1], scansize)
-				scansize+=1
-
-			if len(appc) > 0:
-				cv2.circle(color_img, (appc[1], appc[0]), 1, f.color, 2)
-
-				point = self.point_in_world(appc)
-				orientation = self.quaternion_to_look_from_to(f.pose.position, point)
+		if self.f_app:
+			faces_MA = MarkerArray()
+			for f in self.f_app.markers: #face approach markers
+				point = self.point_on_map(f.pose.position)
+				#marker.pose.position = point
+				#self.f_app.markers.append(marker)
+				#print "Face added to Points", point.x, point.y
+				cv2.circle(color_img, (point[0], point[1]), max_scan_size, 150)
 				
-				f.pose.position = point
-				f.pose.orientation = orientation
-				f.scale = Vector3(marker.scale.x, marker.scale.y, 0)
-				f.type = 0 #arrow
-				faces_MA.markers.append(f)
-		if len(faces_MA.markers) > 0:
-			self.app_faces_pub.publish(faces_MA)
+				appc = []
+				while (len(appc) == 0) and scansize < max_scan_size:
+					appc = self.calculate_approach_xy(point[0], point[1], scansize)
+					scansize+=1
 
+				if len(appc) > 0:
+					cv2.circle(color_img, (appc[1], appc[0]), 1, 200, 2)
 
-		cylinders_MA = MarkerArray()
-		for cy in self.cy_app.markers: #face approach markers
+					point = self.point_in_world(appc)
+					orientation = self.quaternion_to_look_from_to(f.pose.position, point)
+					
+					mkr = Marker()
+					mkr.header.seq = f.header.seq
+					mkr.header.stamp = rospy.Time.now()
+					mkr.header.frame_id = 'map'
+					mkr.color = f.color
+					mkr.pose.position = point
+					mkr.pose.orientation = orientation
+					mkr.scale = Vector3(f.scale.x, f.scale.y, 0.01)
+					mkr.type = 0 #arrow
+					mkr.action = Marker.ADD
+					mkr.frame_locked = False
+					mkr.lifetime = rospy.Time(0)
+					mkr.id = f.id
 
-			point = self.point_on_map(cy.pose.position)
-			#marker.pose.position = point
-			#self.f_app.markers.append(marker)
-			#print "Face added to Points", point.x, point.y
-			cv2.circle(color_img, (point.x, point.y), max_scan_size, cy.color / 2)
-			
-			appc = []
-			scansize = 1
-			while (len(appc) == 0) and scansize < max_scan_size:
-				appc = self.calculate_approach_xy(point[0], point[1], scansize)
-				scansize+=1
+					faces_MA.markers.append(f)
+			if len(faces_MA.markers) > 0:
+				self.app_faces_pub.publish(faces_MA)
 
-			if len(appc) > 0:
-				cv2.circle(color_img, (appc[1], appc[0]), 1, f.color, 2)
+		if self.cy_app:
+			cylinders_MA = MarkerArray()
+			for cy in self.cy_app.markers: #face approach markers
 
-				point = self.point_in_world(appc)
-				orientation = self.quaternion_to_look_from_to(cy.pose.position, point)
+				point = self.point_on_map(cy.pose.position)
+				#marker.pose.position = point
+				#self.f_app.markers.append(marker)
+				#print "Face added to Points", point.x, point.y
+				cv2.circle(color_img, (point[0], point[1]), max_scan_size, 150 )
 				
-				cy.pose.position = point
-				cy.pose.orientation = orientation
-				cy.scale = Vector3(marker.scale.x, marker.scale.y, 0)
-				cy.type = 0 #arrow
-				cylinders_MA.markers.append(cy)
-		if len(cylinders_MA.markers) > 0:
-			self.app_faces_pub.publish(cylinders_MA)
+				appc = []
+				while (len(appc) == 0) and scansize < max_scan_size:
+					appc = self.calculate_approach_xy(point[0], point[1], scansize)
+					scansize+=1
+
+				if len(appc) > 0:
+					print "Found Approach"
+					cv2.circle(color_img, (appc[1], appc[0]), 1, 200, 2)
+
+					point = self.point_in_world([appc[1], appc[0]])
+					orientation = self.quaternion_to_look_from_to(cy.pose.position, point)
+					
+					mkr = Marker()
+					mkr.header.seq = cy.header.seq
+					mkr.header.stamp = rospy.Time.now()
+					mkr.header.frame_id = 'map'
+					mkr.color = cy.color
+					mkr.pose.position = point
+					mkr.pose.orientation = orientation
+					mkr.scale = Vector3(cy.scale.x, cy.scale.y, 0.01)
+					mkr.type = 0 #arrow
+					mkr.action = Marker.ADD
+					mkr.frame_locked = False
+					mkr.lifetime = rospy.Time(0)
+					mkr.id = cy.id
+
+					cylinders_MA.markers.append(mkr)
+
+			if len(cylinders_MA.markers) > 0:
+				self.app_cy_pub.publish(cylinders_MA)
 
 		cv2.imshow("Enhanced costmap", color_img)
 		cv2.waitKey(3)
@@ -230,10 +256,10 @@ class CostmapApproach():
 		clicked_topic = rospy.get_param('~clicked_topic', '/clicked_point')
 		self.clicked_sub = rospy.Subscriber(clicked_topic, PointStamped, self.clicked_callback)
 
-		cylinders_topic = rospy.get_param('~cylinders_topic', 'cylinder_detector/markers')
+		cylinders_topic = rospy.get_param('~cylinders_topic', 'cyllinderdetector/markers')
 		self.cylinders_sub = rospy.Subscriber(cylinders_topic, MarkerArray, self.cylinders_callback)
 
-		faces_topic = rospy.get_param('~faces_topic', 'faces_detector/markers')
+		faces_topic = rospy.get_param('~faces_topic', 'facemapper/markers')
 		self.faces_sub = rospy.Subscriber(faces_topic, MarkerArray, self.faces_callback)
 
 		#data output
@@ -253,7 +279,7 @@ class CostmapApproach():
 # Main function.    
 if __name__ == '__main__':
 
-		rospy.init_node('cyllinderdetector')
+		rospy.init_node('approach')
 		try:
 			fd = CostmapApproach()
 			rospy.spin()	

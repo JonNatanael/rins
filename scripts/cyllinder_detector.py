@@ -112,11 +112,12 @@ class CyllinderDetector():
 					mkr.type = Marker.CYLINDER
 					self.all_cyllinders.markers.append(mkr)
 				#self.all_cyllinders.markers += self.markers_by_color[x] #add whole color to all_cyllinders
+				
+			if self.all_cyllinders:
+				self.markers_pub.publish(self.all_cyllinders)
 
 		cv2.imshow("Image window", cv_image)
 		cv2.waitKey(3)
-		if self.all_cyllinders:
-			self.markers_pub.publish(self.all_cyllinders)
 
 		self.message_counter = self.message_counter + 1
 
@@ -220,15 +221,13 @@ class CyllinderDetector():
 				return False
 
 			#print p.point
-			#print self.mappixelOfPoint(p.point)
-			if self.mappixelOfPoint(p.point) > 0: #playfield is absolutely white
+			if self.mappixelOfPoint(p.point) < 255 : #playfield is absolutely white
 				return False
 
 			return True
 
 		except Exception as ex:
-			print "ERROR in pointIsInsideMap"
-			print ex
+			print "ERROR in pointIsInsideMap", ex
 			return False
 
 	def mappixelOfPoint(self,point):
@@ -240,7 +239,8 @@ class CyllinderDetector():
 		img = np.copy(self.bloated_map)
 		cv2.circle(img, (x,y), 1, 150, 2)
 		cv2.imshow("Bloated map", img)
-		return self.bloated_map[x][y]
+		#print self.bloated_map[y][x]
+		return self.bloated_map[y][x]
 
 	def centerOfProminentCluster(self, clusters):
 		#find biggest cluster

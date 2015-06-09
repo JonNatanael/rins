@@ -10,6 +10,7 @@ Panels:
         - /LaserScan1
         - /RobotModel1
         - /MarkerArray1
+        - /MarkerArray2
       Splitter Ratio: 0.5
     Tree Height: 368
   - Class: rviz/Selection
@@ -297,7 +298,15 @@ Visualization Manager:
       Visual Enabled: true
     - Class: rviz/MarkerArray
       Enabled: true
-      Marker Topic: /faces/markers
+      Marker Topic: /cyllinderdetector/markers
+      Name: MarkerArray
+      Namespaces:
+        "": true
+      Queue Size: 100
+      Value: true
+    - Class: rviz/MarkerArray
+      Enabled: true
+      Marker Topic: /approach/cylinders
       Name: MarkerArray
       Namespaces:
         "": true
@@ -327,22 +336,22 @@ Visualization Manager:
   Views:
     Current:
       Class: rviz/Orbit
-      Distance: 6.68031
+      Distance: 7.04111
       Enable Stereo Rendering:
         Stereo Eye Separation: 0.06
         Stereo Focal Distance: 1
         Swap Stereo Eyes: false
         Value: false
       Focal Point:
-        X: 0
-        Y: 0
-        Z: 0
+        X: 1.72444
+        Y: -0.117059
+        Z: -0.337805
       Name: Current View
       Near Clip Distance: 0.01
-      Pitch: 1.4848
+      Pitch: 1.5698
       Target Frame: <Fixed Frame>
       Value: Orbit (rviz)
-      Yaw: 0.3604
+      Yaw: 4.72357
     Saved: ~
 Window Geometry:
   Displays:
@@ -360,5 +369,5 @@ Window Geometry:
   Views:
     collapsed: false
   Width: 1212
-  X: 368
-  Y: 14
+  X: 366
+  Y: 22

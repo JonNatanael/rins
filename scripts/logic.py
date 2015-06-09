@@ -2,11 +2,11 @@
 
 import sys
 import rospy
-#from sound_play.msg import SoundRequest
-#from sound_play.libsoundplay import SoundClient
+from sound_play.msg import SoundRequest
+from sound_play.libsoundplay import SoundClient
 
 # values should be changed to actual locations, maybe?
-obj_clr = {'blue':0, 'red':1, 'yellow':2, 'green':3}
+obj_clr = {'red': 0, 'green':1, 'yellow': 2, 'blue':3}
 
 # temporary answers for testing
 osebe = ['kim', 'harry', 'ellen']
@@ -20,9 +20,9 @@ def say(string):
     rospy.sleep(1)
 
 if __name__ == '__main__':
-    #rospy.init_node('say', anonymous = True)
-    #soundhandle = SoundClient()
-    #rospy.sleep(1)
+    rospy.init_node('say', anonymous = True)
+    soundhandle = SoundClient()
+    rospy.sleep(1)
 
     global voice
     voice = 'voice_kal_diphone'
@@ -30,9 +30,7 @@ if __name__ == '__main__':
     for i in xrange(len(osebe)):
         know[i][0] = osebe[i]
 
-    idx = 0    
-
-    # TODO get
+    idx = 0
 
     for person in osebe:
         # TODO move to person's location
@@ -82,13 +80,14 @@ if __name__ == '__main__':
         #say('This is your object, right?')
         print 'Please remove object'
         #say('Please remove object')
+        #raw_input('Press enter when done removing object:\n')
         print
         idx+=1
     print
 
     print 'My final knowledge of the world:'
     for line in know:
-        print line
+        print line[0].title() + ' hid the ' + line[2] + ' under the ' + line[1] + ' cylinder' 
 
 
 
