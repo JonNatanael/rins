@@ -353,22 +353,12 @@ class CyllinderDetector():
 		#std_msgs/Header header
 		#nav_msgs/MapMetaData info
 		#int8[] data
-
 		self.map_metadata = grid.info
-		print self.map_metadata
 		#time map_load_time
 		#float32 resolution
 		#uint32 width
 		#uint32 height
 		#geometry_msgs/Pose origin
-
-		#np_arr = []
-		#for x in costmap.data:
-		#	if x < 0:
-		#		np_arr.append(0)
-		#	else:
-		#		np_arr.append(x)
-
 		np_arr = np.reshape(grid.data, (grid.info.height, grid.info.width))
 		cv_image = np.asarray(np_arr, np.uint8)
 		cv_image = cv2.flip(cv_image,0)

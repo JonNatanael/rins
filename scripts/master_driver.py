@@ -33,11 +33,17 @@ class master_driver():
 				]
 	loc = [
 		Point(0.000, 0.000, 0.000),
-		Point(0.000, 0.000, 0.000),
-		Point(0.000, 0.000, 0.000),
-		Point(0.000, 0.000, 0.000),
-		Point(0.000, 0.000, 0.000),
-		Point(0.000, 0.000, 0.000)
+		Point(1.03675413132, -0.509295165539, 0.0),
+		Point(1.87630188465, -0.331272959709, 0.0),
+		Point(2.83038377762, -0.264413654804, 0.0),
+		Point(1.65771877766,  0.828545689583, 0.0),
+		Point(2.92959189415,  0.880264699459, 0.0),
+		Point(3.99440670013,  0.948163211346, 0.0),
+		Point(4.89326143265,  0.958462297916, 0.0),
+		Point(4.54763841629,  0.054767534136, 0.0),
+		Point(5.1187505722,  -0.801208794117, 0.0),
+		Point(5.48666477203, -1.92177832127,  0.0),
+		Point(5.73681497574, -2.53763198853,  0.0)
 		]
 
 
@@ -92,6 +98,14 @@ class master_driver():
 		for theta in range(0, 360, 60):
 			self.move(Pose(point, Quaternion(0, 0, sin(theta), cos(theta))))
 			rospy.sleep(2)
+
+		#ALTERNATIVE
+		turningTime = 10
+		twist = Twist()
+		twist.angular.z = math.pi/turningTime	#radian/s
+		turning.publish(twist) 		#start rotating
+		rospy.sleep(turningTime)	#rotate
+		turning.publish(Twist())	#stop
 
 		# for twCounter in range(1, 10):
 		#	 twist = Twist()

@@ -111,8 +111,11 @@ class CostmapApproach():
 	def quaternion_to_look_from_to(self, from_point, to_point):
 		delta_x = to_point.x - from_point.x
 		delta_y = to_point.y - from_point.y
-		theta = np.arctan( delta_x/delta_y )
-		return Quaternion(0, 0, sin(theta), cos(theta))
+		theta = np.arctan( delta_y/delta_x )
+		if delta_x > 0:
+			theta += math.pi
+		print theta
+		return Quaternion(0, 0, sin(theta/2), cos(theta/2))
 
 		
 	def calculate_approach_xy(self, x, y, diameter):
@@ -121,9 +124,10 @@ class CostmapApproach():
 		points = np.transpose(np.where(scan==255)) #we get array of coordinates where the circle is
 												  #in a [y, x] manner
 		min_coord = []
-		min_value = 50	#map value treshold, what is acceptable
+		min_value = 60	#map value treshold, what is acceptable
 					#127 is definitely not in collision, as per http://wiki.ros.org/costmap_2d
 					#we could scale the color balance graph of the image or just scale 0-255 on 0-100
+					#OR JUST FIND A DECENT NUMBER, LIVE DANGEROUSLY
 		for coord in points:
 			cur_value = self.costmap[coord[0]][coord[1]] #costmap value of one of the points on the circle
 			if (cur_value < min_value):
