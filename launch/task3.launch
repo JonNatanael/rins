@@ -37,4 +37,8 @@
   <!-- Map server -->
   <node name="map_server" pkg="map_server" type="map_server" args="$(find rins)/map/newmap.yaml"/>
 
+  <!-- Speech sythnesis -->
+  <!--rosrun sound_play soundplay_node.py-->
+  <node name="soundplay_node" pkg="sound_play" type="soundplay_node.py" />
+
 </launch>

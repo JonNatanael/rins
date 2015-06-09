@@ -64,11 +64,11 @@ class FaceRecognizer():
 		self.joined_sub.registerCallback(self.image_callback)
 
 		# loads matlab matrices
-		self.U = loadmat('../recog/u.mat');self.U = self.U['U']
-		self.V = loadmat('../recog/v.mat');self.V = self.V['V']
-		self.Ms = loadmat('../recog/ms.mat');self.Ms = self.Ms['Ms']
-		self.Mu = loadmat('../recog/mu.mat');self.Mu = self.Mu['Mu']
-		self.MM = loadmat('../recog/mm.mat');self.MM = self.MM['MM']
+		self.U = loadmat('/home/team_beta/ROS/src/rins/recog/u.mat');self.U = self.U['U']
+		self.V = loadmat('/home/team_beta/ROS/src/rins/recog/v.mat');self.V = self.V['V']
+		self.Ms = loadmat('/home/team_beta/ROS/src/rins/recog/ms.mat');self.Ms = self.Ms['Ms']
+		self.Mu = loadmat('/home/team_beta/ROS/src/rins/recog/mu.mat');self.Mu = self.Mu['Mu']
+		self.MM = loadmat('/home/team_beta/ROS/src/rins/recog/mm.mat');self.MM = self.MM['MM']
 
 		self.osebe = {0:'harry', 1:'ellen',2:'kim',3:'matt',4:'filip',5:'scarlett',6:'tina',7:'prevc'}
 
