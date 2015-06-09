@@ -21,7 +21,7 @@ from tf.transformations import euler_from_quaternion
 class FaceMapper():
 
     def faces_callback(self, faces, camera):
-        #print "faces"
+        #print faces
 
         camera_model = PinholeCameraModel()
         camera_model.fromCameraInfo(camera)
@@ -32,6 +32,7 @@ class FaceMapper():
         clusteringResults = PoseArray(Header(),[])
 
         for i in xrange(0, n):
+            print faces.x[i]
             u = faces.x[i] + faces.width[i] / 2
             v = faces.y[i] + faces.height[i] / 2
             # TODO limit detections on y coordinate
@@ -65,16 +66,15 @@ class FaceMapper():
                 p = PointStamped()
 
                 try:
-                    listener = TransformListener()
-                    listener.waitForTransform("/map", "/camera_rgb_optical_frame", rospy.Time(0), rospy.Duration(2.0))
-                    (trans, rot) = listener.lookupTransform('/map', '/camera_rgb_optical_frame', rospy.Time(0))
+                    
+                    (trans, rot) = self.listener.lookupTransform('/map', '/camera_rgb_optical_frame', rospy.Time(0))
                     #(trans, rot) = listener.lookupTransform('/map', '/camera_rgb_optical_frame', faces.header.stamp)
                     ps = PointStamped()
                     ps.header.stamp = rospy.Time()
                     ps.header.frame_id = faces.header.frame_id
                     ps.point = marker.pose.position
                     #t = TransformerROS()
-                    p = listener.transformPoint('/map', ps)
+                    p = self.listener.transformPoint('/map', ps)
                     #print p
                     #print trans,rot
 
@@ -94,7 +94,7 @@ class FaceMapper():
                             in_range = False
                             for j in xrange(0,len(self.faces_list)):
                                 #if dist(self.faces_list[j].pose.position.x,self.faces_list[j].pose.position.y,resp.pose.position.x,resp.pose.position.y) < self.dist_limit:
-                                if dist(self.faces_locs.poses[j].position.x, self.faces_locs.poses[j].position.y, x1, y1) < self.dist_limit:
+                                if self.dist(self.faces_locs.poses[j].position.x, self.faces_locs.poses[j].position.y, x1, y1) < self.dist_limit:
                                     in_range = True
                             if not in_range:	
                                 if marker.pose.position.z > 0:
@@ -102,24 +102,24 @@ class FaceMapper():
                                   pose = Pose(Point(x1, y1, 0.66), Quaternion(0, 0, 1, 0))
                                   self.faces_locs.poses.append(pose)
                                   #self.app_points.markers.append(self.createMarker(pose, faces.header))
-                                  pose = self.calculateApproach(self.faces_locs.poses[len(self.faces_locs.poses)-1],x1,y1)
-                                  if pose is not None:
-                                    self.app_points.markers.append(self.createMarker(pose, faces.header))
+                                  #pose = self.calculateApproach(self.faces_locs.poses[len(self.faces_locs.poses)-1],x1,y1)
+                                  #if pose is not None:
+                                    #self.app_points.markers.append(self.createMarker(pose, faces.header))
                         else:
                             if marker.pose.position.z > 0:
                                 self.faces_list.append(marker)
                                 pose = Pose(Point(x1, y1, 0.66), Quaternion(0, 0, 1, 0))
                                 self.faces_locs.poses.append(pose)
-                                pose = self.calculateApproach(self.faces_locs.poses[len(self.faces_locs.poses)-1],x1,y1)
-                                if pose is not None:
-                                    self.app_points.markers.append(self.createMarker(pose, faces.header))
+                                #pose = self.calculateApproach(self.faces_locs.poses[len(self.faces_locs.poses)-1],x1,y1)
+                                #if pose is not None:
+                                    #self.app_points.markers.append(self.createMarker(pose, faces.header))
 
                     if abs(resp.pose.position.y) < self.height_limit:
                         pose = Pose(Point(x1, y1, 0.66), Quaternion(0, 0, 1, 0))
                         self.allDetected.poses.append(pose)
                 
                 except Exception as ex:
-                    print "e"
+                    print "exception"
                     print ex
 
         #add all previously detected faces
@@ -128,23 +128,19 @@ class FaceMapper():
             #print face
 
         print len(self.faces_list)
-        #print markers
 
         clusteringResults = PoseArray(Header(),[])
         clusteringResults.header.frame_id = 'map'
-        for (xCluster, yCluster) in makeFaceClusters(self, self.allDetected):
+        for (xCluster, yCluster) in self.makeFaceClusters(self.allDetected):
             clusteringResults.poses.append(Pose(Point(xCluster, yCluster, 0.50), Quaternion(0, 0, 1, 0)))
 
         self.markers_pub.publish(markers)
         self.locations_pub.publish(clusteringResults)
 
-        self.approach_point_pub.publish(self.app_points)
-
 
     def createMarker(self,pose,header):
     	mrkr = Marker()
         mrkr.header.stamp = header.stamp
-        #mrkr.header.frame_id = header.frame_id
         mrkr.header.frame_id = 'map'
         mrkr.pose = pose
         mrkr.type = Marker.CUBE
@@ -155,44 +151,8 @@ class FaceMapper():
         mrkr.scale = Vector3(0.1, 0.1, 0.1)
         mrkr.color = ColorRGBA(0, 1, 0, 1)
         return mrkr
-
-    def calculateApproach(self,faceIndex,x1,y1):
-        try:
-            listener = TransformListener()
-            listener.waitForTransform("/map", "/base_link", rospy.Time(), rospy.Duration(4.0))
-            #if listener.canTransform("/map", "/base_link",rospy.Time()):
-            #time = listener.getLatestCommonTime("/map", "/base_link")
-            (trans, rot) = listener.lookupTransform('/map', '/base_link', rospy.Time())
-
-            dist = 0.35 # distance from face
-            x2 = trans[0]
-            y2 = trans[1]
-            if (abs((x2 - x1)**2 + (y2 - y1)**2) < dist):
-                x3 = x2
-                y3 = y2
-            else:
-                m = abs((y2-y1)/(x2-x1)) # slope
-                offsetX = dist * 1/sqrt(1 + m**2)
-                offsetY = dist * m/sqrt(1 + m**2)
-                if (x2 > x1):
-                    x3 = x1 + offsetX
-                else:
-                    x3 = x1 - offsetX
-                if (y2 > y1):
-                    y3 = y1 + offsetY
-                else:
-                    y3 = y1 - offsetY
-
-            m = (trans[1]-y1)/(trans[0]-x1) # slope
-            theta = atan(m)
-            return Pose(Point(x3, y3, 0.000), Quaternion(0.000, 0.000, sin(theta/2), cos(theta/2)))
-        except Exception as ex:
-            print "Failed to calculate approach position"
-            print ex
-        return None
-
     
-    def dist(x1,y1,x2,y2):
+    def dist(self,x1,y1,x2,y2):
         return sqrt((x1-x2)*(x1-x2)+(y1-y2)*(y1-y2))
 
     def makeFaceClusters(self, hits):
@@ -206,6 +166,7 @@ class FaceMapper():
         #find all contenders. raw is a list of tuples: cluster(x_center, y_center, max_distance_from_center)
         raw = []
         for marker in hits.poses:
+            print marker
 
             #sorted_by_dist = sorted(hits, key=self.dist(hits.))
             points_in_range = 0
@@ -218,7 +179,7 @@ class FaceMapper():
                     continue
 
                 #get the distance from the center point
-                dst = dist(marker.position.x, marker.position.y, contender.position.x, contender.position.y)
+                dst = self.dist(marker.position.x, marker.position.y, contender.position.x, contender.position.y)
                 if dst < spread: #if it's inside the spread add to the cluster size counter 
                     points_in_range += 1
                     points_cluster_xy.append((contender.position.x, contender.position.y))
@@ -232,16 +193,16 @@ class FaceMapper():
 
         clusters = []
         if len(sorted_raw) > 0:
-            adjustedFace = clusterCenter(sorted_raw[0][3])
+            adjustedFace = self.clusterCenter(sorted_raw[0][3])
             clusters.append(adjustedFace) #the tightest one if we have one can automatically be added
 
         for i in xrange(1, len(sorted_raw)):        
-            adjustedFace = clusterCenter(sorted_raw[i][3])
+            adjustedFace = self.clusterCenter(sorted_raw[i][3])
 
             #for each contending cluster check if there isn't one (tighter, better) added to the list withun its range 
             below_thresh = False
             for appoved_cluster in clusters:
-                dst = dist(appoved_cluster[0], appoved_cluster[1], adjustedFace[0], adjustedFace[1])
+                dst = self.dist(appoved_cluster[0], appoved_cluster[1], adjustedFace[0], adjustedFace[1])
 
                 if dst < threshold: 
                     below_thresh=True
@@ -251,7 +212,7 @@ class FaceMapper():
 
         return clusters #returns a list of tuples: tup(cluster_center.x, cluster_center.y)
 
-    def clusterCenter(points_cluster_xy):
+    def clusterCenter(self, points_cluster_xy):
         centerX = 0.0
         centerY = 0.0
         for (newX, newY) in points_cluster_xy:
@@ -260,16 +221,19 @@ class FaceMapper():
         centerX /= len(points_cluster_xy)
         centerY /= len(points_cluster_xy)
     
-    return (centerX, centerY)
+        return (centerX, centerY)
 
     def __init__(self):
+        self.listener = TransformListener()
+        self.listener.waitForTransform("/map", "/camera_rgb_optical_frame", rospy.Time(0), rospy.Duration(2.0))
+
         region_scope = rospy.get_param('~region', 3)
         markers_topic = rospy.get_param('~markers_topic', rospy.resolve_name('%s/markers' % rospy.get_name()))
         locations_topic = rospy.get_param('~locations_topic', rospy.resolve_name('%s/locations' % rospy.get_name()))
         approach_point_topic = rospy.get_param('~approach_point_pub', rospy.resolve_name('%s/approach_points' % rospy.get_name()))
 
         faces_topic = rospy.get_param('~faces_topic', '/facedetector/faces')
-        camera_topic = rospy.get_param('~camera_topic', '/camera/camera_info')      
+        camera_topic = rospy.get_param('~camera_topic', '/camera/rgb/camera_info')      
 
         rospy.wait_for_service('localizer/localize')
 
@@ -280,40 +244,25 @@ class FaceMapper():
 
         self.localize = rospy.ServiceProxy('localizer/localize', Localize)
 
-        self.markers_pub = rospy.Publisher(markers_topic, MarkerArray)
+        self.markers_pub = rospy.Publisher(markers_topic, MarkerArray, queue_size=10)
         self.markers_pub.publish([])
 
-        self.locations_pub = rospy.Publisher(locations_topic, PoseArray)
+        self.locations_pub = rospy.Publisher(locations_topic, PoseArray, queue_size=10)
         self.locations_pub.publish(Header(), [])
 
-        self.approach_point_pub = rospy.Publisher(approach_point_topic, MarkerArray)
-        self.approach_point_pub.publish([])
-
         self.message_counter = 0
-
-        self.app_points = MarkerArray()
 
         self.faces_list = []
         self.faces_locs = PoseArray(Header(),[])
         self.allDetected = PoseArray(Header(),[])
-        self.dist_limit = 2
+        self.dist_limit = .5
         self.height_limit = 0.2
-
-        # init transform listener
-        #self.listener = TransformListener()
-        #self.listener.waitForTransform("/map", "/odom", rospy.Time(), rospy.Duration(10.0))
-        #(trans,rot)=self.listener.lookupTransform('/map', '/odom', rospy.Time(0))
-        #print trans,rot
-        #rospy.sleep(2.0)
 
 # Main function.    
 if __name__ == '__main__':
 
     rospy.init_node('facemapper')
     try:
-        print "here"
-        #listener = TransformListener()
-        #listener.waitForTransform("/map", "/camera_rgb_optical_frame", rospy.Time(), rospy.Duration(10.0))
     	fd = FaceMapper()
         rospy.spin()    
     except rospy.ROSInterruptException: pass
