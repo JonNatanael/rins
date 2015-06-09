@@ -69,8 +69,6 @@ class CyllinderDetector():
 		
 		i=0
 
-		markers = MarkerArray()
-
 		for (lower, upper) in self.boundaries: #parse all colors
 			
 			#Find contours of each color
@@ -80,8 +78,6 @@ class CyllinderDetector():
 				
 				marker = self.markerFromCoutourEllipse(ellipse, i, image, camera_model)
 				if marker:
-					#self.all_cyllinders.markers.append(mkr)
-
 					if len(self.markers_by_color[i]) > 3000: #lets not clog the memory and burden the clusterer shall we
 						del self.markers_by_color[i][0:100]  #purge old markers
 					self.markers_by_color[i].append(marker)
@@ -108,6 +104,7 @@ class CyllinderDetector():
 					#print center
 				if len(center) > 0:
 					mkr = self.markers_by_color[x][0] #take random properly colored marker
+					mkr.id = x #we give it the ID of its color IDX
 					mkr.pose.position.x = center[0]
 					mkr.pose.position.y = center[1]
 					mkr.pose.position.z = 0.2

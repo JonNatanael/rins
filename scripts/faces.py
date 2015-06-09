@@ -114,7 +114,6 @@ class FaceMapper():
                                 if pose is not None:
                                     self.app_points.markers.append(self.createMarker(pose, faces.header))
 
-                    # CLUSTERING
                     if abs(resp.pose.position.y) < self.height_limit:
                         pose = Pose(Point(x1, y1, 0.66), Quaternion(0, 0, 1, 0))
                         self.allDetected.poses.append(pose)
@@ -141,7 +140,6 @@ class FaceMapper():
 
         self.approach_point_pub.publish(self.app_points)
 
-        self.message_counter = self.message_counter + 1
 
     def createMarker(self,pose,header):
     	mrkr = Marker()
@@ -189,9 +187,80 @@ class FaceMapper():
             theta = atan(m)
             return Pose(Point(x3, y3, 0.000), Quaternion(0.000, 0.000, sin(theta/2), cos(theta/2)))
         except Exception as ex:
-            print "fail"
+            print "Failed to calculate approach position"
             print ex
         return None
+
+    
+    def dist(x1,y1,x2,y2):
+        return sqrt((x1-x2)*(x1-x2)+(y1-y2)*(y1-y2))
+
+    def makeFaceClusters(self, hits):
+        # spremenjena verzija, bo mogoce boljsi preformance
+        # zdaj prejmo PoseArray, ne MarkerArray
+
+        num_closest = 5 #how many must be in the desired range to be consisered a cluster
+        spread = 0.5 #how small must the cluster be
+        threshold = 1 #how close can clusters be one another
+
+        #find all contenders. raw is a list of tuples: cluster(x_center, y_center, max_distance_from_center)
+        raw = []
+        for marker in hits.poses:
+
+            #sorted_by_dist = sorted(hits, key=self.dist(hits.))
+            points_in_range = 0
+            max_dist = 0
+            points_cluster_xy = []
+
+            for contender in hits.poses: #O(n^2), yay!
+
+                if contender == marker: #if it's our center ignore it
+                    continue
+
+                #get the distance from the center point
+                dst = dist(marker.position.x, marker.position.y, contender.position.x, contender.position.y)
+                if dst < spread: #if it's inside the spread add to the cluster size counter 
+                    points_in_range += 1
+                    points_cluster_xy.append((contender.position.x, contender.position.y))
+
+            if points_in_range > num_closest: #if we had enough nearby points to consider this a cluster
+                raw.append((marker.position.x, marker.position.y, points_in_range, points_cluster_xy)) #add our initial center and number of points in cloud
+
+        #we should now have a list of all cluster centers stored in raw[]
+        #we need to define our logic for what the best clusters are. In this instance I assume the tightest one as in lowest max_dist
+        sorted_raw = sorted(raw, key=lambda tup: tup[2])
+
+        clusters = []
+        if len(sorted_raw) > 0:
+            adjustedFace = clusterCenter(sorted_raw[0][3])
+            clusters.append(adjustedFace) #the tightest one if we have one can automatically be added
+
+        for i in xrange(1, len(sorted_raw)):        
+            adjustedFace = clusterCenter(sorted_raw[i][3])
+
+            #for each contending cluster check if there isn't one (tighter, better) added to the list withun its range 
+            below_thresh = False
+            for appoved_cluster in clusters:
+                dst = dist(appoved_cluster[0], appoved_cluster[1], adjustedFace[0], adjustedFace[1])
+
+                if dst < threshold: 
+                    below_thresh=True
+
+            if not below_thresh:
+                clusters.append(adjustedFace)
+
+        return clusters #returns a list of tuples: tup(cluster_center.x, cluster_center.y)
+
+    def clusterCenter(points_cluster_xy):
+        centerX = 0.0
+        centerY = 0.0
+        for (newX, newY) in points_cluster_xy:
+            centerX += newX
+            centerY += newY
+        centerX /= len(points_cluster_xy)
+        centerY /= len(points_cluster_xy)
+    
+    return (centerX, centerY)
 
     def __init__(self):
         region_scope = rospy.get_param('~region', 3)
@@ -236,76 +305,6 @@ class FaceMapper():
         #(trans,rot)=self.listener.lookupTransform('/map', '/odom', rospy.Time(0))
         #print trans,rot
         #rospy.sleep(2.0)
-
-def dist(x1,y1,x2,y2):
-    return sqrt((x1-x2)*(x1-x2)+(y1-y2)*(y1-y2))
-
-def makeFaceClusters(self, hits):
-    # spremenjena verzija, bo mogoce boljsi preformance
-    # zdaj prejmo PoseArray, ne MarkerArray
-
-    num_closest = 5 #how many must be in the desired range to be consisered a cluster
-    spread = 0.5 #how small must the cluster be
-    threshold = 0.8 #how close can clusters be one another
-
-    #find all contenders. raw is a list of tuples: cluster(x_center, y_center, max_distance_from_center)
-    raw = []
-    for marker in hits.poses:
-
-        #sorted_by_dist = sorted(hits, key=self.dist(hits.))
-        points_in_range = 0
-        max_dist = 0
-        points_cluster_xy = []
-
-        for contender in hits.poses: #O(n^2), yay!
-
-            if contender == marker: #if it's our center ignore it
-                continue
-
-            #get the distance from the center point
-            dst = dist(marker.position.x, marker.position.y, contender.position.x, contender.position.y)
-            if dst < spread: #if it's inside the spread add to the cluster size counter 
-                points_in_range += 1
-                points_cluster_xy.append((contender.position.x, contender.position.y))
-
-        if points_in_range > num_closest: #if we had enough nearby points to consider this a cluster
-            raw.append((marker.position.x, marker.position.y, points_in_range, points_cluster_xy)) #add our initial center and number of points in cloud
-
-    #we should now have a list of all cluster centers stored in raw[]
-    #we need to define our logic for what the best clusters are. In this instance I assume the tightest one as in lowest max_dist
-    sorted_raw = sorted(raw, key=lambda tup: tup[2])
-
-    clusters = []
-    if len(sorted_raw) > 0:
-        adjustedFace = clusterCenter(sorted_raw[0][3])
-        clusters.append(adjustedFace) #the tightest one if we have one can automatically be added
-
-    for i in xrange(1, len(sorted_raw)):        
-        adjustedFace = clusterCenter(sorted_raw[i][3])
-
-        #for each contending cluster check if there isn't one (tighter, better) added to the list withun its range 
-        below_thresh = False
-        for appoved_cluster in clusters:
-            dst = dist(appoved_cluster[0], appoved_cluster[1], adjustedFace[0], adjustedFace[1])
-
-            if dst < threshold: 
-                below_thresh=True
-
-        if not below_thresh:
-            clusters.append(adjustedFace)
-
-    return clusters #returns a list of tuples: tup(cluster_center.x, cluster_center.y)
-
-def clusterCenter(points_cluster_xy):
-    centerX = 0.0
-    centerY = 0.0
-    for (newX, newY) in points_cluster_xy:
-        centerX += newX
-        centerY += newY
-    centerX /= len(points_cluster_xy)
-    centerY /= len(points_cluster_xy)
-    
-    return (centerX, centerY)
 
 # Main function.    
 if __name__ == '__main__':
