@@ -22,6 +22,7 @@ find_package(catkin REQUIRED COMPONENTS
   roslib
   sensor_msgs
   std_msgs
+  message_generation
 )
 
 ## Add include directories
@@ -42,6 +43,18 @@ link_directories(
 
 link_libraries(${Boost_LIBRARIES} ${catkin_LIBRARIES} ${PCL_LIBRARIES})
 
+add_message_files(
+  FILES
+  StampedString.msg
+)
+
+catkin_python_setup()
+
+generate_messages(
+  DEPENDENCIES
+  std_msgs
+)
+
 ## Declare the catkin package
 catkin_package(
   LIBRARIES
@@ -56,13 +69,14 @@ catkin_package(
     rospy
     sensor_msgs
     std_msgs
+    message_runtime
   DEPENDS
     Boost
     Eigen
     PCL
 )
 
-catkin_python_setup()
+
 
 add_executable (example src/example.cpp)
 

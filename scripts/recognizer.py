@@ -13,7 +13,8 @@ from scipy.io.matlab.mio import loadmat
 from scipy.misc import imresize
 from scipy.spatial import distance
 import glob
-from std_msgs.msg import String
+from std_msgs.msg import String, Header
+from rins.msg import StampedString
 
 class FaceRecognizer():
 
@@ -26,6 +27,7 @@ class FaceRecognizer():
 		#rosrun map_server map_server map/map.yaml
 		
 		try:
+			names = []
 			for i in xrange(0,len(faces.x)):	
 				im = self.bridge.imgmsg_to_cv2(faces.image[i], "bgr8")
 				im = cv2.cvtColor(im, cv2.COLOR_BGR2GRAY)
@@ -44,7 +46,15 @@ class FaceRecognizer():
 						mind = i
 						mi = dist
 				#print self.osebe[mind]
-				self.person_topic.publish(String(self.osebe[mind]))
+				#self.person_topic.publish(String(self.osebe[mind]))
+				names.append(str(self.osebe[mind]))
+			m = StampedString()
+			m.s = names
+			#print names
+			hdr = faces.header
+			m.header = hdr
+			self.person_topic.publish(m)
+
 
 		except CvBridgeError, e:
 			print e
@@ -58,7 +68,7 @@ class FaceRecognizer():
 		camera_topic = rospy.get_param('~camera_topic', '/camera/rgb/camera_info')
 		faces_topic = rospy.get_param('~faces_topic', '/facedetector/faces')
 
-		self.person_topic = rospy.Publisher('/recognizer', String, queue_size=10)
+		self.person_topic = rospy.Publisher('/recognizer', StampedString, queue_size=40)
 
 		
 		self.faces_sub = message_filters.Subscriber(faces_topic, Detection)
