@@ -49,6 +49,7 @@ class master_driver():
 
 
 	def __init__(self):
+
 		rospy.init_node('master_driver', anonymous=True)
 		
 		rospy.on_shutdown(self.shutdown)
@@ -69,8 +70,8 @@ class master_driver():
 		#Subscribe to the facial recognition server
 
 		#sub = rospy.Subscriber('/faces/markers', MarkerArray, face_callback, queue_size=10)
-		sub = rospy.Subscriber('/faces/locations', PoseArray, face_callback, queue_size=10)
-		sub2 = rospy.Subscriber('/faces/approach_points', MarkerArray, approach_locs_callback, queue_size=10)
+		#sub = rospy.Subscriber('/faces/locations', PoseArray, face_callback, queue_size=10)
+		#sub2 = rospy.Subscriber('/faces/approach_points', MarkerArray, approach_locs_callback, queue_size=10)
 
 		# Variables to keep track of success rate, running time,
 		# and distance traveled

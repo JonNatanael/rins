@@ -1,0 +1,13 @@
+<launch>
+  
+
+  <node pkg="rins" type="faces.py" name="faces" output="screen">
+    <param name="faces_topic" type="string" value="/facedetector/faces" />
+    <param name="camera_topic" type="string" value="/camera/rgb/camera_info" />
+  </node>
+  <node pkg="rins" type="recognizer.py" name="recognizer" output="screen" />
+  <node pkg="rins" type="cyllinder_detector.py" name="cyllinder_detector" output="screen" />
+  <node pkg="rins" type="costmap_approach.py" name="costmap_approach" output="screen" />  
+
+
+</launch>

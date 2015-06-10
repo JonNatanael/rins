@@ -11,9 +11,9 @@ obj_clr_rev = {'red': 0, 'green':1, 'yellow': 2, 'blue':3}
 
 
 # temporary answers for testing
-osebe = ['kim', 'harry', 'ellen']
-clr = ['red', 'blue', 'green']
-ob = ['can', 'tea', 'square']
+osebe = ['prevc', 'scarlett', 'ellen']
+clr = ['blue', 'red', 'yellow']
+ob = ['teabox', 'cube', 'can']
 
 n_faces = 3
 n_cylinders = 4
@@ -101,8 +101,8 @@ if __name__ == '__main__':
         print 'What color is your hiding place?'
         say('What color is your hiding place?')  
         while True:
-            ans = raw_input("Please input the color:\n")
-            #ans = clr[idx]
+            #ans = raw_input("Please input the color:\n")
+            ans = clr[idx]
             if ans in obj_clr_rev.keys():
                 break
             else:
@@ -136,8 +136,8 @@ if __name__ == '__main__':
         print 'Which object are you hiding?'
         say('Which object are you hiding?')
         while True:
-            ans = raw_input("Please input the object name:\n")
-            #ans = ob[idx]
+            #ans = raw_input("Please input the object name:\n")
+            ans = ob[idx]
             if ans in ob:
                 break
             else:

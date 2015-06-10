@@ -29,10 +29,10 @@
   
   <include file="$(find localizer)/launch/localizer_node.launch" />
 
-  <node pkg="rins" type="faces.py" name="faces" output="screen">
+  <!--<node pkg="rins" type="faces.py" name="faces" output="screen">
     <param name="faces_topic" type="string" value="/facedetector/faces" />
     <param name="camera_topic" type="string" value="/camera/rgb/camera_info" />
-  </node>
+  </node>-->
 
   <!-- Map server -->
   <node name="map_server" pkg="map_server" type="map_server" args="$(find rins)/map/newmap.yaml"/>
