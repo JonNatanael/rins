@@ -116,8 +116,8 @@ class CyllinderDetector():
 			if self.all_cyllinders:
 				self.markers_pub.publish(self.all_cyllinders)
 
-		cv2.imshow("Image window", cv_image)
-		cv2.waitKey(3)
+		#cv2.imshow("Image window", cv_image)
+		#cv2.waitKey(3)
 
 		self.message_counter = self.message_counter + 1
 
@@ -237,8 +237,8 @@ class CyllinderDetector():
 		y = self.map_metadata.height - int(round(y)) #images are reversed
 
 		img = np.copy(self.bloated_map)
-		cv2.circle(img, (x,y), 1, 150, 2)
-		cv2.imshow("Bloated map", img)
+		#cv2.circle(img, (x,y), 1, 150, 2)
+		#cv2.imshow("Bloated map", img)
 		#print self.bloated_map[y][x]
 		return self.bloated_map[y][x]
 

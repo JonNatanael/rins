@@ -77,6 +77,14 @@ class FaceRecognizer():
 		self.joined_sub = message_filters.TimeSynchronizer([self.image_sub, self.camera_sub, self.faces_sub], 20)
 		self.joined_sub.registerCallback(self.image_callback)
 
+		# # loads matlab matrices
+		# self.U = loadmat('/home/durin/catkin_ws/src/rins/recog/u.mat');self.U = self.U['U']
+		# self.V = loadmat('/home/durin/catkin_ws/src/rins/recog/v.mat');self.V = self.V['V']
+		# self.Ms = loadmat('/home/durin/catkin_ws/src/rins/recog/ms.mat');self.Ms = self.Ms['Ms']
+		# self.Mu = loadmat('/home/durin/catkin_ws/src/rins/recog/mu.mat');self.Mu = self.Mu['Mu']
+		# self.MM = loadmat('/home/durin/catkin_ws/src/rins/recog/mm.mat');self.MM = self.MM['MM']
+
+
 		# loads matlab matrices
 		self.U = loadmat('/home/team_beta/ROS/src/rins/recog/u.mat');self.U = self.U['U']
 		self.V = loadmat('/home/team_beta/ROS/src/rins/recog/v.mat');self.V = self.V['V']

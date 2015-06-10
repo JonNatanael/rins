@@ -215,8 +215,8 @@ class CostmapApproach():
 			if len(cylinders_MA.markers) > 0:
 				self.app_cy_pub.publish(cylinders_MA)
 
-		cv2.imshow("Enhanced costmap", color_img)
-		cv2.waitKey(3)
+		# cv2.imshow("Enhanced costmap", color_img)
+		# cv2.waitKey(3)
 
 	def makeArrow(self, point, orientation, original_marker):
 		mkr = Marker()
@@ -254,7 +254,7 @@ class CostmapApproach():
 		cylinders_topic = rospy.get_param('~cylinders_topic', 'cyllinderdetector/markers')
 		self.cylinders_sub = rospy.Subscriber(cylinders_topic, MarkerArray, self.cylinders_callback)
 
-		faces_topic = rospy.get_param('~faces_topic', 'facemapper/markers')
+		faces_topic = rospy.get_param('~faces_topic', 'facemapper/locations')
 		self.faces_sub = rospy.Subscriber(faces_topic, MarkerArray, self.faces_callback)
 
 		#data output
