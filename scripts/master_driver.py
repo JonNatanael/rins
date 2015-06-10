@@ -75,7 +75,7 @@ class master_driver():
 
 		# Variables to keep track of success rate, running time,
 		# and distance traveled
-		n_loc = len(loc)
+		n_loc = len(self.loc)
 		n_goals = 0
 		n_successes = 0
 		i = 0
