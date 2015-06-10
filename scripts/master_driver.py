@@ -142,7 +142,7 @@ class master_driver():
 				rospy.loginfo("Goal succeeded!")
 				rospy.loginfo("State:" + str(state))
 			else:
-			  rospy.loginfo("Goal failed with error code: " + str(goal_states[state]))
+			  rospy.loginfo("Goal failed with error code: " + str(self.goal_states[state]))
 
 
 	def shutdown(self):
