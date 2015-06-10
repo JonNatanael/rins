@@ -400,7 +400,7 @@ class CyllinderDetector():
 		self.listener = TransformListener()
 		self.listener.waitForTransform("map", "/camera_rgb_optical_frame", rospy.Time(0), rospy.Duration(5.0))		
 
-		cv2.namedWindow("Image window", 1) #Control window
+		#cv2.namedWindow("Image window", 1) #Control window
 		self.bridge = CvBridge()
 
 		print "Creating time synced sub..."
