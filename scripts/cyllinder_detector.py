@@ -102,6 +102,7 @@ class CyllinderDetector():
 				if len(clusters) > 0:
 					center = self.centerOfProminentCluster(clusters)
 					#print center
+
 				if len(center) > 0:
 					mkr = self.markers_by_color[x][0] #take random properly colored marker
 					mkr.id = x #we give it the ID of its color IDX
@@ -204,6 +205,8 @@ class CyllinderDetector():
 			elif self.pointIsInsideMap(resp):
 				return True
 
+		return False
+
 	def pointIsInsideMap(self, localizerResponse):
 		resp = localizerResponse
 		try:
@@ -294,8 +297,8 @@ class CyllinderDetector():
 			if this_tag >= 0: #we could ignore the noise
 				clusters[this_tag].append(markers[x])
 
-		#for x in range(len(clusters)):
-		#	print "Tag:", x, ":", len(clusters[x])
+		for x in range(len(clusters)):
+			print "Tag:", x, ":", len(clusters[x])
 
 		return clusters[1:]
 

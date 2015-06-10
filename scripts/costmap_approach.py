@@ -215,8 +215,8 @@ class CostmapApproach():
 			if len(cylinders_MA.markers) > 0:
 				self.app_cy_pub.publish(cylinders_MA)
 
-		# cv2.imshow("Enhanced costmap", color_img)
-		# cv2.waitKey(3)
+		cv2.imshow("Enhanced costmap", color_img)
+		cv2.waitKey(3)
 
 	def makeArrow(self, point, orientation, original_marker):
 		mkr = Marker()
@@ -235,6 +235,7 @@ class CostmapApproach():
 		return mkr
 
 	def __init__(self):
+		#commit test
 		costmap_topic = rospy.get_param('~costmap_topic', '/move_base/global_costmap/costmap')
 		update_topic = rospy.get_param('~update_topic', '/move_base/global_costmap/costmap_updates')
 		#costmap handling
