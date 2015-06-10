@@ -72,7 +72,6 @@ class FaceMapper():
             mkr = self.createMarker(Pose(Point(xCluster, yCluster, 0.50),Quaternion(0,0,1,0)),h)
             mkr.ns = name
             mkr.id = self.osebe_rev[name]
-            print name
             clusteringResults.markers.append(mkr)
 
         self.markers_pub.publish(self.faces_list)
