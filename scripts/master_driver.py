@@ -87,7 +87,7 @@ class master_driver():
 		
 		# Begin the main loop and run through a sequence of locations
 		for point in self.loc:
-			move(Pose(point, Quaternion(0,0,0,1))) #Quaternion(0.000, 0.000, sin(theta/2), cos(theta/2))
+			self.move(Pose(point, Quaternion(0,0,0,1))) #Quaternion(0.000, 0.000, sin(theta/2), cos(theta/2))
 			# rotate in place for detection
 			rotate(point)
 
