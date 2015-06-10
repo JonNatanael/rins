@@ -61,7 +61,7 @@ class FaceRecognizer():
 
 
 	def __init__(self):
-		cv2.namedWindow("Image window", 1)
+		#cv2.namedWindow("Image window", 1)
 		self.bridge = CvBridge()
 
 		image_topic = rospy.get_param('~image_topic', '/camera/rgb/image_color')
