@@ -22,6 +22,7 @@ class FaceMapper():
 
     def faces_callback(self, faces, camera, recog):
         #print recog
+        #print faces
 
         camera_model = PinholeCameraModel()
         camera_model.fromCameraInfo(camera)
@@ -45,6 +46,8 @@ class FaceMapper():
                 rot = (0,0,1,0)
                 p = PointStamped()
 
+                #print resp
+
                 try:                    
                     (trans, rot) = self.listener.lookupTransform('/map', '/camera_rgb_optical_frame', rospy.Time(0))
                     ps = PointStamped()
@@ -54,9 +57,12 @@ class FaceMapper():
                     p = self.listener.transformPoint('/map', ps)
                     marker.pose.position.x = p.point.x
                     marker.pose.position.y = p.point.y
+                    marker.pose.position.z = p.point.z
                     marker.ns = recog.s[i]
 
-                    if abs(resp.pose.position.y) < self.height_limit:
+                    #print marker
+                    #print marker.pose.position.z
+                    if abs(marker.pose.position.z) < self.height_limit:
                         if marker.pose.position.z > 0:
                             self.faces_list.markers.append(marker)
                             #self.faces_locs.markers.append(marker)
@@ -65,6 +71,7 @@ class FaceMapper():
                     print "exception"
                     print ex
 
+        #print self.faces_list
         #clusteringResults.header.frame_id = 'map'
         for (xCluster, yCluster, name) in self.makeFaceClusters(self.faces_list):
             h = Header()
@@ -109,7 +116,7 @@ class FaceMapper():
         #find all contenders. raw is a list of tuples: cluster(x_center, y_center, max_distance_from_center)
         raw = []
         for marker in hits.markers:
-            print marker.ns
+            #print marker.ns
 
             #sorted_by_dist = sorted(hits, key=self.dist(hits.))
             points_in_range = 0
@@ -207,7 +214,7 @@ class FaceMapper():
 
         self.faces_list = MarkerArray()
         self.dist_limit = .5
-        self.height_limit = 0.2
+        self.height_limit = 0.5
         self.osebe = {0:'harry', 1:'ellen',2:'kim',3:'matt',4:'filip',5:'scarlett',6:'tina',7:'prevc'}
         self.osebe_rev = {'harry':0, 'ellen':1,'kim':2,'matt':3,'filip':4,'scarlett':5,'tina':6,'prevc':7}
 

@@ -178,12 +178,12 @@ class CostmapApproach():
 				if len(appc) > 0:
 					cv2.circle(color_img, (appc[1], appc[0]), 1, 200, 2)
 
-					point = self.point_in_world(appc)
+					point = self.point_in_world([appc[1], appc[0]])
 					orientation = self.quaternion_to_look_from_to(f.pose.position, point)
 					
 					mkr = self.makeArrow(point, orientation, f)
 
-					faces_MA.markers.append(f)
+					faces_MA.markers.append(mkr)
 			if len(faces_MA.markers) > 0:
 				self.app_faces_pub.publish(faces_MA)
 
