@@ -3,7 +3,7 @@ import roslib
 import rospy, math
 import numpy as np
 import sys, select, termios, tty
-from std_msgs.msg import String, Bool, ColorRGBA
+from std_msgs.msg import String, Bool, ColorRGBA, Empty
 import sensor_msgs.msg
 import message_filters
 import cv2
