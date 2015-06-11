@@ -122,8 +122,8 @@ class CyllinderDetector():
 			if self.all_cyllinders:
 				self.markers_pub.publish(self.all_cyllinders)
 
-		cv2.imshow("Image window", cv_image)
-		cv2.waitKey(3)
+		#cv2.imshow("Image window", cv_image)
+		#cv2.waitKey(3)
 
 		self.message_counter = self.message_counter + 1
 
