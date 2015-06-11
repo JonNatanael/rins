@@ -272,7 +272,7 @@ class CyllinderDetector():
 
 		img = np.copy(self.bloated_map)
 		cv2.circle(img, (x,y), 1, 150, 2)
-		cv2.imshow("Bloated map", img)
+		#cv2.imshow("Bloated map", img)
 		#print self.bloated_map[y][x]
 		return self.bloated_map[y][x]
 
