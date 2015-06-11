@@ -154,11 +154,15 @@ class FaceMapper():
         sorted_raw = sorted(raw, key=lambda tup: tup[2])
 
         clusters = []
+        dom_names = []
         if len(sorted_raw) > 0:
             adjustedFace = self.clusterCenter(sorted_raw[0][3],sorted_raw[0][4])
+            dom_names.append(sorted_raw[0][4])
             clusters.append(adjustedFace) #the tightest one if we have one can automatically be added
 
-        for i in xrange(1, len(sorted_raw)):        
+        for i in xrange(1, len(sorted_raw)):   
+            if sorted_raw[i][4] in dom_names:
+                continue
             adjustedFace = self.clusterCenter(sorted_raw[i][3],sorted_raw[i][4])
 
             #for each contending cluster check if there isn't one (tighter, better) added to the list withun its range 
@@ -170,6 +174,7 @@ class FaceMapper():
                     below_thresh=True
 
             if not below_thresh:
+                dom_names.append(sorted_raw[0][4])
                 clusters.append(adjustedFace)
 
             if len(clusters) == num_clusters:
