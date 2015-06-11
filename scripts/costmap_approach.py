@@ -235,6 +235,7 @@ class CostmapApproach():
 		mkr.frame_locked = False
 		mkr.lifetime = rospy.Time(0)
 		mkr.id = original_marker.id
+		mkr.ns = original_marker.ns
 		return mkr
 
 	def __init__(self):
