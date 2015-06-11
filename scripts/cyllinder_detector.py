@@ -89,43 +89,67 @@ class CyllinderDetector():
 
 			i+=1
 
-		if self.message_counter % 100 == 0: #calculate clusters every 100 messages...about 4s?
-											#this is VERY expensive
-			self.all_cyllinders = MarkerArray()
-			#print " "
-			#print "Counter:", self.message_counter
-			for x in range(len(self.markers_by_color)): #iterate through markers of all colors
-				print "Current color:", self.color_names[x], "markers in bag:", len(self.markers_by_color[x])
-				if (len(self.markers_by_color[x]) == 0):
-					continue
+		# if self.message_counter % 100 == 0: #calculate clusters every 100 messages...about 4s?
+		# 									#this is VERY expensive
+		# 	self.all_cyllinders = MarkerArray()
+		# 	#print " "
+		# 	#print "Counter:", self.message_counter
+		# 	for x in range(len(self.markers_by_color)): #iterate through markers of all colors
+		# 		print "Current color:", self.color_names[x], "markers in bag:", len(self.markers_by_color[x])
+		# 		if (len(self.markers_by_color[x]) == 0):
+		# 			continue
 
-				#time = datetime.now()
-				clusters = self.DBSCAN_markers(self.markers_by_color[x], 0.1, 20)
-				#print "DBSCAN took ", datetime.now() - time
+		# 		#time = datetime.now()
+		# 		clusters = self.DBSCAN_markers(self.markers_by_color[x], 0.1, 20)
+		# 		#print "DBSCAN took ", datetime.now() - time
 
-				center = []
-				if len(clusters) > 0:
-					center = self.centerOfProminentCluster(clusters)
-					#print center
+		# 		center = []
+		# 		if len(clusters) > 0:
+		# 			center = self.centerOfProminentCluster(clusters)
+		# 			#print center
 
-				if len(center) > 0:
-					mkr = self.markers_by_color[x][0] #take random properly colored marker
-					mkr.id = x #we give it the ID of its color IDX
-					mkr.pose.position.x = center[0]
-					mkr.pose.position.y = center[1]
-					mkr.pose.position.z = 0.2
-					mkr.scale = Vector3(0.24, 0.24, 0.4)
-					mkr.type = Marker.CYLINDER
-					self.all_cyllinders.markers.append(mkr)
-				#self.all_cyllinders.markers += self.markers_by_color[x] #add whole color to all_cyllinders
+		# 		if len(center) > 0:
+		# 			mkr = self.markers_by_color[x][0] #take random properly colored marker
+		# 			mkr.id = x #we give it the ID of its color IDX
+		# 			mkr.pose.position.x = center[0]
+		# 			mkr.pose.position.y = center[1]
+		# 			mkr.pose.position.z = 0.2
+		# 			mkr.scale = Vector3(0.24, 0.24, 0.4)
+		# 			mkr.type = Marker.CYLINDER
+		# 			self.all_cyllinders.markers.append(mkr)
+		# 		#self.all_cyllinders.markers += self.markers_by_color[x] #add whole color to all_cyllinders
 				
-			if self.all_cyllinders:
-				self.markers_pub.publish(self.all_cyllinders)
+		# 	if self.all_cyllinders:
+		# 		self.markers_pub.publish(self.all_cyllinders)
 
 		cv2.imshow("Image window", cv_image)
 		cv2.waitKey(3)
 
 		self.message_counter = self.message_counter + 1
+
+	def calculateCluster(self, data):
+		self.all_cyllinders = MarkerArray()
+		for x in range(len(self.markers_by_color)): #iterate through markers of all colors
+			print "Current color:", self.color_names[x], "markers in bag:", len(self.markers_by_color[x])
+			if (len(self.markers_by_color[x]) == 0):
+				continue
+			clusters = self.DBSCAN_markers(self.markers_by_color[x], 0.1, 20)
+
+			center = []
+			if len(clusters) > 0:
+				center = self.centerOfProminentCluster(clusters)
+
+			if len(center) > 0:
+				mkr = self.markers_by_color[x][0] #take random properly colored marker
+				mkr.id = x #we give it the ID of its color IDX
+				mkr.pose.position.x = center[0]
+				mkr.pose.position.y = center[1]
+				mkr.pose.position.z = 0.2
+				mkr.scale = Vector3(0.24, 0.24, 0.4)
+				mkr.type = Marker.CYLINDER
+				self.all_cyllinders.markers.append(mkr)
+			
+		self.markers_pub.publish(self.all_cyllinders)
 
 	def markerFromCoutourEllipse(self, ellipse, color_idx, image, camera_model):
 		u = int(ellipse[0][0])
@@ -418,6 +442,8 @@ class CyllinderDetector():
 		self.joined_sub.registerCallback(self.image_callback)
 		
 		self.markers_pub = rospy.Publisher(markers_topic, MarkerArray, queue_size=10)
+
+		self.calc = rospy.Subscriber('calculate_clusters', Empty, calculateCluster)
 
 		self.message_counter = 0
 

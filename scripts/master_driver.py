@@ -3,6 +3,7 @@
 import roslib
 import rospy
 import actionlib
+from std_msgs.msg import Empty
 from actionlib_msgs.msg import *
 from geometry_msgs.msg import Pose, PoseWithCovarianceStamped, Point, Quaternion, Twist, PoseArray
 from move_base_msgs.msg import MoveBaseAction, MoveBaseGoal
@@ -91,6 +92,9 @@ class master_driver():
 			# rotate in place for detection
 			self.rotate(point)
 
+		# send init message to cyllinder_detector and faces
+		calc = rospy.Publisher('calculate_clusters', Empty)
+		calc.publish(Empty())
 
 		rospy.sleep(self.rest_time)
 

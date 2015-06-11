@@ -80,7 +80,9 @@ if __name__ == '__main__':
     cylinders_sub = rospy.Subscriber(app_cylinders, MarkerArray, self.cylinders_callback)
 
     while (len(faces)<n_faces and len(cylinders)<n_cylinders):
-        rospy.sleep(1)
+        rospy.sleep(1)    
+
+    # when all necessary data is acquired
 
     # fill the first column with names
     for i in xrange(n_faces):
@@ -89,8 +91,6 @@ if __name__ == '__main__':
     # save cylinder colors
     for i in xrange(n_cylinders):
         clr[i] = obj_clr[cylinders[i].id]
-
-    # when all necessary data is acquired
 
     for i in xrange(n_faces):
         person = know[idx][0]

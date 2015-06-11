@@ -29,7 +29,7 @@ class FaceMapper():
 
         n = len(faces.x)
 
-        clusteringResults = MarkerArray()
+        #clusteringResults = MarkerArray()
 
         for i in xrange(0, n):
             u = faces.x[i] + faces.width[i] / 2
@@ -72,8 +72,11 @@ class FaceMapper():
                     print "exception"
                     print ex
 
-        #print self.faces_list
-        #clusteringResults.header.frame_id = 'map'
+        print len(self.faces_list.markers)
+        self.markers_pub.publish(self.faces_list)
+
+    def calculateClusters(self, data):
+        clusteringResults = MarkerArray()
         for (xCluster, yCluster, name) in self.makeFaceClusters(self.faces_list):
             h = Header()
             h.frame_id = 'map'
@@ -83,9 +86,6 @@ class FaceMapper():
             mkr.scale = Vector3(0.2, 0.2, 0.2)
             mkr.color = ColorRGBA(0, 1, 0, 1)
             clusteringResults.markers.append(mkr)
-
-        print len(self.faces_list.markers)
-        self.markers_pub.publish(self.faces_list)
         self.locations_pub.publish(clusteringResults)
 
 
@@ -214,6 +214,8 @@ class FaceMapper():
 
         self.locations_pub = rospy.Publisher(locations_topic, MarkerArray, queue_size=10)
         self.locations_pub.publish([])
+
+        self.calc = rospy.Subscriber('calculate_clusters', Empty, self.calculateClusters)
 
         self.message_counter = 0
 
