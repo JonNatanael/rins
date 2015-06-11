@@ -375,9 +375,9 @@ class CyllinderDetector():
 		cv_image = cv2.morphologyEx(cv_image,cv2.MORPH_OPEN, kernel, iterations = 2)
 		cv_image = cv2.morphologyEx(cv_image,cv2.MORPH_CLOSE, kernel, iterations = 2)
 		#cv_image = cv2.erode(cv_image,kernel,iterations = 2)
-		cv_image = cv2.threshold(cv_image, 200, 255, cv2.THRESH_BINARY) #100 is an arbitrary number between 155-255, 155 is the original grayness
-		retval, self.bloated_map = cv_image
-		#cv2.imshow("Bloated map", self.bloated_map)
+		retal, cv_image = cv2.threshold(cv_image, 200, 255, cv2.THRESH_BINARY) #100 is an arbitrary number between 155-255, 155 is the original grayness
+		self.bloated_map = cv_image
+		cv2.imshow("Bloated map", self.bloated_map)
 		#cv2.imwrite("cv_map.png",cv_image)
 
 	def __init__(self):
