@@ -3,7 +3,7 @@ import roslib
 #roslib.load_manifest('faces')
 import rospy
 import sys, select, termios, tty
-from std_msgs.msg import String, Bool, ColorRGBA,Header
+from std_msgs.msg import String, Bool, ColorRGBA,Header, Empty
 import sensor_msgs.msg
 import message_filters
 from facedetector.msg import Detection
