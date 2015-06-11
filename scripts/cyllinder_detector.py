@@ -443,7 +443,7 @@ class CyllinderDetector():
 		
 		self.markers_pub = rospy.Publisher(markers_topic, MarkerArray, queue_size=10)
 
-		self.calc = rospy.Subscriber('calculate_clusters', Empty, calculateCluster)
+		self.calc = rospy.Subscriber('calculate_clusters', Empty, self.calculateCluster)
 
 		self.message_counter = 0
 
