@@ -50,6 +50,7 @@ class master_driver():
 
 
 	def __init__(self):
+		calc = rospy.Publisher('calculate_clusters', Empty)
 
 		rospy.init_node('master_driver', anonymous=True)
 		
@@ -93,8 +94,8 @@ class master_driver():
 			self.rotate(point)
 
 		# send init message to cyllinder_detector and faces
-		calc = rospy.Publisher('calculate_clusters', Empty)
-		try:		
+		
+		try:			
 			calc.publish(Empty())
 			print "Published Empty message"
 		except e:

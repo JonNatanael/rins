@@ -19,6 +19,8 @@ if __name__ == '__main__':
 	rospy.init_node('test', anonymous = True)
 
 	calc = rospy.Publisher('calculate_clusters', Empty, queue_size=10)
-	for i in xrange(2):
+	rospy.sleep(1)
+	for i in xrange(1):
+		print "published"
 		calc.publish(Empty())
 		rospy.sleep(1)
