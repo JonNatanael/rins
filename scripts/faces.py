@@ -39,6 +39,9 @@ class FaceMapper():
             
             resp = self.localize(faces.header, point, 3)
             if resp:
+                if resp.pose.position.z < 0.3: #too close (in the camera frame_id)
+                    continue
+
                 marker = self.createMarker(resp.pose, faces.header)
                 marker.header.frame_id = faces.header.frame_id
                 
@@ -49,21 +52,19 @@ class FaceMapper():
                 #print resp
 
                 try:                    
-                    (trans, rot) = self.listener.lookupTransform('/map', '/camera_rgb_optical_frame', rospy.Time(0))
                     ps = PointStamped()
                     ps.header.stamp = rospy.Time()
                     ps.header.frame_id = faces.header.frame_id
                     ps.point = marker.pose.position
                     p = self.listener.transformPoint('/map', ps)
-                    marker.pose.position.x = p.point.x
-                    marker.pose.position.y = p.point.y
-                    marker.pose.position.z = p.point.z
+                    marker.pose.position = p.point
+                    marker.header = p.header
                     marker.ns = recog.s[i]
 
                     #print marker
                     #print marker.pose.position.z
                     if abs(marker.pose.position.z) < self.height_limit:
-                        if marker.pose.position.z > 0:
+                        if marker.pose.position.z > 0: #not under ground
                             self.faces_list.markers.append(marker)
                             #self.faces_locs.markers.append(marker)
                 
@@ -79,8 +80,11 @@ class FaceMapper():
             mkr = self.createMarker(Pose(Point(xCluster, yCluster, 0.50),Quaternion(0,0,1,0)),h)
             mkr.ns = name
             mkr.id = self.osebe_rev[name]
+            mkr.scale = Vector3(0.2, 0.2, 0.2)
+            mkr.color = ColorRGBA(0, 1, 0, 1)
             clusteringResults.markers.append(mkr)
 
+        print len(self.faces_list.markers)
         self.markers_pub.publish(self.faces_list)
         self.locations_pub.publish(clusteringResults)
 
@@ -96,7 +100,7 @@ class FaceMapper():
         mrkr.lifetime = rospy.Time(0)
         mrkr.id = len(self.faces_list.markers)
         mrkr.scale = Vector3(0.1, 0.1, 0.1)
-        mrkr.color = ColorRGBA(0, 1, 0, 1)
+        mrkr.color = ColorRGBA(1, 0, 0, 1)
         return mrkr
     
 
@@ -109,9 +113,10 @@ class FaceMapper():
         # zdaj prejmo PoseArray, ne MarkerArray
         # zdaj spet MarkerArray
 
-        num_closest = 5 #how many must be in the desired range to be consisered a cluster
+        num_closest = 10 #how many must be in the desired range to be consisered a cluster
         spread = 0.5 #how small must the cluster be
-        threshold = 1 #how close can clusters be one another
+        threshold = 1.5 #how close can clusters be one another
+        num_clusters = 3 #how many of the best clusters we take
 
         #find all contenders. raw is a list of tuples: cluster(x_center, y_center, max_distance_from_center)
         raw = []
@@ -156,7 +161,7 @@ class FaceMapper():
 
             #for each contending cluster check if there isn't one (tighter, better) added to the list withun its range 
             below_thresh = False
-            for appoved_cluster in clusters:
+            for appoved_cluster in clusters: #O(n^2), yay!, but this should be a low #
                 dst = self.dist(appoved_cluster[0], appoved_cluster[1], adjustedFace[0], adjustedFace[1])
 
                 if dst < threshold: 
@@ -165,7 +170,7 @@ class FaceMapper():
             if not below_thresh:
                 clusters.append(adjustedFace)
 
-            if len(clusters) == 3:
+            if len(clusters) == num_clusters:
                 break
 
         return clusters #returns a list of tuples: tup(cluster_center.x, cluster_center.y)
@@ -218,7 +223,7 @@ class FaceMapper():
         self.osebe = {0:'harry', 1:'ellen',2:'kim',3:'matt',4:'filip',5:'scarlett',6:'tina',7:'prevc'}
         self.osebe_rev = {'harry':0, 'ellen':1,'kim':2,'matt':3,'filip':4,'scarlett':5,'tina':6,'prevc':7}
 
-        print "b"
+        print rospy.get_name(), "waiting for callbacks..."
 
 # Main function.    
 if __name__ == '__main__':

@@ -93,13 +93,12 @@ class FaceRecognizer():
 		self.MM = loadmat('/home/team_beta/ROS/src/rins/recog/mm.mat');self.MM = self.MM['MM']
 
 		self.osebe = {0:'harry', 1:'ellen',2:'kim',3:'matt',4:'filip',5:'scarlett',6:'tina',7:'prevc'}
-
-
+		print rospy.get_name(), "waiting for callbacks..."
 
 # Main function.    
 if __name__ == '__main__':
 		print "Starting.."
-		rospy.init_node('image_saver')
+		rospy.init_node('recognizer')
 		try:
 			fd = FaceRecognizer()
 			rospy.spin()	

@@ -15,6 +15,8 @@ from image_geometry import PinholeCameraModel
 from geometry_msgs.msg import Point, Vector3, PointStamped
 from nav_msgs.msg import OccupancyGrid
 from tf import TransformListener
+from datetime import datetime
+
 
 # Node for cyllinder detection.
 class CyllinderDetector():
@@ -87,7 +89,8 @@ class CyllinderDetector():
 
 			i+=1
 
-		if self.message_counter % 50 == 0: #calculate clusters every 50 messages...about 2s?
+		if self.message_counter % 100 == 0: #calculate clusters every 100 messages...about 4s?
+											#this is VERY expensive
 			self.all_cyllinders = MarkerArray()
 			#print " "
 			#print "Counter:", self.message_counter
@@ -96,7 +99,9 @@ class CyllinderDetector():
 				if (len(self.markers_by_color[x]) == 0):
 					continue
 
+				#time = datetime.now()
 				clusters = self.DBSCAN_markers(self.markers_by_color[x], 0.1, 20)
+				#print "DBSCAN took ", datetime.now() - time
 
 				center = []
 				if len(clusters) > 0:
@@ -173,7 +178,7 @@ class CyllinderDetector():
 			for cnt in contours:
 				area = cv2.contourArea(cnt)
 
-				if area < 2000: #minimal size 
+				if area < 3000: #minimal size on image
 					continue
 				if len(cnt) < 5:
 				 	continue
@@ -241,7 +246,7 @@ class CyllinderDetector():
 
 		img = np.copy(self.bloated_map)
 		cv2.circle(img, (x,y), 1, 150, 2)
-		cv2.imshow("Bloated map", img)
+		#cv2.imshow("Bloated map", img)
 		#print self.bloated_map[y][x]
 		return self.bloated_map[y][x]
 
@@ -289,7 +294,6 @@ class CyllinderDetector():
 			else:
 				tag += 1
 				tags = self.expandCluster(x, nearbyMarkerIndexes, tag, eps, MinPts, markers, tags)
-
 
 		clusters = [[] for x in range(tag+1)]
 		for x in range(len(tags)):
@@ -417,7 +421,7 @@ class CyllinderDetector():
 
 		self.message_counter = 0
 
-		print "Waiting for callbacks..."
+		print rospy.get_name(), "waiting for callbacks..."
 
 # Main function.    
 if __name__ == '__main__':

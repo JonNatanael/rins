@@ -145,7 +145,7 @@ class CostmapApproach():
 
 		#color_img = cv2.cvtColor(self.costmap, cv.CV_GRAY2RGB)
 		color_img = np.copy(self.costmap)
-		max_scan_size = 10
+		max_scan_size = 12
 		scansize = 5
 
 
@@ -215,8 +215,8 @@ class CostmapApproach():
 			if len(cylinders_MA.markers) > 0:
 				self.app_cy_pub.publish(cylinders_MA)
 
-		cv2.imshow("Enhanced costmap", color_img)
-		cv2.waitKey(3)
+		#cv2.imshow("Enhanced costmap", color_img)
+		#cv2.waitKey(3)
 
 	def makeArrow(self, point, orientation, original_marker):
 		mkr = Marker()
@@ -270,7 +270,7 @@ class CostmapApproach():
 
 		self.message_counter = 0
 
-		print "Waiting for callbacks..."
+		print rospy.get_name(), "waiting for callbacks..."
 
 # Main function.    
 if __name__ == '__main__':
