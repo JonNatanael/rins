@@ -72,7 +72,7 @@ class FaceMapper():
                     print "exception"
                     print ex
 
-        print len(self.faces_list.markers)
+        #print len(self.faces_list.markers)
         self.markers_pub.publish(self.faces_list)
 
     def calculateClusters(self, data):
