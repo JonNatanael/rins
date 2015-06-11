@@ -115,8 +115,8 @@ class FaceMapper():
         # zdaj prejmo PoseArray, ne MarkerArray
         # zdaj spet MarkerArray
 
-        num_closest = 10 #how many must be in the desired range to be consisered a cluster
-        spread = 0.5 #how small must the cluster be
+        num_closest = 30 #how many must be in the desired range to be consisered a cluster
+        spread = 0.2 #how small must the cluster be
         threshold = 1.5 #how close can clusters be one another
         num_clusters = 3 #how many of the best clusters we take
 

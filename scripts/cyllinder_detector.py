@@ -340,6 +340,8 @@ class CyllinderDetector():
 		while todo:
 			added = []
 			for point in todo:
+				if point > len(tags)-1:
+					continue
 				if tags[point] < 0:
 					tags[point] = 0
 					pointContenders = self.nearbyMarkers(point, eps, markers)

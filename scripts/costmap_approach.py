@@ -124,7 +124,7 @@ class CostmapApproach():
 		points = np.transpose(np.where(scan==255)) #we get array of coordinates where the circle is
 												  #in a [y, x] manner
 		min_coord = []
-		min_value = 65	#map value treshold, what is acceptable
+		min_value = 50	#map value treshold, what is acceptable
 					#127 is definitely not in collision, as per http://wiki.ros.org/costmap_2d
 					#we could scale the color balance graph of the image or just scale 0-255 on 0-100
 					#OR JUST FIND A DECENT NUMBER, LIVE DANGEROUSLY
@@ -198,6 +198,7 @@ class CostmapApproach():
 				#print "Face added to Points", point.x, point.y
 				cv2.circle(color_img, (point[0], point[1]), max_scan_size, 150 )
 				
+				scansize = min_scansize
 				appc = []
 				while (len(appc) == 0) and scansize < max_scan_size:
 					appc = self.calculate_approach_xy(point[0], point[1], scansize)
