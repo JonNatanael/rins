@@ -75,7 +75,7 @@ class FaceMapper():
         print len(self.faces_list.markers)
         self.markers_pub.publish(self.faces_list)
 
-    def calculateClusters(self, data):
+    def calculateClusters(self):
         print "start calculating face clusters"
         clusteringResults = MarkerArray()
         for (xCluster, yCluster, name) in self.makeFaceClusters(self.faces_list):

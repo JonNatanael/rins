@@ -127,7 +127,7 @@ class CyllinderDetector():
 
 		self.message_counter = self.message_counter + 1
 
-	def calculateCluster(self, data):
+	def calculateCluster(self):
 		print "start calculating cylinder clusters"
 		self.all_cyllinders = MarkerArray()
 		for x in range(len(self.markers_by_color)): #iterate through markers of all colors
