@@ -76,6 +76,7 @@ class FaceMapper():
         self.markers_pub.publish(self.faces_list)
 
     def calculateClusters(self, data):
+        print "start calculating face clusters"
         clusteringResults = MarkerArray()
         for (xCluster, yCluster, name) in self.makeFaceClusters(self.faces_list):
             h = Header()
@@ -87,6 +88,7 @@ class FaceMapper():
             mkr.color = ColorRGBA(0, 1, 0, 1)
             clusteringResults.markers.append(mkr)
         self.locations_pub.publish(clusteringResults)
+        print "calculating face clusters finished"
 
 
     def createMarker(self,pose,header):
@@ -225,7 +227,7 @@ class FaceMapper():
         self.osebe = {0:'harry', 1:'ellen',2:'kim',3:'matt',4:'filip',5:'scarlett',6:'tina',7:'prevc'}
         self.osebe_rev = {'harry':0, 'ellen':1,'kim':2,'matt':3,'filip':4,'scarlett':5,'tina':6,'prevc':7}
 
-        print rospy.get_name(), "waiting for callbacks..."
+        print rospy.get_name(), "waiting for callbacks... "
 
 # Main function.    
 if __name__ == '__main__':

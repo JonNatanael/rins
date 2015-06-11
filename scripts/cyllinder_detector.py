@@ -128,6 +128,7 @@ class CyllinderDetector():
 		self.message_counter = self.message_counter + 1
 
 	def calculateCluster(self, data):
+		print "start calculating cylinder clusters"
 		self.all_cyllinders = MarkerArray()
 		for x in range(len(self.markers_by_color)): #iterate through markers of all colors
 			print "Current color:", self.color_names[x], "markers in bag:", len(self.markers_by_color[x])
@@ -150,6 +151,7 @@ class CyllinderDetector():
 				self.all_cyllinders.markers.append(mkr)
 			
 		self.markers_pub.publish(self.all_cyllinders)
+		print "calculating cylinder clusters finished"
 
 	def markerFromCoutourEllipse(self, ellipse, color_idx, image, camera_model):
 		u = int(ellipse[0][0])

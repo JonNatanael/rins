@@ -60,7 +60,7 @@ def move(self, location):
 if __name__ == '__main__':
 
 
-    rospy.init_node('say', anonymous = True)
+    rospy.init_node('logic', anonymous = True)
     soundhandle = SoundClient()
     rospy.sleep(1)
 
