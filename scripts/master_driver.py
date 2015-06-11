@@ -96,17 +96,17 @@ class master_driver():
 
 	def rotate(self, point):
 		#Quaternion(0.000, 0.000, sin(theta/2), cos(theta/2))
-		for theta in range(0, 360, 60):
+		for theta in range(0, 720, 120):
 			self.move(Pose(point, Quaternion(0, 0, sin(theta), cos(theta))))
 			rospy.sleep(2)
 
 		#ALTERNATIVE
-		turningTime = 10
-		twist = Twist()
-		twist.angular.z = pi/turningTime	#radian/s
-		turning.publish(twist) 		#start rotating
-		rospy.sleep(turningTime)	#rotate
-		turning.publish(Twist())	#stop
+		#turningTime = 10
+		#twist = Twist()
+		#twist.angular.z = pi/turningTime	#radian/s
+		#turning.publish(twist) 		#start rotating
+		#rospy.sleep(turningTime)	#rotate
+		#turning.publish(Twist())	#stop
 
 		# for twCounter in range(1, 10):
 		#	 twist = Twist()
