@@ -264,7 +264,6 @@ class CostmapApproach():
 		app_cylinders_topic = rospy.get_param('~app_cylinders_topic', rospy.resolve_name('%s/cylinders' % rospy.get_name()))
 		self.app_cy_pub = rospy.Publisher(app_cylinders_topic, MarkerArray, queue_size=10)
 
-
 		self.bridge = CvBridge()
 
 		self.message_counter = 0
