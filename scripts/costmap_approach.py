@@ -119,19 +119,20 @@ class CostmapApproach():
 
 		
 	def calculate_approach_xy(self, x, y, diameter):
-		scan = np.zeros((self.width, self.height),np.uint8)
+		scan = np.zeros((self.height, self.width),np.uint8)
 		cv2.circle(scan, (x,y), diameter/2, 255, diameter)
-		points = np.transpose(np.where(scan==255)) #we get array of coordinates where the circle is
+		points = np.transpose(np.where(scan>0)) #we get array of coordinates where the circle is
 												  #in a [y, x] manner
+
 		min_coord = []
-		min_value = 50	#map value treshold, what is acceptable
+		max_value = 60	#map value treshold, what is acceptable
 					#127 is definitely not in collision, as per http://wiki.ros.org/costmap_2d
 					#we could scale the color balance graph of the image or just scale 0-255 on 0-100
 					#OR JUST FIND A DECENT NUMBER, LIVE DANGEROUSLY
 		for coord in points:
 			cur_value = self.costmap[coord[0]][coord[1]] #costmap value of one of the points on the circle
-			if (cur_value < min_value):
-				min_value = cur_value
+			if (cur_value < max_value):
+				max_value = cur_value
 				min_coord = coord
 
 		if len(min_coord) > 0:
@@ -145,7 +146,7 @@ class CostmapApproach():
 
 		#color_img = cv2.cvtColor(self.costmap, cv.CV_GRAY2RGB)
 		color_img = np.copy(self.costmap)
-		max_scan_size = 11
+		max_scan_size = 13
 		min_scansize = 5
 
 
@@ -217,7 +218,7 @@ class CostmapApproach():
 			if len(cylinders_MA.markers) > 0:
 				self.app_cy_pub.publish(cylinders_MA)
 
-		#cv2.imshow("Enhanced costmap", color_img)
+		cv2.imshow("Enhanced costmap", color_img)
 		cv2.waitKey(3)
 
 	def makeArrow(self, point, orientation, original_marker):

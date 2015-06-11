@@ -359,6 +359,8 @@ class CyllinderDetector():
 		nearby = [seed_point]
 
 		for x in range(len(markers)):
+			if x > len(markers)-1:
+				break
 			p = markers[x].pose.position
 			dist = math.sqrt( (seed.x-p.x)*(seed.x-p.x) + (seed.y-p.y)*(seed.y-p.y) + (seed.z-p.z)*(seed.z-p.z) )
 			if dist < eps:
