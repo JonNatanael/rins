@@ -4,11 +4,6 @@ Panels:
     Name: Displays
     Property Tree Widget:
       Expanded:
-        - /Global Options1
-        - /Status1
-        - /Map1
-        - /LaserScan1
-        - /RobotModel1
         - /MarkerArray1
         - /MarkerArray2
         - /MarkerArray3
@@ -304,23 +299,23 @@ Visualization Manager:
       Marker Topic: /cyllinderdetector/markers
       Name: MarkerArray
       Namespaces:
-        {}
+        "": true
       Queue Size: 100
       Value: true
     - Class: rviz/MarkerArray
       Enabled: true
-      Marker Topic: /costmap_approach/cylinders
+      Marker Topic: /approach/cylinders
       Name: MarkerArray
       Namespaces:
-        {}
+        "": true
       Queue Size: 100
       Value: true
     - Class: rviz/MarkerArray
       Enabled: true
-      Marker Topic: /costmap_approach/faces
+      Marker Topic: /approach/faces
       Name: MarkerArray
       Namespaces:
-        {}
+        "": true
       Queue Size: 100
       Value: true
     - Class: rviz/MarkerArray
@@ -328,7 +323,6 @@ Visualization Manager:
       Marker Topic: /facemapper/markers
       Name: MarkerArray
       Namespaces:
-        ellen: true
         filip: true
         matt: true
         prevc: true
@@ -340,9 +334,7 @@ Visualization Manager:
       Marker Topic: /facemapper/locations
       Name: MarkerArray
       Namespaces:
-        ellen: true
-        filip: true
-        prevc: true
+        matt: true
       Queue Size: 100
       Value: true
   Enabled: true
@@ -369,22 +361,22 @@ Visualization Manager:
   Views:
     Current:
       Class: rviz/Orbit
-      Distance: 7.70547
+      Distance: 10.1878
       Enable Stereo Rendering:
         Stereo Eye Separation: 0.06
         Stereo Focal Distance: 1
         Swap Stereo Eyes: false
         Value: false
       Focal Point:
-        X: 1.72444
-        Y: -0.117059
-        Z: -0.337805
+        X: 2.74843
+        Y: 2.44849
+        Z: 0.386849
       Name: Current View
       Near Clip Distance: 0.01
-      Pitch: 0.299797
+      Pitch: 1.1548
       Target Frame: <Fixed Frame>
       Value: Orbit (rviz)
-      Yaw: 3.36356
+      Yaw: 1.74038
     Saved: ~
 Window Geometry:
   Displays:
@@ -403,4 +395,4 @@ Window Geometry:
     collapsed: false
   Width: 1155
   X: 133
-  Y: 14
+  Y: 24
