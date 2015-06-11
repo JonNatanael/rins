@@ -216,7 +216,7 @@ class CostmapApproach():
 			if len(cylinders_MA.markers) > 0:
 				self.app_cy_pub.publish(cylinders_MA)
 
-		cv2.imshow("Enhanced costmap", color_img)
+		#cv2.imshow("Enhanced costmap", color_img)
 		cv2.waitKey(3)
 
 	def makeArrow(self, point, orientation, original_marker):

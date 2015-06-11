@@ -94,7 +94,12 @@ class master_driver():
 
 		# send init message to cyllinder_detector and faces
 		calc = rospy.Publisher('calculate_clusters', Empty)
-		calc.publish(Empty())
+		try:		
+			calc.publish(Empty())
+			print "Published Empty message"
+		except e:
+			print "Failed publishing empty message"
+			print e
 
 		rospy.sleep(self.rest_time)
 
