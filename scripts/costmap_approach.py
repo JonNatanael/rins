@@ -145,7 +145,7 @@ class CostmapApproach():
 
 		#color_img = cv2.cvtColor(self.costmap, cv.CV_GRAY2RGB)
 		color_img = np.copy(self.costmap)
-		max_scan_size = 12
+		max_scan_size = 11
 		scansize = 5
 
 
@@ -235,7 +235,6 @@ class CostmapApproach():
 		return mkr
 
 	def __init__(self):
-		#commit test
 		costmap_topic = rospy.get_param('~costmap_topic', '/move_base/global_costmap/costmap')
 		update_topic = rospy.get_param('~update_topic', '/move_base/global_costmap/costmap_updates')
 		#costmap handling
