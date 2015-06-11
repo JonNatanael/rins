@@ -8,7 +8,7 @@ from geometry_msgs.msg import Pose, PoseWithCovarianceStamped, Point, Quaternion
 from move_base_msgs.msg import MoveBaseAction, MoveBaseGoal
 from visualization_msgs.msg import Marker, MarkerArray
 from random import sample
-from math import pow, sqrt, sin, cos, atan
+from math import pow, sqrt, sin, cos, atan, pi
 from tf import TransformListener, ConnectivityException, Exception, LookupException
 from nav_msgs.msg import Odometry
 
@@ -103,7 +103,7 @@ class master_driver():
 		#ALTERNATIVE
 		turningTime = 10
 		twist = Twist()
-		twist.angular.z = math.pi/turningTime	#radian/s
+		twist.angular.z = pi/turningTime	#radian/s
 		turning.publish(twist) 		#start rotating
 		rospy.sleep(turningTime)	#rotate
 		turning.publish(Twist())	#stop
