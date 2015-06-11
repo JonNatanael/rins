@@ -80,7 +80,7 @@ class CyllinderDetector():
 				
 				marker = self.markerFromCoutourEllipse(ellipse, i, image, camera_model)
 				if marker:
-					if len(self.markers_by_color[i]) > 3000: #lets not clog the memory and burden the clusterer shall we
+					if len(self.markers_by_color[i]) > 1000: #lets not clog the memory and burden the clusterer shall we
 						del self.markers_by_color[i][0:100]  #purge old markers
 					self.markers_by_color[i].append(marker)
 

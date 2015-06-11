@@ -114,7 +114,7 @@ class CostmapApproach():
 		theta = np.arctan( delta_y/delta_x )
 		if delta_x > 0:
 			theta += math.pi
-		print theta
+		#print theta
 		return Quaternion(0, 0, sin(theta/2), cos(theta/2))
 
 		
