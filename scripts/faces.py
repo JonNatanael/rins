@@ -132,7 +132,7 @@ class FaceMapper():
         for marker in hits.markers:
             #print marker.ns
 
-            if self.osebe_rev[marker.ns] in present_face_idxs:
+            if not self.osebe_rev[marker.ns] in present_face_idxs:
                 continue
 
             #sorted_by_dist = sorted(hits, key=self.dist(hits.))
@@ -143,7 +143,7 @@ class FaceMapper():
 
             for contender in hits.markers: #O(n^2), yay!
 
-                if self.osebe_rev[marker.ns] in present_face_idxs:
+                if not self.osebe_rev[contender.ns] in present_face_idxs:
                     continue
 
                 if contender == marker: #if it's our center ignore it
