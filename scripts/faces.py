@@ -229,8 +229,8 @@ class FaceMapper():
         self.faces_list = MarkerArray()
         self.dist_limit = .5
         self.height_limit = 0.5
-        self.osebe = {0:'harry', 1:'ellen',2:'kim',3:'matt',4:'filip',5:'scarlett',6:'tina',7:'prevc'}
-        self.osebe_rev = {'harry':0, 'ellen':1,'kim':2,'matt':3,'filip':4,'scarlett':5,'tina':6,'prevc':7}
+        self.osebe = {0:'harry', 1:'ellen',2:'kim',3:'matt',4:'filip',5:'scarlett',6:'tina',7:'prevts'}
+        self.osebe_rev = {'harry':0, 'ellen':1,'kim':2,'matt':3,'filip':4,'scarlett':5,'tina':6,'prevts':7}
 
         print rospy.get_name(), "waiting for callbacks... "
 

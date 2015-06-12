@@ -24,19 +24,22 @@ faces = []
 cylinders = []
 
 # temporary answers for testing
-osebe = ['prevc', 'scarlett', 'ellen']
-clr = ['blue', 'red', 'yellow']
+#osebe = ['prevc', 'scarlett', 'ellen']
+#clr = ['blue', 'red', 'yellow']
 ob = ['teabox', 'cube', 'can']
+
+person_cy = {'scarlett':'red', 'prevts':'blue', 'ellen':'yellow'}
+person_ob = {'scarlett':'cube', 'prevts':'teabox', 'ellen':'can'}
 
 n_faces = 3
 n_cylinders = 4
 
-know = [[0 for x in range(4)] for x in osebe] 
-clr = [0 for x in range(4)]
+know = [[0 for x in range(4)] for x in range(3)] 
 
 def say(string):
+    print string
     soundhandle.say(string,voice)
-    rospy.sleep(1)
+    rospy.sleep(2)
 
 def faces_callback(data):
     #print "FACES"
@@ -62,7 +65,7 @@ def move(location):
     move_base.send_goal(goal)
         
     # Allow 30 seconds to get there
-    finished_within_time = move_base.wait_for_result(rospy.Duration(30)) 
+    finished_within_time = move_base.wait_for_result(rospy.Duration(60)) 
         
     # Check for success or failure
     if not finished_within_time:
@@ -88,8 +91,8 @@ if __name__ == '__main__':
     global voice
     voice = 'voice_kal_diphone'
 
-    for i in xrange(len(osebe)):
-        know[i][0] = osebe[i]
+    #for i in xrange(3):
+    #    know[i][0] = osebe[i]
 
     # TODO subscribe to topics and wait for sufficient lengths of lists
 
@@ -99,13 +102,14 @@ if __name__ == '__main__':
     faces_sub = rospy.Subscriber(app_faces, MarkerArray, faces_callback)
     cylinders_sub = rospy.Subscriber(app_cylinders, MarkerArray, cylinders_callback)
 
-    
+    say('prevts')
+    sys.exit()
 
     #rospy.wait_for_message(app_cylinders, MarkerArray, timeout=20)
 
-    while not(len(faces)<n_faces or len(cylinders)<n_cylinders):
-        rospy.wait_for_message(app_faces, MarkerArray, timeout=5)
-        rospy.wait_for_message(app_cylinders, MarkerArray, timeout=5)  
+    while (len(faces)<n_faces or len(cylinders)<n_cylinders):
+        rospy.wait_for_message(app_faces, MarkerArray, timeout=3000)
+        rospy.wait_for_message(app_cylinders, MarkerArray, timeout=3000)  
   
 
     # when all necessary data is acquired
@@ -114,35 +118,36 @@ if __name__ == '__main__':
 
     # fill the first column with names
     for i in xrange(n_faces):
-        print faces[i].ns
         know[i][0] = faces[i].ns
 
     # save cylinder colors
-    for i in xrange(n_cylinders):
-        clr[i] = obj_clr[cylinders[i].id]
+    #if not clr:
+    #    for i in xrange(n_cylinders):
+    #        clr[i] = obj_clr[cylinders[i].id]
 
     print know
+    #print cylinders
 
     for i in xrange(n_faces):
         person = know[i][0]
         # move to person's location
         move(faces[i].pose)
-        print 'Hi, ' + person.title()
-        say('Hi, '+person)
-        print 'What color is your hiding place?'
-        say('What color is your hiding place?')  
+        say('Hi, ' + person + ', what color is your hiding place?')
         while True:
             #ans = raw_input("Please input the color:\n")
-            ans = clr[i]
+            #ans = clr[i]
+            ans = person_cy[person]
             if ans in obj_clr_rev.keys():
                 break
             else:
                print 'Color incorrect'
         # sets the second column to the color name
-        know[idx][1] = ans
+        know[i][1] = ans
         # sets the fourth column to the index the cylinder of corresponding color
-        know[idx][3] = clr.index(ans)
+        know[i][3] = obj_clr_rev[ans]
     print
+    print know
+    #sys.exit()
 
     for i in xrange(n_faces):
         person = know[i][0]
@@ -150,41 +155,33 @@ if __name__ == '__main__':
         cy = cylinders[know[i][3]]
         # gets the cylinder's color
         cy_clr = know[i][1]
-        print 'Moving to the ' + cy_clr + ' cylinder'
         say('Moving to the ' + cy_clr + ' cylinder')
         # move to appropriate cylinder
         move(cy.pose)
-        print 'Please attach object'
         say('Please attach object')
         raw_input('Press enter when done attaching object:\n')
-        print 'Moving back to ' + person.title()
         say('Moving back to ' + person)
         # move to person's location
         move(faces[i].pose)
-        print 'Hello again, ' + person
-        say('Hello again, ' + person)
-        print 'Which object are you hiding?'
-        say('Which object are you hiding?')
+        say('Hello again, ' + person + ', which object were you hiding?')
         while True:
             #ans = raw_input("Please input the object name:\n")
-            ans = ob[idx]
+            #ans = ob[i]
+            ans = person_ob[person]
             if ans in ob:
                 break
             else:
                print 'Object name incorrect'
-        know[idx][2] = ans
-        print 'This is your object, right?'
+        know[i][2] = ans
         say('This is your object, right?')
-        print 'Please remove object'
         say('Please remove object')
         raw_input('Press enter when done removing object:\n')
         print
-        idx+=1
     print
 
     print 'My final knowledge of the world:'
     for line in know:
-        print line[0].title() + ' hid the ' + line[2] + ' under the ' + line[1] + ' cylinder'
+        say(line[0].title() + ' hid the ' + line[2] + ' under the ' + line[1] + ' cylinder')
         rospy.sleep(1)
 
 
