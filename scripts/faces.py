@@ -120,10 +120,20 @@ class FaceMapper():
         threshold = 1.5 #how close can clusters be one another
         num_clusters = 3 #how many of the best clusters we take
 
+        #we could first determine which 3 have the most markers (probably the actual 3, on the whole map)
+        namecounter = [0 for x in range(len(self.osebe_rev))]
+        for marker in hits.markers:
+            namecounter[self.osebe_rev[marker.ns]] +=1
+        print namecounter
+        present_face_idxs = sorted(range(len(namecounter)), key=lambda i: namecounter[i], reverse=True)[:3] #SO THIS THINGY returns the top 3 name indexes
+
         #find all contenders. raw is a list of tuples: cluster(x_center, y_center, max_distance_from_center)
         raw = []
         for marker in hits.markers:
             #print marker.ns
+        
+            if osebe_rev[marker.ns] in present_face_idxs:
+                continue
 
             #sorted_by_dist = sorted(hits, key=self.dist(hits.))
             points_in_range = 0
@@ -132,6 +142,9 @@ class FaceMapper():
             recog_cnt = [0 for x in range(8)]
 
             for contender in hits.markers: #O(n^2), yay!
+
+                if osebe_rev[marker.ns] in present_face_idxs:
+                    continue
 
                 if contender == marker: #if it's our center ignore it
                     continue

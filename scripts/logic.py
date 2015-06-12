@@ -79,7 +79,8 @@ def move(location):
             rospy.loginfo("Goal succeeded!")
             rospy.loginfo("State:" + str(state))
         else:
-          rospy.loginfo("Goal failed with error code: " + str(goal_states[state]))
+            say('I\'m stuck, help!')
+            rospy.loginfo("Goal failed with error code: " + str(goal_states[state]))
 
 if __name__ == '__main__':
     move_base = actionlib.SimpleActionClient("move_base", MoveBaseAction)
@@ -102,8 +103,8 @@ if __name__ == '__main__':
     faces_sub = rospy.Subscriber(app_faces, MarkerArray, faces_callback)
     cylinders_sub = rospy.Subscriber(app_cylinders, MarkerArray, cylinders_callback)
 
-    say('prevts')
-    sys.exit()
+    #say('prevts')
+    #sys.exit()
 
     #rospy.wait_for_message(app_cylinders, MarkerArray, timeout=20)
 

@@ -92,7 +92,7 @@ class FaceRecognizer():
 		self.Mu = loadmat('/home/team_beta/ROS/src/rins/recog/mu.mat');self.Mu = self.Mu['Mu']
 		self.MM = loadmat('/home/team_beta/ROS/src/rins/recog/mm.mat');self.MM = self.MM['MM']
 
-		self.osebe = {0:'harry', 1:'ellen',2:'kim',3:'matt',4:'filip',5:'scarlett',6:'tina',7:'prevc'}
+		self.osebe = {0:'harry', 1:'ellen',2:'kim',3:'matt',4:'filip',5:'scarlett',6:'tina',7:'prevts'}
 		print rospy.get_name(), "waiting for callbacks..."
 
 # Main function.    
