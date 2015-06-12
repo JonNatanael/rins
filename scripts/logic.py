@@ -108,6 +108,7 @@ if __name__ == '__main__':
 
     #rospy.wait_for_message(app_cylinders, MarkerArray, timeout=20)
 
+    print "waiting for data"
     while (len(faces)<n_faces or len(cylinders)<n_cylinders):
         rospy.wait_for_message(app_faces, MarkerArray, timeout=3000)
         rospy.wait_for_message(app_cylinders, MarkerArray, timeout=3000)  
