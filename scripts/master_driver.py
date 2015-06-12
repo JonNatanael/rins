@@ -89,9 +89,15 @@ class master_driver():
 		
 		# Begin the main loop and run through a sequence of locations
 		for point in self.loc:
-			self.move(Pose(point, Quaternion(0,0,0,1))) #Quaternion(0.000, 0.000, sin(theta/2), cos(theta/2))
-			# rotate in place for detection
-			self.rotate(point)
+			retval = self.move(Pose(point, Quaternion(0,0,0,1))) #Quaternion(0.000, 0.000, sin(theta/2), cos(theta/2))
+			#returns 0,1,2 for success, unreachable, timeout
+			if retval == 0:
+				# rotate in place for detection
+				self.rotate(point)
+			if retval == 1:
+				print "We need evasive manouvers"
+			if retval == 2:
+				print "Sorry, I got distracted and lost on the way"
 
 		# send init message to cyllinder_detector and faces
 		
@@ -146,13 +152,16 @@ class master_driver():
 		if not finished_within_time:
 			self.move_base.cancel_goal()
 			rospy.loginfo("Timed out achieving goal")
+			return 2
 		else:
 			state = self.move_base.get_state()
 			if state == GoalStatus.SUCCEEDED:
 				rospy.loginfo("Goal succeeded!")
 				rospy.loginfo("State:" + str(state))
+				return 0
 			else:
 			  rospy.loginfo("Goal failed with error code: " + str(self.goal_states[state]))
+			  return 1
 
 
 	def shutdown(self):
