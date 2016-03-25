@@ -1,10 +1,14 @@
 cmake_minimum_required(VERSION 2.8.3)
 project(rins)
 
+set (OpenCV_DIR /usr/share/OpenCV)
 ## Find system dependencies
 find_package(Boost REQUIRED COMPONENTS system filesystem thread)
 find_package(Eigen3 REQUIRED)
 find_package(PCL REQUIRED)
+
+include(dlib/cmake)
+set(CMAKE_BUILD_TYPE Release)
 
 ## Find catkin packages
 find_package(catkin REQUIRED COMPONENTS
@@ -23,6 +27,8 @@ find_package(catkin REQUIRED COMPONENTS
   sensor_msgs
   std_msgs
   message_generation
+  OpenCV
+  cv_bridge
 )
 
 ## Add include directories
@@ -80,9 +86,11 @@ catkin_package(
 
 add_executable (example src/example.cpp)
 
+add_executable (detect src/detect.cpp)
+TARGET_LINK_LIBRARIES(detect dlib ${catkin_LIBRARIES} ${OpenCV_LIBS})
+
 
 install(PROGRAMS
-        #scripts/drive.py
         scripts/faces.py
         DESTINATION ${CATKIN_PACKAGE_BIN_DESTINATION})
 
